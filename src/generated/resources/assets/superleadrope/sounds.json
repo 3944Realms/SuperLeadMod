@@ -1,0 +1,24 @@
+{
+  "lead_break": {
+    "sounds": [
+      "superleadrope:item/superlead/lead_break"
+    ],
+    "subtitle": "sound.superleadrope.subtitle.lead_break"
+  },
+  "lead_tied": {
+    "sounds": [
+      "superleadrope:item/superlead/lead_tied1",
+      "superleadrope:item/superlead/lead_tied2",
+      "superleadrope:item/superlead/lead_tied3"
+    ],
+    "subtitle": "sound.superleadrope.subtitle.lead_tied"
+  },
+  "lead_untied": {
+    "sounds": [
+      "superleadrope:item/superlead/lead_untied1",
+      "superleadrope:item/superlead/lead_untied2",
+      "superleadrope:item/superlead/lead_untied3"
+    ],
+    "subtitle": "sound.superleadrope.subtitle.lead_untied"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "entity.superleadrope.super_lead_knot": "神駒羈縻索結",
+  "entity.superleadrope.super_leash": "神駒羈縻索",
+  "item.superleadrope.super_lead_rope": "神駒羈縻索",
+  "sound.superleadrope.subtitle.lead_break": "索絕",
+  "sound.superleadrope.subtitle.lead_tied": "繫索",
+  "sound.superleadrope.subtitle.lead_untied": "解索"
+}

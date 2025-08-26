@@ -1,0 +1,223 @@
+import proguard.gradle.ProGuardTask
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.7.0'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'idea'
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.jetbrains.dokka' version '1.9.10'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'net.neoforged.moddev.legacyforge' version '2.0.103'
+}
+
+def enableProguard = project.hasProperty("enableProguard") && project.enableProguard.toBoolean()
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+group = mod_group_id
+version = "${minecraft_version}-${mod_version}"
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
+
+base {
+    archivesName = mod_id
+}
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+repositories {
+    maven { url = "https://libraries.minecraft.net/" }
+    maven { url = "https://neoforged.forgecdn.net/releases" }
+    maven { url = "https://neoforged.forgecdn.net/mojang-meta" }
+}
+
+legacyForge {
+    version = "${minecraft_version}-${forge_version}"
+    accessTransformers = project.files "src/main/resources/META-INF/accesstransformer.cfg"
+
+    parchment {
+        minecraftVersion = "${minecraft_version}"
+        mappingsVersion =  "${mapping_lasting_version}"
+    }
+
+    runs {
+        configureEach {
+            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+        clientAuth {
+            devLogin = true
+            client()
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+        client {
+            client()
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+        data {
+            systemProperty('gradle.task', 'runData')
+            data()
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            programArguments.addAll '--mod', project.mod_id, '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+        server {
+            server()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+// 源码资源目录
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// ========== 依赖 ==========
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+// ========== 编译配置 ==========
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dokkaJavadoc {
+    outputDirectory = file("$buildDir/javadoc")
+}
+
+// ========== 打包配置 ==========
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
+    }
+    archiveFileName = "${mod_id}-${mod_version}-origin.jar"
+    finalizedBy 'proguard'
+}
+
+// 资源处理
+processResources {
+    def props = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version          : forge_version,
+            forge_version_range    : forge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
+    ]
+    inputs.properties props
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand props + [project: project]
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// ShadowJar 禁止缓存优化
+shadowJar {
+    outputs.upToDateWhen { false }
+}
+
+// 本地 Maven 发布
+publishing {
+    publications {
+        create('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+// ========== ProGuard 配置 ==========
+tasks.register('proguard', ProGuardTask) {
+    onlyIf { enableProguard } // 只有 enableProguard=true 才会执行
+    dependsOn(tasks.jar)
+    configuration 'proguard.pro'
+
+    // JDK jmods 库
+    libraryjars "${System.getProperty('java.home')}/jmods"
+
+    // 项目依赖作为库输入
+    configurations.compileClasspath.files.each { file ->
+        libraryjars file.absolutePath
+    }
+
+    // 输入输出
+    def inputJar = tasks.jar.archiveFile.get().asFile
+    injars(inputJar)
+    outjars("${project.buildDir}/libs/[NOTUSE]${mod_id}-${minecraft_version}-${mod_version}-proguard.jar")
+    doFirst {
+        copy {
+            from inputJar
+            into "${project.buildDir}/libs"
+            rename { "[NOTUSE]${mod_id}-${minecraft_version}-${mod_version}-origin.jar" }
+        }
+    }
+    inputs.files(tasks.jar.archiveFile)
+    finalizedBy 'reobfJar'
+}
+
+// ========== Forge reobf 绑定 ==========
+afterEvaluate {
+    tasks.named('reobfJar') {
+        if (enableProguard) {
+            dependsOn('proguard')
+            input = file("${buildDir}/libs/[NOTUSE]${mod_id}-${minecraft_version}-${mod_version}-proguard.jar")
+        } else {
+            dependsOn('jar')
+            input = tasks.jar.archiveFile.get().asFile
+        }
+    }
+}
+
+// IDEA 支持
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

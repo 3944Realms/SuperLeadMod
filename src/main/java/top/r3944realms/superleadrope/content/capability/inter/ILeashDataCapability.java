@@ -31,6 +31,7 @@ public interface ILeashDataCapability extends INBTSerializable<CompoundTag> {
     // 原LeashData的方法接口
     boolean addLeash(Entity holder, ItemStack leashStack, double maxDistance);
     boolean addLeash(Entity holder, ItemStack leashStack, double maxDistance, double elasticDistance, int maxKeepLeashTicks);
+    boolean addLeash(Entity holder, LeashInfo leashInfo);
 
     boolean setMaxDistance(Entity holder, double newMaxDistance);
     boolean setMaxDistance(Entity holder,double newMaxDistance, int newMaxKeepLeashTicks);
@@ -82,6 +83,10 @@ public interface ILeashDataCapability extends INBTSerializable<CompoundTag> {
             int keepLeashTicks,      // 新增：保持拴绳的剩余Tick数
             int maxKeepLeashTicks    // 新增：最大保持Tick数（可配置）
     ) {
+        public static final LeashInfo EMPTY = new LeashInfo(
+                Optional.empty(), Optional.empty(), Optional.empty(),
+                "", Vec3.ZERO, 12.0D, 6.0D, 0, 0
+        );
         public static LeashInfo CreateLeashInfo(
                 Entity entity,
                 String reserved,

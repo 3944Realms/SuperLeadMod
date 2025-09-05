@@ -19,20 +19,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
+import net.minecraftforge.network.ICustomPacket;
 import net.minecraftforge.network.NetworkEvent;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 
 import java.util.function.Supplier;
 
-public class LeashDataSyncPacket {
-    private final int entityId;
-    private final CompoundTag leashData;
-
-    public LeashDataSyncPacket(int entityId, CompoundTag leashData) {
-        this.entityId = entityId;
-        this.leashData = leashData;
-    }
+public record LeashDataSyncPacket(int entityId, CompoundTag leashData) {
 
     public static void encode(LeashDataSyncPacket msg, FriendlyByteBuf buffer) {
         buffer.writeInt(msg.entityId);

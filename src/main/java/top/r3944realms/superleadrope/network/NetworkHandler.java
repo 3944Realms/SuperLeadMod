@@ -23,6 +23,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
+import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
 
 public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -38,6 +39,11 @@ public class NetworkHandler {
                 .decoder(LeashDataSyncPacket::decode)
                 .encoder(LeashDataSyncPacket::encode)
                 .consumerNetworkThread(LeashDataSyncPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(UpdatePlayerMovementPacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(UpdatePlayerMovementPacket::decode)
+                .encoder(UpdatePlayerMovementPacket::encode)
+                .consumerNetworkThread(UpdatePlayerMovementPacket::handle)
                 .add();
     }
     public static <MSG> void sendAllPlayer(MSG message){

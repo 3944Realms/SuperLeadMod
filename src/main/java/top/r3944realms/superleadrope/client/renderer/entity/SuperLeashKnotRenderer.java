@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
@@ -41,18 +42,30 @@ public class SuperLeashKnotRenderer extends EntityRenderer<SuperLeashKnotEntity>
 
     @Override
     public void render(@NotNull SuperLeashKnotEntity entity, float entityYaw, float partialTick, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
-        // 根据实体的实际 hitbox 调整缩放
-        float scaleX = entity.getBbWidth() / 0.5f;   // 默认 0.5f，对应 scale=1
-        float scaleY = entity.getBbHeight() / 0.5f;  // 默认 0.5f，对应 scale=1
-        float scaleZ = scaleX;                            // 宽度对称
+        AABB box = entity.getBoundingBox();
+        float boxWidth = (float) box.getXsize();
+        float boxHeight = (float) box.getYsize();
 
-        poseStack.scale(-1.5F * scaleX, -1.5F * scaleY, 1.5F * scaleZ);
+        // 模型原始尺寸（像素 → 方块）
+        float modelWidthBlocks = 6.0F / 16.0F;
+        float modelHeightBlocks = 8.0F / 16.0F;
 
-        // 位置微调（避免浮空）
-        poseStack.translate(0.0D, 0.15D * scaleY, 0.0D);
+        // 缩放比例
+        float scaleX = boxWidth / modelWidthBlocks;
+        float scaleY = boxHeight / modelHeightBlocks;
+        float scaleZ = scaleX;
+
+        poseStack.pushPose();
+
+        // 先缩放
+        poseStack.scale(scaleX, scaleY, scaleZ);
+
+        // 再平移：把模型抬到碰撞箱底部
+        poseStack.translate(0.0D, boxHeight / scaleY, 0.0D);
 
         this.model.setupAnim(entity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         VertexConsumer vertexConsumer = buffer.getBuffer(this.model.renderType(KNOT_LOCATION));
+
         this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY,
                 1.0F, 1.0F, 1.0F, 1.0F);
 

@@ -31,10 +31,10 @@ public class SLPEntityTypes {
     public static RegistryObject<EntityType<SuperLeashKnotEntity>> SUPER_LEAD_KNOT =  ENTITY_TYPES.register(
             "super_lead_knot",
             () -> EntityType.Builder.<SuperLeashKnotEntity>of(SuperLeashKnotEntity::new, MobCategory.MISC)
-                    .sized(1.0F, 1.0F)
-                    .clientTrackingRange(4)
-                    .updateInterval(20)
                     .noSave()
+                    .sized(0.375F, 0.5F)
+                    .clientTrackingRange(10)
+                    .updateInterval(Integer.MAX_VALUE)
                     .build("super_lead_knot")
     );
     public static  RegistryObject<EntityType<SuperLeashEntity>> SUPER_LEASH = ENTITY_TYPES.register(

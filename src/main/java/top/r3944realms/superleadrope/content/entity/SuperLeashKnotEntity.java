@@ -20,6 +20,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
@@ -57,11 +58,31 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         super(pEntityType, pLevel);
     }
 
+
     public SuperLeashKnotEntity(Level pLevel, BlockPos pPos) {
         this(SLPEntityTypes.SUPER_LEAD_KNOT.get(), pLevel);
         this.setPos(pPos.getX(), pPos.getY(), pPos.getZ());
+
     }
 
+    @Override
+    public boolean hurt(@NotNull DamageSource source, float amount) {
+        if (this.isInvulnerableTo(source)) {
+            return false;
+        } else {
+            if (!this.isRemoved() && !this.level().isClientSide) {
+                this.kill();
+                this.markHurt();
+                List<Entity> entities = LeashDataImpl.leashableInArea(this.level(), pos.getCenter(), entity -> LeashDataImpl.isLeashHolder(entity, this));
+                entities.forEach(entity -> entity
+                        .getCapability(CapabilityHandler.LEASH_DATA_CAP)
+                        .map(iLeashDataCapability -> iLeashDataCapability.removeLeash(this))
+                );
+            }
+
+            return true;
+        }
+    }
 
     @Override
     public boolean survives() {
@@ -73,7 +94,15 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         int j = pPos.getY();
         int k = pPos.getZ();
 
-        for(SuperLeashKnotEntity superLeashKnotEntity : pLevel.getEntitiesOfClass(SuperLeashKnotEntity.class, new AABB((double)i - 1.0D, (double)j - 1.0D, (double)k - 1.0D, (double)i + 1.0D, (double)j + 1.0D, (double)k + 1.0D))) {
+        for(SuperLeashKnotEntity superLeashKnotEntity :
+                pLevel.getEntitiesOfClass(
+                        SuperLeashKnotEntity.class,
+                        new AABB((double)i - 1.0D,
+                                (double)j - 1.0D,
+                                (double)k - 1.0D,
+                                (double)i + 1.0D,
+                                (double)j + 1.0D,
+                                (double)k + 1.0D))) {
             if (superLeashKnotEntity.getPos().equals(pPos)) {
                 return superLeashKnotEntity;
             }
@@ -87,6 +116,7 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
     @Override
     protected void recalculateBoundingBox() {
         updateDimensionsBasedOnBlock();
+        setPosRaw(this.pos.getX() + 0.5, this.pos.getY() + 0.20, this.pos.getZ() + 0.5);
         double halfWidth = currentWidth / 2.0f;
         this.setBoundingBox(new AABB(
                 this.getX() - halfWidth,
@@ -104,7 +134,7 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         // 根据方块类型调整尺寸
         if (state.is(BlockTags.WALLS)) {
             // 墙类方块 - 更窄更高
-            currentWidth = 0.25f;
+            currentWidth = 0.75f;
             currentHeight = 0.75f;
         } else {
             // 默认栅栏尺寸
@@ -112,13 +142,6 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
             currentHeight = DEFAULT_HEIGHT;
         }
         //TODO: 未来扩展可配置化大小
-    }
-    @Override
-    public void setPos(double x, double y, double z) {
-        super.setPos(x, y, z);
-        // 确保位置与方块中心对齐
-        BlockPos pos = this.getPos();
-        this.setPosRaw(pos.getX() + 0.5, pos.getY() + 0.375, pos.getZ() + 0.5);
     }
 
     public static boolean isSupportBlock(BlockState state) {
@@ -135,7 +158,7 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
             return InteractionResult.SUCCESS;
         }
         AtomicBoolean isTransferLeash = new AtomicBoolean(false);
-        List<Entity> entities = LeashDataImpl.leashableInArea(player, ing -> true);
+        List<Entity> entities = LeashDataImpl.leashableInArea(player);
         for(Entity entity : entities) {
             if (LeashDataImpl.isLeashHolder(entity, player.getUUID()))
                 entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> {
@@ -143,10 +166,22 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
                     isTransferLeash.set(true);
                 });
 
+        }
+        AtomicBoolean isRemoveLeashKnot = new AtomicBoolean(false);
+        if (!isTransferLeash.get()) {
+            this.discard();
+            if (player.getAbilities().instabuild) {
+                entities.forEach(
+                        entity -> entity
+                                .getCapability(CapabilityHandler.LEASH_DATA_CAP)
+                                .ifPresent(iLeashDataCapability -> {
+                                    iLeashDataCapability.removeLeash(this);
+                                    isRemoveLeashKnot.set(true);
+                                }
+                ));
             }
-
-
-        if (isTransferLeash.get() ) {
+        }
+        if (isTransferLeash.get() || isRemoveLeashKnot.get()) {
             this.gameEvent(GameEvent.BLOCK_ATTACH, player);
         }
         return InteractionResult.CONSUME;

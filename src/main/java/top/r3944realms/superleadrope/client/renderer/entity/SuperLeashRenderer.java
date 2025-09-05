@@ -147,7 +147,7 @@ public class SuperLeashRenderer extends EntityRenderer<SuperLeashEntity> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(@NotNull SuperLeashEntity entity) {
-        return null; // 使用自定义渲染类型，不需要纹理
+    public @NotNull ResourceLocation getTextureLocation(@NotNull SuperLeashEntity entity) {
+        return new ResourceLocation("unknown"); // 使用自定义渲染类型，不需要纹理
     }
 }

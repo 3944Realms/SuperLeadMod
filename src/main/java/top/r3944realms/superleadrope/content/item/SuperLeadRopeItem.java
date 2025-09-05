@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 // 实现拴生物，在生物的interact方法里去写相关逻辑
 // （尝试0 mixin 实现 加强拴绳逻辑）
 public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
-
     // 配置常量
     // 【手动调节,可以通过附魔获取更远抛掷和抛掷距离 - x1.3】//TODO:将可抛掷实现留到下次编写
     // 可以做个大于一定距离时远距离使用时抛出拴绳的实体，击中生物才栓中的
@@ -92,12 +91,32 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
         if(SuperLeashKnotEntity.isSupportBlock(state)) {
             Player player = context.getPlayer();
             if(!level.isClientSide && player != null) {
-                return bindToBlock(player, level, pos, itemStack);
+                return bindToBlock(player, level, pos, itemStack, false) ? InteractionResult.CONSUME : InteractionResult.PASS;
             }
         }
         return InteractionResult.PASS;
     }
-    public static InteractionResult bindToEntity (Entity newHolder, Player player, Level level, BlockPos pos, ItemStack leashStack) {
+    /**
+     * 右键蹲下绑定到另一实体上
+     * @param newHolder 新实体
+     * @param player 明确持有玩家
+     * @param level 维度世界
+     * @param leashStack 拴绳物品实例
+     * @return 是否成功
+     */
+    public static boolean bindToEntity(Entity newHolder, Player player, Level level, ItemStack leashStack) {
+        return bindToEntity(newHolder, player, level, player.getOnPos(), leashStack);
+    }
+    /**
+     * 右键蹲下绑定到另一实体上
+     * @param newHolder 新实体
+     * @param player 明确持有玩家
+     * @param level 维度世界
+     * @param pos 坐标（一般是明确持有玩家的位置）
+     * @param leashStack 拴绳物品实例
+     * @return 是否成功
+     */
+    public static boolean bindToEntity(Entity newHolder, Player player, Level level, BlockPos pos, ItemStack leashStack) {
         AtomicBoolean isSuccess = new AtomicBoolean(false);
         List<Entity> list = LeashDataImpl.leashableInArea(level, pos.getCenter(), entity -> LeashDataImpl.isLeashHolder(entity, player.getUUID()));
         for(Entity e : list) {
@@ -118,22 +137,43 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
             }
         }
         if(!isSuccess.get()) {
-            return InteractionResult.PASS;
+            return false;
         }
         else {
             level.gameEvent(GameEvent.ENTITY_INTERACT, pos, GameEvent.Context.of(player));
             newHolder.playSound(SLPSoundEvents.LEAD_TIED.get());
-            return InteractionResult.CONSUME;
+            return true;
         }
     }
-    public static InteractionResult bindToBlock(Player player, Level level, BlockPos pos, ItemStack leashStack) {
+
+    /**
+     * 右键蹲下绑定到支持方块上
+     * @param player 明确持有玩家
+     * @param level 维度世界
+     * @param leashStack 拴绳物品实例
+     * @param shouldBindSelf 是否应该触发拴自己逻辑检查
+     * @return 是否成功
+     */
+    public static boolean bindToBlock(Player player, Level level, ItemStack leashStack, boolean shouldBindSelf) {
+        return bindToBlock(player, level, player.getOnPos(), leashStack, shouldBindSelf);
+    }
+    /**
+     * 右键蹲下绑定到支持方块上
+     * @param player 明确持有玩家
+     * @param level 维度世界
+     * @param pos 坐标（一般是明确持有玩家的位置）
+     * @param leashStack 拴绳物品实例
+     * @param shouldBindSelf 是否应该触发拴自己逻辑检查
+     * @return 是否成功
+     */
+    public static boolean bindToBlock(Player player, Level level, BlockPos pos, ItemStack leashStack, boolean shouldBindSelf) {
         //实现个加强绳结实体
         SuperLeashKnotEntity knot = null;
         AtomicBoolean isSuccess = new AtomicBoolean(false);
         UUID uuid = player.getUUID();
         List<Entity> list = LeashDataImpl.leashableInArea(level, pos.getCenter(), entity -> LeashDataImpl.isLeashHolder(entity, uuid));
-        if(list.isEmpty()) {//拴自己 to new knot
-            if (leashStack.isEmpty() || !canUse(leashStack)) return InteractionResult.PASS;
+        if (shouldBindSelf && list.isEmpty()) {//拴自己 to new knot
+            if (leashStack.isEmpty() || !canUse(leashStack)) return false;
             knot = SuperLeashKnotEntity.getOrCreateKnot(level, pos);;
             knot.playPlacementSound();
 
@@ -146,10 +186,10 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
             });
 
         }
-        else {
+        else if (!list.isEmpty()) {
             for(Entity e : list) {
                 if(knot == null) {
-                    knot = SuperLeashKnotEntity.getOrCreateKnot(level, pos);;
+                    knot = SuperLeashKnotEntity.getOrCreateKnot(level, pos);
                     knot.playPlacementSound();
                 }
                 AtomicBoolean canBeAttachedTo = new AtomicBoolean(false);
@@ -171,12 +211,9 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
             }
         }
         if (isSuccess.get()) {
-            if(!player.isCreative()) {
-                leashStack.hurtAndBreak(50, player, e->{});
-            }
             level.gameEvent(GameEvent.BLOCK_ATTACH, pos, GameEvent.Context.of(player));
-            return InteractionResult.SUCCESS;
-        } else
-            return InteractionResult.PASS;
+            return true;
+        }
+        return false;
     }
 }

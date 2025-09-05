@@ -19,9 +19,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.ItemStack;
@@ -36,9 +41,11 @@ import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapabili
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
+import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
@@ -84,6 +91,7 @@ public class LeashDataImpl implements ILeashDataCapability {
     // 引入解决 绳结不保存导致第二进入持有者不存在的问题
     private final Map<BlockPos, LeashInfo> leashKnots = new ConcurrentHashMap<>();
     private CompoundTag lastSyncedData = new CompoundTag();
+
     public LeashDataImpl(Entity entity) {
         this.entity = entity;
     }
@@ -153,6 +161,11 @@ public class LeashDataImpl implements ILeashDataCapability {
         else leashHolders.put(holder.getUUID(), info);
         markForSync();
         return true;
+    }
+
+    @Override
+    public boolean addLeash(Entity holder, LeashInfo leashInfo) {
+        return addLeash(holder, ItemStack.EMPTY, leashInfo.maxDistance(), leashInfo.elasticDistance(), leashInfo.maxKeepLeashTicks());
     }
 
     @Override
@@ -331,32 +344,82 @@ public class LeashDataImpl implements ILeashDataCapability {
         return true;
     }
 
-    // 计算拴绳拉力（防抖动逻辑）
+    /**
+     * 计算拴绳拉力（防抖动逻辑）
+     */
     @Override
     public void applyLeashForces() {
-        for (Map.Entry<UUID, LeashInfo> uuidLeashInfoEntry : leashHolders.entrySet()) {
-            internalUUIDApplyLeashForces(uuidLeashInfoEntry);
+        Vec3 combinedForce = Vec3.ZERO; // 初始化合力向量
+
+        // 计算所有拴绳的合力
+        for (Map.Entry<UUID, LeashInfo> entry : leashHolders.entrySet()) {
+            Vec3 force = calculateLeashForceForUUID(entry);
+            if (force != null) {
+                combinedForce = combinedForce.add(force);
+            }
         }
-        for (Map.Entry<BlockPos, LeashInfo> blockPosLeashInfoEntry : leashKnots.entrySet()) {
-            internalBlockPosApplyLeashForce(blockPosLeashInfoEntry);
+
+        for (Map.Entry<BlockPos, LeashInfo> entry : leashKnots.entrySet()) {
+            Vec3 force = calculateLeashForceForBlockPos(entry);
+            if (force != null) {
+                combinedForce = combinedForce.add(force);
+            }
+        }
+
+        // 应用合力
+        if (!combinedForce.equals(Vec3.ZERO)) {
+            if(entity instanceof ServerPlayer serverPlayer) { //对于玩家发包交给客户端处理移动
+                NetworkHandler.sendToPlayer(
+                        new UpdatePlayerMovementPacket(
+                                UpdatePlayerMovementPacket.Operation.ADD,
+                                combinedForce
+                        ), serverPlayer
+                );
+                return; //后面的逻辑肯定与该分支无关，直接返回
+            } else {
+                entity.setDeltaMovement(entity.getDeltaMovement().add(combinedForce));
+                entity.hurtMarked = true;
+            }
+
+            // 有拴绳时：禁用移动控制
+            if (entity instanceof Animal mob) {
+                mob.goalSelector.disableControlFlag(Goal.Flag.MOVE);
+                entity.resetFallDistance();
+            }
+        } else {
+            // 无拴绳时：恢复移动控制
+            if (entity instanceof Animal mob) {
+                mob.goalSelector.enableControlFlag(Goal.Flag.MOVE);
+            }
         }
     }
 
-    private void internalUUIDApplyLeashForces(Map.Entry<UUID, LeashInfo> entry) {
+    /**
+     * 为UUID拴绳计算力
+     */
+    private Vec3 calculateLeashForceForUUID(Map.Entry<UUID, LeashInfo> entry) {
         UUID uuid = entry.getKey();
         Entity uuidHolder = ((ServerLevel) entity.level()).getEntity(uuid);
         if (uuidHolder != null) {
-            internalApplyLeashForces(uuidHolder, entry);
+            return calculateLeashForce(uuidHolder, entry);
         } else {
             SuperLeadRope.logger.error("Could not apply leash forces for {}, because it is not found.", uuid);
+            return null;
         }
     }
 
-    private void internalBlockPosApplyLeashForce(Map.Entry<BlockPos, LeashInfo> entry) {
+    /**
+     * 为方块位置拴绳计算力
+     */
+    private Vec3 calculateLeashForceForBlockPos(Map.Entry<BlockPos, LeashInfo> entry) {
         SuperLeashKnotEntity orCreateKnot = SuperLeashKnotEntity.getOrCreateKnot(entity.level(), entry.getKey());
-        internalApplyLeashForces(orCreateKnot, entry);
+        return calculateLeashForce(orCreateKnot, entry);
     }
-    private void internalApplyLeashForces(Entity holder, Map.Entry<?, LeashInfo> entry) {
+
+    /**
+     * 计算单个拴绳的力
+     */
+    private Vec3 calculateLeashForce(Entity holder, Map.Entry<?, LeashInfo> entry) {
         Vec3 holderPos = holder.position().add(0, holder.getBbHeight() * 0.7, 0);
         LeashInfo info = entry.getValue();
         Vec3 entityPos = entity.position().add(info.attachOffset());
@@ -365,41 +428,49 @@ public class LeashDataImpl implements ILeashDataCapability {
 
         // 1. 检查是否超出断裂距离
         if (distance > extremeSnapDist) {
-            // 如果还有剩余缓冲Tick，施加更强拉力并减少计数
             if (info.keepLeashTicks() > 0) {
-                // 计算临界拉力（距离越远，拉力越强）
+                // 计算临界拉力
                 Vec3 pullForce = calculateCriticalPullForce(holderPos, entityPos, distance, info);
-                entity.setDeltaMovement(entity.getDeltaMovement().add(pullForce));
-                entity.hurtMarked = true;
                 entry.setValue(info.decrementKeepLeashTicks());
-                return;
+                return pullForce;
             }
-            // 否则立即断裂
+            // 断裂
             removeLeash(holder);
-            return;
+            return null;
         }
 
-        // 2. 正常弹性拉力逻辑（保持不变）
+        // 2. 正常弹性拉力逻辑
+        Vec3 pullForce = Vec3.ZERO;
         if (distance > info.elasticDistance()) {
-            Vec3 pullForce = calculatePullForce(holderPos, entityPos, distance, info);
-            entity.setDeltaMovement(entity.getDeltaMovement().add(pullForce));
-            entity.hurtMarked = true;
+            pullForce = calculatePullForce(holderPos, entityPos, distance, info);
+
+            // 生物添加跟随逻辑（保持不变）
+            if(entity instanceof Mob mob) {
+                Vec3 vec3 = (new Vec3(holder.getX() - entity.getX(), holder.getY() - entity.getY(), holder.getZ() - entity.getZ()))
+                        .normalize()
+                        .scale(Math.max(distance - 2.0F, 0.0F));
+                double speed = mob instanceof Llama ? 2.0 : 1.0;
+                mob.getNavigation().moveTo(entity.getX() + vec3.x, entity.getY() + vec3.y, entity.getZ() + vec3.z, speed);
+            }
         }
 
-        // 3. 重置缓冲Tick（如果回到安全距离）
+        // 3. 重置缓冲Tick
         if (distance <= info.maxDistance() && info.keepLeashTicks() < info.maxKeepLeashTicks()) {
             entry.setValue(info.resetKeepLeashTicks());
         }
+
+        return pullForce;
     }
+
+    // 计算正常拉力（保持不变）
     @Contract("_, _, _, _ -> new")
     private @NotNull Vec3 calculatePullForce(@NotNull Vec3 holderPos, Vec3 entityPos, double distance, @NotNull LeashInfo info) {
         Vec3 pullDirection = holderPos.subtract(entityPos).normalize();
         double pullStrength = 0.2;
 
-        // 增强拉力（如果超出maxDistance但未达断裂距离）
         if (distance > info.maxDistance()) {
-            double excessRatio = (distance - info.maxDistance()) / (info.maxDistance());
-            pullStrength += excessRatio * 0.8; // 最高1.0倍基础拉力
+            double excessRatio = (distance - info.maxDistance()) / info.maxDistance();
+            pullStrength += excessRatio * 0.8;
         }
 
         Vec3 pullForce = pullDirection.scale(
@@ -412,18 +483,17 @@ public class LeashDataImpl implements ILeashDataCapability {
                 pullForce.z * AXIS_SPECIFIC_ELASTICITY.z
         );
     }
+
+    // 计算临界拉力（保持不变）
     private @NotNull Vec3 calculateCriticalPullForce(@NotNull Vec3 holderPos, Vec3 entityPos, double distance, @NotNull LeashInfo info) {
         Vec3 pullDirection = holderPos.subtract(entityPos).normalize();
-
-        // 非线性增强拉力（距离越远，拉力越强）
-        double excessRatio = (distance - info.maxDistance()) / (info.maxDistance());
-        double pullStrength = 1.0 + excessRatio * 2.0; // 基础1.0 + 额外增强（最高3.0倍）
+        double excessRatio = (distance - info.maxDistance()) / info.maxDistance();
+        double pullStrength = 1.0 + excessRatio * 2.0;
 
         Vec3 pullForce = pullDirection.scale(
                 (distance - info.elasticDistance()) * pullStrength * SPRING_DAMPENING
         );
 
-        // 应用轴向弹性系数（减少Y轴抖动）
         return new Vec3(
                 pullForce.x * AXIS_SPECIFIC_ELASTICITY.x,
                 pullForce.y * AXIS_SPECIFIC_ELASTICITY.y,
@@ -702,11 +772,14 @@ public class LeashDataImpl implements ILeashDataCapability {
     public static @NotNull List<Entity> leashableInArea(Entity entity, Predicate<Entity> filter) {
         return leashableInArea(entity, filter, 1024D);
     }
+    public static @NotNull List<Entity> leashableInArea(Entity holder) {
+        return leashableInArea(holder, i -> isLeashHolder(i, holder), 1024D);
+    }
     public boolean canBeAttachedTo(Entity pEntity) {
         if(pEntity == entity) {
             return false;
         } else {
-            Optional<LeashInfo> leashInfo = getLeashInfo(pEntity.getUUID());
+            Optional<LeashInfo> leashInfo = getLeashInfo(pEntity);
             return leashInfo.isEmpty() && (entity.distanceTo(pEntity) <= LEASH_ELASTIC_DIST * LEASH_EXTREME_SNAP_DIST_FACTOR) && canBeLeashed();//距离最大,则不可以被固定或转移
         }
     }

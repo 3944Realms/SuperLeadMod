@@ -53,6 +53,11 @@ public class SuperLeashEntity extends Entity {
     }
 
     @Override
+    public void kill() {
+
+    }
+
+    @Override
     protected void defineSynchedData() {
 
     }

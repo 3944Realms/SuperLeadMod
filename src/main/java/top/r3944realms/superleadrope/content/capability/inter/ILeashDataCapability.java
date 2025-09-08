@@ -70,7 +70,9 @@ public interface ILeashDataCapability extends INBTSerializable<CompoundTag> {
 
     boolean canBeLeashed();
     boolean canBeAttachedTo(Entity pEntity);
-
+    void markForSync();
+    void immediateSync();
+    void checkSync();
 
     record LeashInfo(
             Optional<BlockPos> blockPosOpt,

@@ -13,20 +13,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.content.capability;
+package top.r3944realms.superleadrope.content.capability.impi;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.Llama;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.ItemStack;
@@ -37,17 +35,19 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
-import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
+import top.r3944realms.superleadrope.util.riding.RindingLeash;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 预期行为
@@ -90,47 +90,48 @@ public class LeashDataImpl implements ILeashDataCapability {
     private final Map<UUID, LeashInfo> leashHolders = new ConcurrentHashMap<>();
     // 引入解决 绳结不保存导致第二进入持有者不存在的问题
     private final Map<BlockPos, LeashInfo> leashKnots = new ConcurrentHashMap<>();
-    private CompoundTag lastSyncedData = new CompoundTag();
+//    private CompoundTag lastSyncedData = new CompoundTag();
 
     public LeashDataImpl(Entity entity) {
         this.entity = entity;
     }
-    private void markForSync() {
+    @Override
+    public void markForSync() {
         if (!entity.level().isClientSide) {
             needsSync = true;
-            immediateSync();
+            immediateSync(); // 立即同步一次
         }
     }
-    private void immediateSync() {
-        NetworkHandler.INSTANCE.send(
-                PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-                new LeashDataSyncPacket(entity.getId(), serializeNBT())
+
+    /** 立即同步，无视时间间隔 */
+    @Override
+    public void immediateSync() {
+        syncNow();
+    }
+
+    /** 定期调用，每 tick 或每几秒检测 */
+    @Override
+    public void checkSync() {
+        if (!needsSync || entity.level().isClientSide) return;
+
+        long now = System.currentTimeMillis();
+        // 每隔 2 秒同步一次
+        if (now - lastSyncTime > 2000) {
+            syncNow();
+        }
+    }
+
+    /** 内部统一同步方法，避免重复逻辑 */
+    private void syncNow() {
+        CompoundTag currentData = serializeNBT();
+
+        NetworkHandler.sendToPlayer(
+                new LeashDataSyncPacket(entity.getId(), currentData),
+                entity,
+                PacketDistributor.TRACKING_ENTITY_AND_SELF
         );
         lastSyncTime = System.currentTimeMillis();
         needsSync = false;
-    }
-    public void sync() {
-        if (!needsSync || entity.level().isClientSide) return;
-
-        CompoundTag currentData = serializeNBT();
-        if (!currentData.equals(lastSyncedData)) {
-            NetworkHandler.INSTANCE.send(
-                    PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-                    new LeashDataSyncPacket(entity.getId(), currentData)
-            );
-            lastSyncTime = System.currentTimeMillis();
-            lastSyncedData = currentData;
-            needsSync = false;
-        }
-    }
-    // 定期同步检查
-    public void checkSync() {
-        if (!needsSync) return;
-
-        // 距离上次同步超过0.1秒才同步
-        if (System.currentTimeMillis() - lastSyncTime > 100) {
-            sync();
-        }
     }
 
     // 添加拴绳（支持自定义最大长度和弹性距离）
@@ -366,33 +367,24 @@ public class LeashDataImpl implements ILeashDataCapability {
             }
         }
 
-        // 应用合力
-        if (!combinedForce.equals(Vec3.ZERO)) {
-            if(entity instanceof ServerPlayer serverPlayer) { //对于玩家发包交给客户端处理移动
-                NetworkHandler.sendToPlayer(
-                        new UpdatePlayerMovementPacket(
-                                UpdatePlayerMovementPacket.Operation.ADD,
-                                combinedForce
-                        ), serverPlayer
-                );
-                return; //后面的逻辑肯定与该分支无关，直接返回
+        boolean hasForce = !combinedForce.equals(Vec3.ZERO);
+        Entity finalApplyEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
+        if (hasForce) {
+
+            if (finalApplyEntity instanceof ServerPlayer player) {
+                RindingLeash.applyForceToPlayer(player, combinedForce);
+                return;
             } else {
-                entity.setDeltaMovement(entity.getDeltaMovement().add(combinedForce));
-                entity.hurtMarked = true;
+                finalApplyEntity.setDeltaMovement(finalApplyEntity.getDeltaMovement().add(combinedForce));
+                finalApplyEntity.hurtMarked = true;
             }
 
-            // 有拴绳时：禁用移动控制
-            if (entity instanceof Animal mob) {
-                mob.goalSelector.disableControlFlag(Goal.Flag.MOVE);
-                entity.resetFallDistance();
-            }
+            RindingLeash.protectAnimalMovement(finalApplyEntity, true);
         } else {
-            // 无拴绳时：恢复移动控制
-            if (entity instanceof Animal mob) {
-                mob.goalSelector.enableControlFlag(Goal.Flag.MOVE);
-            }
+            RindingLeash.protectAnimalMovement(finalApplyEntity, false);
         }
     }
+
 
     /**
      * 为UUID拴绳计算力
@@ -403,7 +395,8 @@ public class LeashDataImpl implements ILeashDataCapability {
         if (uuidHolder != null) {
             return calculateLeashForce(uuidHolder, entry);
         } else {
-            SuperLeadRope.logger.error("Could not apply leash forces for {}, because it is not found.", uuid);
+            SuperLeadRope.logger.error("Could not apply leash forces for {}, because it is not found(it will be removed from list).", uuid);
+            leashHolders.remove(uuid);
             return null;
         }
     }
@@ -608,9 +601,10 @@ public class LeashDataImpl implements ILeashDataCapability {
     // 获取所有拴绳信息
     @Override
     public Collection<LeashInfo> getAllLeashes() {
-        Collection<LeashInfo> values = leashHolders.values();
-        values.addAll(leashKnots.values());
-        return values;
+        return Stream.concat(
+                leashHolders.values().stream(),
+                leashKnots.values().stream()
+        ).collect(Collectors.toList());
     }
 
     @Override
@@ -785,20 +779,12 @@ public class LeashDataImpl implements ILeashDataCapability {
     }
     public static boolean isLeashHolder(@NotNull Entity pEntity, UUID pHolderUUID) {
         AtomicBoolean isTarget = new AtomicBoolean(false);
-        pEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> {
-            if (i instanceof LeashDataImpl li) {
-                isTarget.set(li.isLeashedBy(pHolderUUID));
-            }
-        });
+        pEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> isTarget.set(i.isLeashedBy(pHolderUUID)));
         return isTarget.get();
     }
     public static boolean isLeashHolder(@NotNull Entity pEntity, BlockPos pKnotPos) {
         AtomicBoolean isTarget = new AtomicBoolean(false);
-        pEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> {
-            if (i instanceof LeashDataImpl li) {
-                isTarget.set(li.isLeashedBy(pKnotPos));
-            }
-        });
+        pEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> isTarget.set(i.isLeashedBy(pKnotPos)));
         return isTarget.get();
     }
     public static boolean isLeashHolder(@NotNull Entity pEntity, Entity pTestHolder) {

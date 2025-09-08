@@ -18,11 +18,12 @@ package top.r3944realms.superleadrope.datagen.data;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
-import top.r3944realms.superleadrope.utils.lang.LanguageEnum;
-import top.r3944realms.superleadrope.utils.lang.ModPartEnum;
+import top.r3944realms.superleadrope.util.lang.LanguageEnum;
+import top.r3944realms.superleadrope.util.lang.ModPartEnum;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -34,6 +35,138 @@ public enum SLPLangKeyValue {
             "Super Lead Rope", "超级拴绳", "超級拴繩","神駒羈縻索"
     ),
 
+    ITEM_ETERNAL_POTATO(
+            SLPItems.ETERNAL_POTATO, ModPartEnum.ITEM,
+            "Eternal Potato", "永恒土豆", "永恆馬鈴薯", "不滅薯", true
+    ),
+
+    EP_TOOLTIP_TITLE(EternalPotatoItem.getDescKey("title"), ModPartEnum.DESCRIPTION,
+            "§6Mythical Item §7- §6Eternal Potato",
+            "§6神话物品 §7- §6永恒土豆",
+            "§6神話物品 §7- §6永恒土豆",
+            "§6永恒土豆 §7- §6传奇之物"
+    ),
+
+    EP_DESC_TOOLTIP(EternalPotatoItem.getDescKey("desc"), ModPartEnum.DESCRIPTION,
+            "§7Symbol of server-wide contract, cannot be discarded",
+            "§7象征全服契约，不可丢弃",
+            "§7象徵全服契約，不可丟棄",
+            "§7象征全服契约，绝不可弃"
+    ),
+
+    EP_BIND_OWNER(EternalPotatoItem.getDescKey("bind_owner"), ModPartEnum.DESCRIPTION,
+            "§bBound Owner: §f%s",
+            "§b绑定主人: §f%s",
+            "§b綁定主人: §f%s",
+            "§b绑定主人: §f%s"
+    ),
+
+    EP_UNBOUND(EternalPotatoItem.getDescKey("unbound"), ModPartEnum.DESCRIPTION,
+            "§cUnbound",
+            "§c未绑定主人",
+            "§c未綁定主人",
+            "§c尚未绑定主人"
+    ),
+
+    EP_OBLIGATION_TOOLTIP(EternalPotatoItem.getDescKey("obligation"), ModPartEnum.DESCRIPTION,
+            "§7Daily obligations remaining: §a%d §c(+%d§c overdue)",
+            "§7今日剩余义务: §a%d §c(+%d §c逾期未完成)",
+            "§7今日剩餘義務: §a%d §c(+%d §c逾期未完成)",
+            "§7今日责务尚余: §a%d §c(+%d §c逾期未尽)"
+    ),
+
+    EP_PUNISH_TOOLTIP(EternalPotatoItem.getDescKey("punish"), ModPartEnum.DESCRIPTION,
+            "§cOverdue punishments: §4%d §7(will be applied), grace exceeded: §4%d",
+            "§c逾期未完成责务: §4%d §7(将会受罚)，超出宽限数: §4%d",
+            "§c逾期未完成责務: §4%d §7(將會受罰)，超出寬限數: §4%d",
+            "§c逾期责务尚未完成: §4%d §7(將受懲罰)，超出寬限數: §4%d"
+    ),
+
+    EP_OBLIGATION_INFO(EternalPotatoItem.getMsgKey("obligation_info"), ModPartEnum.MESSAGE,
+            "§e[Eternal Potato] §fThis is the server-wide shared person, remaining obligations today: §a%d§f.",
+            "§e[永恒土豆] §f这是全服共有之人，今日义务剩余：§a%d§f次。",
+            "§e[永恒土豆] §f這是全服共有之人，今日義務剩餘：§a%d§f次。",
+            "§e[永恒土豆] §f此为全服共享之人，今日责务尚余：§a%d§f次。"
+    ),
+
+    EP_POTATO_HEAL(EternalPotatoItem.getMsgKey("potato_heal"), ModPartEnum.MESSAGE,
+            "§aThe power of the Eternal Potato comforts you, it won't disappear.",
+            "§a永恒土豆的力量抚慰了你，但它不会消失。",
+            "§a永恆土豆的力量撫慰了你，但它不會消失。",
+            "§a永恒土豆之力慰心，永不消逝。"
+    ),
+
+    EP_CANNOT_DROP(EternalPotatoItem.getMsgKey("cannot_drop"), ModPartEnum.MESSAGE,
+            "§cThe Eternal Potato cannot be dropped! +%d punishments.",
+            "§c永恒土豆是不可丢弃的，惩罚数加%d！",
+            "§c永恆土豆不可丟棄，懲罰數加%d！",
+            "§c永恒土豆不可丟棄，懲罰數增加%d！"
+    ),
+
+    EP_BIND_MSG(EternalPotatoItem.getMsgKey("bind_msg"), ModPartEnum.MESSAGE,
+            "§6Bound to you as the server-wide shared person.",
+            "§6已与你绑定，成为全服共有之人。",
+            "§6已與你綁定，成為全服共有之人。",
+            "§6已与汝绑定，为全服共享之人。"
+    ),
+
+
+
+    EP_OBLIGATION_DONE(EternalPotatoItem.getMsgKey("obligation_done"), ModPartEnum.MESSAGE,
+            "§eObligation completed, remaining: §a%d§e",
+            "§e义务完成一次，剩余 §a%d §e次。",
+            "§e義務完成一次，剩餘 §a%d §e次。",
+            "§e责务完成，尚余 §a%d §e次。"
+    ),
+
+    EP_OBLIGATION_FULL(EternalPotatoItem.getMsgKey("obligation_full"), ModPartEnum.MESSAGE,
+            "§aAll obligations completed today!",
+            "§a今日义务已全部完成！",
+            "§a今日義務已全部完成！",
+            "§a今日责务尽矣！"
+    ),
+
+    EP_PUNISH_MSG(EternalPotatoItem.getMsgKey("punish_msg"), ModPartEnum.MESSAGE,
+            "§cYesterday obligations incomplete, punished!",
+            "§c未完成昨日义务，受到惩罚！",
+            "§c未完成昨日義務，受到懲罰！",
+            "§c昨日之责未尽，受罚矣！"
+    ),
+
+    EP_OBLIGATION_COUNTDOWN(EternalPotatoItem.getMsgKey("obligation_countdown"), ModPartEnum.MESSAGE,
+            "Punish Countdown: §a%d §fseconds remaining",
+            "惩罚倒计时: §a%d §f秒",
+            "懲罰倒計時: §a%d §f秒",
+            "受罚倒数：§a%d §f瞬"
+    ),
+
+    EP_PICKUP_NOT_OWNER(EternalPotatoItem.getMsgKey("pickup_not_owner"), ModPartEnum.MESSAGE,
+            "§cYou are not the rightful owner and cannot pick this up!",
+            "§c非绑定主人无法拾取此物品！",
+            "§c非綁定主人無法拾取此物品！",
+            "§c非汝所主，勿取！"
+    ),
+
+    EP_PUNISH_NOT_OWNER(EternalPotatoItem.getMsgKey("punish_not_owner"), ModPartEnum.MESSAGE,
+            "§cYou are not the rightful owner, punished by lightning!",
+            "§c非绑定主人使用，受到闪电惩罚！",
+            "§c非綁定主人使用，受到閃電懲罰！",
+            "§c非汝所主，雷霆降身！"
+    ),
+    EP_PUNISH_NOT_OWNER_DEATH_MSG(
+            "death.attack.eternal_potato_not_owner", ModPartEnum.MESSAGE,
+            "§c%1$s was not the rightful owner, struck by lightning!",
+            "§c%1$s 因使用非自己绑定物品，受到闪电惩罚！",
+            "§c%1$s 因使用非自己綁定物品，受到閃電懲罰！",
+            "§c%1$s 非汝所主，雷霆降身！"
+    ),
+    EP_PUNISH_NOT_COMPETE_DEATH_MSG(
+            "death.attack.eternal_potato_not_complete", ModPartEnum.MESSAGE,
+            "§c%1$s was not the rightful owner, struck by lightning!",
+            "§c%1$s 因使用非自己绑定物品，受到闪电惩罚！",
+            "§c%1$s 因使用非自己綁定物品，受到閃電懲罰！",
+            "§c%1$s 非汝所主，雷霆降身！"
+    ),
     SOUND_SUBTITLE_SUPER_LEAD_BREAK(
             SLPSoundEvents.getSubTitleTranslateKey("lead_break"), ModPartEnum.SOUND,
             "Lead Break", "拴绳断裂", "拴繩斷裂", "索絕"
@@ -53,13 +186,6 @@ public enum SLPLangKeyValue {
             SLPEntityTypes.getEntityNameKey("super_lead_knot"), ModPartEnum.ENTITY,
             "Super Lead Knot", "超级拴绳结", "超級拴繩結", "神駒羈縻索結"
     ),
-
-    ENTITY_SUPER_LEASH(
-        SLPEntityTypes.getEntityNameKey("super_leash"), ModPartEnum.ENTITY,
-        "Super Leash", "超级拴绳", "超級拴繩","神駒羈縻索"
-    ),
-
-
 
     ;
     private final Supplier<?> supplier;

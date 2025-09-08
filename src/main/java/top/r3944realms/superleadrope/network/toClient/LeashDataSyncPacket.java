@@ -19,9 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.ICustomPacket;
 import net.minecraftforge.network.NetworkEvent;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 

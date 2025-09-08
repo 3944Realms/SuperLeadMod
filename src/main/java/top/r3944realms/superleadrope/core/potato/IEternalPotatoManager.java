@@ -13,25 +13,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.utils.lang;
+package top.r3944realms.superleadrope.core.potato;
 
-public enum ModPartEnum {
-    DEFAULT,
-    ITEM,
-    BLOCK,
-    ENCHANTMENT,
-    ADVANCEMENT,
-    CREATIVE_TAB,
-    CONFIG,
-    ENTITY,
-    GUI,
-    AUTHOR,
-    TITLE,
-    NAME,
-    DESCRIPTION,
-    INFO,
-    MESSAGE,
-    COMMAND,
-    SOUND
+import net.minecraft.nbt.CompoundTag;
+import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 
+import java.util.UUID;
+
+public interface IEternalPotatoManager {
+    IEternalPotato getOrCreate(UUID uuid);
+
+    void remove(UUID uuid);
+
+    void clear();
+    CompoundTag saveAll();
+    void loadAll(CompoundTag tag);
 }

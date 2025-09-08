@@ -26,7 +26,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.LeashDataImpl;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 import top.r3944realms.superleadrope.core.register.SLPItems;
@@ -39,6 +39,13 @@ public class LeashInteractHandler {
 
         // ===== 卫语句 =====
         if (level.isClientSide) {
+            if (hand == InteractionHand.MAIN_HAND &&
+                    (player.getItemInHand(InteractionHand.MAIN_HAND).is(SLPItems.SUPER_LEAD_ROPE.get()) ||
+                    player.getItemInHand(InteractionHand.OFF_HAND).is(SLPItems.SUPER_LEAD_ROPE.get()))
+            ) {
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.CONSUME);
+            }
             return;
         }
         if (hand == InteractionHand.OFF_HAND) {
@@ -69,12 +76,14 @@ public class LeashInteractHandler {
                 event.setCancellationResult(InteractionResult.CONSUME);
             }
         } else {
-            if(LeashDataImpl.isLeashHolder(target, player)) {
+            if (LeashDataImpl.isLeashHolder(target, player)) {
                 LeashCap.ifPresent(
                         iLeashDataCapability -> iLeashDataCapability.removeLeash(player.getUUID())
                 );
                 target.gameEvent(GameEvent.ENTITY_INTERACT, player);
                 target.playSound(SLPSoundEvents.LEAD_UNTIED.get());
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.CONSUME);
                 return;
             }
             ItemStack itemStack;
@@ -92,15 +101,16 @@ public class LeashInteractHandler {
                             boolean success = iLeashDataCapability.addLeash(player, itemStack, 12);
                             if (success) {
                                 if(!player.isCreative())
-                                    itemStack.hurtAndBreak(50, player, e->{});
+                                    itemStack.hurtAndBreak(24, player, e->{});
                                  target.playSound(SLPSoundEvents.LEAD_TIED.get());
+                                 event.setCanceled(true);
+                                 event.setCancellationResult(InteractionResult.CONSUME);
                              }
                         }
                     });
                 }
             }
         }
-
 
     }
 }

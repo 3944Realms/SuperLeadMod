@@ -13,7 +13,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.utils.lang;
+package top.r3944realms.superleadrope.util.lang;
 
 public enum LanguageEnum {
     English("en_us"),

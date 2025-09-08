@@ -13,24 +13,28 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.datagen.data;
+package top.r3944realms.superleadrope.core.exception;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
+import java.util.UUID;
 
-public final class SLPItemTags {
+public class RidingCycleException extends IllegalStateException {
+    private final UUID entityId;
+    private final UUID vehicleId;
 
-
-    private SLPItemTags() {
+    public RidingCycleException(UUID entityId, UUID vehicleId) {
+        super(String.format("Cyclic riding reference detected. " +
+                        "Entity %s cannot be added as passenger to vehicle %s " +
+                        "as it would create a circular dependency.",
+                entityId, vehicleId));
+        this.entityId = entityId;
+        this.vehicleId = vehicleId;
     }
 
-    private static TagKey<Item> bind(String name) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(name));
+    public UUID getEntityId() {
+        return entityId;
     }
 
-    public static TagKey<Item> create(final ResourceLocation name) {
-        return TagKey.create(Registries.ITEM, name);
+    public UUID getVehicleId() {
+        return vehicleId;
     }
 }

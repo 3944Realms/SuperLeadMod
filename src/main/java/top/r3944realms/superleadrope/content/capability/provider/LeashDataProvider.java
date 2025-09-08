@@ -13,7 +13,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.content.capability;
+package top.r3944realms.superleadrope.content.capability.provider;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -25,6 +25,8 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
 
 public class LeashDataProvider implements ICapabilitySerializable<CompoundTag> {

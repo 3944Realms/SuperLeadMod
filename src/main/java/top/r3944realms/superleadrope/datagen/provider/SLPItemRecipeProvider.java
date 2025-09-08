@@ -17,8 +17,12 @@ package top.r3944realms.superleadrope.datagen.provider;
 
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.core.register.SLPItems;
 
 import java.util.function.Consumer;
 
@@ -29,6 +33,15 @@ public class SLPItemRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildRecipes(@NotNull Consumer<FinishedRecipe> consumer) {
-
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, SLPItems.SUPER_LEAD_ROPE.get())
+                .pattern("SL ")
+                .pattern("LE ")
+                .pattern("  I")
+                .define('S', Items.SLIME_BALL)
+                .define('L', Items.LEAD)
+                .define('E', Items.EXPERIENCE_BOTTLE)
+                .define('I', Items.STRING)
+                .unlockedBy("has_lead", has(Items.LEAD))
+                .save(consumer);
     }
 }

@@ -13,12 +13,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.utils.coremods;
+package top.r3944realms.superleadrope.core.potato;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 
-@OnlyIn(Dist.CLIENT)
-public class InvokerMethod {
+import java.util.UUID;
 
+public interface IEternalPotatoChangeListener {
+    void onPotatoChanged(UUID uuid, IEternalPotato potato);
 }

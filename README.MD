@@ -30,3 +30,17 @@ This project is licensed under the **GNU GPL v3** open source license.
 
 **Full Terms:** [View LICENSE file](LICENSE.GPL3) | [GPL v3 Details](https://www.gnu.org/licenses/gpl-3.0.html)  
 **完整条款：** [查看LICENSE文件](LICENSE.GPL3) | [GPL v3详情](https://www.gnu.org/licenses/gpl-3.0.html)
+# 🎵 Audio Resources / 音效资源声明
+
+This mod includes supplemental audio assets from **Minecraft (by Mojang Studios / Microsoft)**,
+which are **not** covered by the GPL license of this project.  
+本模组中包含部分来自 **Minecraft（Mojang Studios / Microsoft）** 的补充音效资源，  
+这些资源 **不属于** 本项目 GPL 协议授权的范围。
+
+- Copyright of these audio files belongs to **Mojang Studios / Microsoft**.  
+  这些音效文件的版权归 **Mojang Studios / Microsoft** 所有。
+- They are provided here solely for compatibility and gameplay purposes.  
+  这些音效仅为兼容性和游戏功能提供。
+- The **GPL v3 license applies only to the original code and assets of this mod**,  
+  and does **not** apply to the bundled Minecraft audio files.  
+  **GPL v3 协议仅适用于本模组的原创代码与资源**，不适用于其中包含的 Minecraft 音效文件。

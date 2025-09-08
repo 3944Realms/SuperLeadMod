@@ -15,35 +15,44 @@
 
 package top.r3944realms.superleadrope.client.renderer;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.RenderType;
-
-import java.util.OptionalDouble;
 
 public class SLPRenderType extends RenderType {
     public SLPRenderType(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
     }
     static RenderType SUPER_LEASH;
+    public static final VertexFormat POSITION_COLOR_LIGHTMAP_NORMAL;
     public static RenderType leashType() {
         return SUPER_LEASH;
     }
     static {
+        POSITION_COLOR_LIGHTMAP_NORMAL = new VertexFormat(
+                ImmutableMap.<String, VertexFormatElement>builder()
+                        .put("Position", DefaultVertexFormat.ELEMENT_POSITION)
+                        .put("Color", DefaultVertexFormat.ELEMENT_COLOR)
+                        .put("UV2", DefaultVertexFormat.ELEMENT_UV2)       // 光照
+                        .put("Normal", DefaultVertexFormat.ELEMENT_NORMAL) // 法线
+                        .put("Padding", DefaultVertexFormat.ELEMENT_PADDING)
+                        .build()
+        );
         SUPER_LEASH = RenderType.create("super_leash",
-                DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,
-                VertexFormat.Mode.LINE_STRIP,
+                POSITION_COLOR_LIGHTMAP_NORMAL, // 注意：需要 NORMAL（法线）信息！
+                VertexFormat.Mode.TRIANGLE_STRIP, // 改为三角形带模式
                 256,
-                false,
-                false,
+                false, // not used for crumbling
+                false, // sortOnUpload
                 CompositeState.builder()
-                        .setShaderState(RENDERTYPE_LINES_SHADER)
-                        .setLineState(new LineStateShard(OptionalDouble.empty()))
-                        .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                        .setShaderState(RENDERTYPE_LEASH_SHADER) // 使用实体着色器
+                        .setTextureState(NO_TEXTURE) // 无纹理
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setWriteMaskState(COLOR_DEPTH_WRITE)
-                        .setCullState(NO_CULL)
-                        .createCompositeState(false));
+                        .setLightmapState(LIGHTMAP) // 启用光照
+                        .setCullState(NO_CULL) // 双面渲染
+                        .createCompositeState(false)
+        );
     }
 }

@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.client.renderer.state.SuperLeashRenderState;
-import top.r3944realms.superleadrope.content.capability.LeashDataImpl;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
@@ -173,7 +173,6 @@ public class SuperLeashStateResolver {
     /**
      * 获取实体所有拴绳的渲染状态
      */
-    @SuppressWarnings("unchecked")
     public static List<SuperLeashRenderState> resolveAll(
             Entity leashedEntity,
             LeashDataImpl leashData,

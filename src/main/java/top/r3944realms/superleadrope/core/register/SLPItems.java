@@ -21,6 +21,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 
 public class SLPItems {
@@ -29,6 +30,13 @@ public class SLPItems {
             "super_lead_rope",
             () -> new SuperLeadRopeItem(new Item.Properties())
     );
+    public static final RegistryObject<Item> ETERNAL_POTATO =
+            ITEMS.register("eternal_potato",
+                    () -> new EternalPotatoItem(
+                            new Item.Properties()
+                                    .stacksTo(1) // 只能有一颗
+                                    .fireResistant() // 防火
+                    ));
     public static void register(IEventBus bus) {
         ITEMS.register(bus);
     }

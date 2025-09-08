@@ -22,7 +22,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.content.entity.SuperLeashEntity;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
 public class SLPEntityTypes {
@@ -36,18 +35,6 @@ public class SLPEntityTypes {
                     .clientTrackingRange(10)
                     .updateInterval(Integer.MAX_VALUE)
                     .build("super_lead_knot")
-    );
-    public static  RegistryObject<EntityType<SuperLeashEntity>> SUPER_LEASH = ENTITY_TYPES.register(
-            "super_leash",
-            () -> EntityType.Builder.<SuperLeashEntity>of(SuperLeashEntity::new, MobCategory.MISC)
-                    .sized(0.01f, 0.01f)
-                    .noSummon()
-                    .noSave()
-                    .clientTrackingRange(0)
-                    .updateInterval(1)
-                    .fireImmune()
-                    .canSpawnFarFromPlayer()
-                    .build("super_leash")
     );
     public static String getEntityNameKey(String entityName) {
         return "entity." + SuperLeadRope.MOD_ID + "." + entityName;

@@ -19,7 +19,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.LanguageProvider;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue;
-import top.r3944realms.superleadrope.utils.lang.LanguageEnum;
+import top.r3944realms.superleadrope.util.lang.LanguageEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;

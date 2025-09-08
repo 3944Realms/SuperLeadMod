@@ -13,7 +13,21 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.config;
+package top.r3944realms.superleadrope.content;
 
-public class CommonConfig {
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import top.r3944realms.superleadrope.SuperLeadRope;
+
+public class SLPTags {
+    public static class Items {
+        public static final TagKey<Item> LEAD = tag("lead");
+        private static TagKey<net.minecraft.world.item.Item> tag(String name)
+        {
+            return TagKey.create(Registries.ITEM, new ResourceLocation(SuperLeadRope.MOD_ID, name));
+        }
+    }
+
 }

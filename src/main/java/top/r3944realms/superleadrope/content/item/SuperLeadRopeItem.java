@@ -22,7 +22,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.LeadItem;
+import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,8 +30,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.common.extensions.IForgeItem;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.content.SLPToolTier;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.LeashDataImpl;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
@@ -50,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 // 6. 不可消耗的（但是有耐久，需要修复, 通过消耗原版拴绳恢复，每次多重绑定就会消耗1点耐久）
 // 实现拴生物，在生物的interact方法里去写相关逻辑
 // （尝试0 mixin 实现 加强拴绳逻辑）
-public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
+public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
     // 配置常量
     // 【手动调节,可以通过附魔获取更远抛掷和抛掷距离 - x1.3】//TODO:将可抛掷实现留到下次编写
     // 可以做个大于一定距离时远距离使用时抛出拴绳的实体，击中生物才栓中的
@@ -59,12 +60,13 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
 
 
     public SuperLeadRopeItem(@NotNull Properties pProperties) {
-        super(
+        super(SLPToolTier.STRING,
                 pProperties
                         .durability(1024)
                         .setNoRepair()
         );
     }
+
     //通过按键 可抛掷启用/关闭实现（不会影响use逻辑）
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level pLevel, @NotNull Player pPlayer, @NotNull InteractionHand pUsedHand) {
@@ -122,17 +124,11 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
         for(Entity e : list) {
             AtomicBoolean canBeAttachedTo = new AtomicBoolean(false);
             LazyOptional<ILeashDataCapability> iLeashDataCapability = e.getCapability(CapabilityHandler.LEASH_DATA_CAP);
-            iLeashDataCapability.ifPresent(i -> {
-                if (i instanceof LeashDataImpl li) {
-                    canBeAttachedTo.set(li.canBeAttachedTo(newHolder));
-                }
-            });
+            iLeashDataCapability.ifPresent(i -> canBeAttachedTo.set(i.canBeAttachedTo(newHolder)));
             if(canBeAttachedTo.get()) {//canBeAttachedTo
                 iLeashDataCapability.ifPresent(i -> {
-                    if(i instanceof LeashDataImpl li) {
-                        li.transferLeash(player.getUUID(), newHolder, leashStack);
+                        i.transferLeash(player.getUUID(), newHolder, leashStack);
                         isSuccess.set(true);
-                    }
                 });
             }
         }
@@ -179,10 +175,8 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
 
             SuperLeashKnotEntity finalKnot1 = knot;
             player.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> {
-                if(i instanceof LeashDataImpl li) {
-                    li.addLeash(finalKnot1, leashStack, 8D);
+                    i.addLeash(finalKnot1, leashStack, 8D);
                     isSuccess.set(true);
-                }
             });
 
         }
@@ -195,17 +189,11 @@ public class SuperLeadRopeItem extends LeadItem implements IForgeItem {
                 AtomicBoolean canBeAttachedTo = new AtomicBoolean(false);
                 SuperLeashKnotEntity finalKnot = knot;
                 LazyOptional<ILeashDataCapability> iLeashDataCapability = e.getCapability(CapabilityHandler.LEASH_DATA_CAP);
-                iLeashDataCapability.ifPresent(i -> {
-                    if (i instanceof LeashDataImpl li) {
-                        canBeAttachedTo.set(li.canBeAttachedTo(finalKnot));
-                    }
-                });
+                iLeashDataCapability.ifPresent(i -> canBeAttachedTo.set(i.canBeAttachedTo(finalKnot)));
                 if(canBeAttachedTo.get()) {//canBeAttachedTo
                     iLeashDataCapability.ifPresent(i -> {
-                        if(i instanceof LeashDataImpl li) {
-                            li.transferLeash(uuid, finalKnot);
+                            i.transferLeash(uuid, finalKnot);
                             isSuccess.set(true);
-                        }
                     });
                 }
             }

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "E": {
+      "item": "minecraft:experience_bottle"
+    },
+    "I": {
+      "item": "minecraft:string"
+    },
+    "L": {
+      "item": "minecraft:lead"
+    },
+    "S": {
+      "item": "minecraft:slime_ball"
+    }
+  },
+  "pattern": [
+    "SL ",
+    "LE ",
+    "  I"
+  ],
+  "result": {
+    "item": "superleadrope:super_lead_rope"
+  },
+  "show_notification": true
+}

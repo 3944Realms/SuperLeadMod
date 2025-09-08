@@ -16,15 +16,18 @@
 package top.r3944realms.superleadrope;
 
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.r3944realms.superleadrope.config.LeashCommonConfig;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.network.NetworkHandler;
-
+import top.r3944realms.superleadrope.util.file.ConfigUtil;
 
 @Mod(value = SuperLeadRope.MOD_ID)
 public class SuperLeadRope {
@@ -36,5 +39,13 @@ public class SuperLeadRope {
         SLPEntityTypes.register(eventBus);
         SLPSoundEvents.register(eventBus);
         NetworkHandler.register();
+        initialize();
+    }
+    public static void initialize() {
+        logger.info("Initializing SuperLeadRope");
+        String c = "common";
+        ConfigUtil.createFile(new String[]{c});
+        ModLoadingContext modLoadingContext = ModLoadingContext.get();
+        ConfigUtil.registerConfig(modLoadingContext, ModConfig.Type.COMMON, LeashCommonConfig.SPEC, c, "leash");
     }
 }

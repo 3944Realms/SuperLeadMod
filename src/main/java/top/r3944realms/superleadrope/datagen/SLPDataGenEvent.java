@@ -25,16 +25,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.datagen.provider.*;
-import top.r3944realms.superleadrope.utils.lang.LanguageEnum;
+import top.r3944realms.superleadrope.util.lang.LanguageEnum;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 @Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SLPDataGenEvent {
     static Logger logger = LoggerFactory.getLogger(SLPDataGenEvent.class);
     @SubscribeEvent
-    public static void gatherData(GatherDataEvent event) throws IOException {
+    public static void gatherData(GatherDataEvent event) {
         logger.info("GatherDataEvent thread: {}", Thread.currentThread().getName());
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
         LanguageGenerator(event, LanguageEnum.English);

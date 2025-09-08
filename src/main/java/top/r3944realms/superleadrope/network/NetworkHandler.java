@@ -22,8 +22,11 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.network.toClient.EternalPotatoSyncCapPacket;
 import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
+import top.r3944realms.superleadrope.network.toClient.PacketEternalPotatoRemovePacket;
 import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
+
 
 public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -45,12 +48,21 @@ public class NetworkHandler {
                 .encoder(UpdatePlayerMovementPacket::encode)
                 .consumerNetworkThread(UpdatePlayerMovementPacket::handle)
                 .add();
+        INSTANCE.messageBuilder(EternalPotatoSyncCapPacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(EternalPotatoSyncCapPacket::decode)
+                .encoder(EternalPotatoSyncCapPacket::encode)
+                .consumerNetworkThread(EternalPotatoSyncCapPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(PacketEternalPotatoRemovePacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(PacketEternalPotatoRemovePacket::decode)
+                .encoder(PacketEternalPotatoRemovePacket::encode)
+                .consumerNetworkThread(PacketEternalPotatoRemovePacket::handle)
+                .add();
     }
-    public static <MSG> void sendAllPlayer(MSG message){
-        INSTANCE.send(PacketDistributor.ALL.noArg(), message);
-    }
-
     public static <MSG> void sendToPlayer(MSG message, ServerPlayer player){
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
+    }
+    public static <MSG, T> void sendToPlayer(MSG message, T entity, PacketDistributor<T> packetDistributor){
+        INSTANCE.send(packetDistributor.with(() -> entity), message);
     }
 }

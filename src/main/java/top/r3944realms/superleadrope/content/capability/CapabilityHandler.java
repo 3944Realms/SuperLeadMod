@@ -16,18 +16,25 @@
 package top.r3944realms.superleadrope.content.capability;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
+import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.content.capability.provider.EternalPotatoProvider;
+import top.r3944realms.superleadrope.content.capability.provider.LeashDataProvider;
+import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 
 public class CapabilityHandler {
     public static final Capability<ILeashDataCapability> LEASH_DATA_CAP = CapabilityManager.get(new CapabilityToken<>(){});
-
+    public static Capability<IEternalPotato> ETERNAL_POTATO_CAP = CapabilityManager.get(new CapabilityToken<>() {});
     public static void registerCapability(RegisterCapabilitiesEvent event) {
         event.register(ILeashDataCapability.class);
+        event.register(IEternalPotato.class);
     }
 
     public static void attachCapability(AttachCapabilitiesEvent<?> event) {
@@ -36,6 +43,9 @@ public class CapabilityHandler {
                 (LeashDataImpl.isLeashable(entity))//只对活体 船 矿车添加CAP
         ) {
             event.addCapability(LeashDataProvider.LEASH_DATA_REL, new LeashDataProvider(entity));
+        } else if (object instanceof ItemStack stack && stack.getItem() instanceof EternalPotatoItem) {
+            event.addCapability(EternalPotatoProvider.ETERNAL_POTATO_DATA_REL, new EternalPotatoProvider(stack));
         }
     }
+
 }

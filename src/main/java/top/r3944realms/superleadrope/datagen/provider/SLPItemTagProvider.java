@@ -18,10 +18,12 @@ package top.r3944realms.superleadrope.datagen.provider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.content.SLPTags;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -35,7 +37,9 @@ public class SLPItemTagProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.@NotNull Provider provider) {
-
-
+        tag(SLPTags.Items.LEAD)
+                .add(Items.LEAD)
+                .add(Items.SLIME_BALL)
+                .add(Items.STRING);
     }
 }

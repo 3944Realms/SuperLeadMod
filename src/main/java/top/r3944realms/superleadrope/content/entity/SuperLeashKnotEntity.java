@@ -16,6 +16,8 @@
 package top.r3944realms.superleadrope.content.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
@@ -25,6 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,7 +35,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.LeashDataImpl;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 
 import java.util.Arrays;
@@ -71,8 +74,12 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
             return false;
         } else {
             if (!this.isRemoved() && !this.level().isClientSide) {
+                if (source.getEntity() instanceof ServerPlayer player && player.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) {
+                    return false;
+                }
                 this.kill();
                 this.markHurt();
+                this.playSound(SoundEvents.LEASH_KNOT_BREAK);
                 List<Entity> entities = LeashDataImpl.leashableInArea(this.level(), pos.getCenter(), entity -> LeashDataImpl.isLeashHolder(entity, this));
                 entities.forEach(entity -> entity
                         .getCapability(CapabilityHandler.LEASH_DATA_CAP)
@@ -169,9 +176,11 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         }
         AtomicBoolean isRemoveLeashKnot = new AtomicBoolean(false);
         if (!isTransferLeash.get()) {
-            this.discard();
-            if (player.getAbilities().instabuild) {
-                entities.forEach(
+            if (((ServerPlayer) player).gameMode.getGameModeForPlayer() != GameType.ADVENTURE) {
+                this.playSound(SoundEvents.LEASH_KNOT_BREAK);
+                this.discard();
+                List<Entity> entities1 = LeashDataImpl.leashableInArea(this);
+                entities1.forEach(
                         entity -> entity
                                 .getCapability(CapabilityHandler.LEASH_DATA_CAP)
                                 .ifPresent(iLeashDataCapability -> {
@@ -180,6 +189,8 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
                                 }
                 ));
             }
+        } else {
+            this.playSound(SoundEvents.LEASH_KNOT_PLACE);
         }
         if (isTransferLeash.get() || isRemoveLeashKnot.get()) {
             this.gameEvent(GameEvent.BLOCK_ATTACH, player);

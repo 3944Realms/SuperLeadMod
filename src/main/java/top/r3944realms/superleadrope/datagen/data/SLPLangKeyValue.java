@@ -18,6 +18,7 @@ package top.r3944realms.superleadrope.datagen.data;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedPlayers;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
@@ -185,6 +186,16 @@ public enum SLPLangKeyValue {
     ENTITY_SUPER_LEAD_KNOT(
             SLPEntityTypes.getEntityNameKey("super_lead_knot"), ModPartEnum.ENTITY,
             "Super Lead Knot", "超级拴绳结", "超級拴繩結", "神駒羈縻索結"
+    ),
+    TELEPORT_WITH_LEASHED_PLAYERS_NAME(TeleportWithLeashedPlayers.NAME_KEY, ModPartEnum.GAME_RULE,
+            "Teleport leashed player with player holder",
+            "被拴实体随玩家持有者传送",
+            "被拴实体随玩家持有者傳送"
+    ),
+    TELEPORT_WITH_LEASHED_DESCRIPTION(TeleportWithLeashedPlayers.DESCRIPTION_KEY, ModPartEnum.DESCRIPTION,
+            "Holder will teleport with their leashed players ",
+            "传送时将被拴玩家与持有者一起传送",
+            "將被拴玩家將隨持有者一起傳送"
     ),
 
     ;

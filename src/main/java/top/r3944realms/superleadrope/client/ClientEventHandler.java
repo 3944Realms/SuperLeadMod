@@ -22,16 +22,22 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.client.model.SuperLeashKnotModel;
 import top.r3944realms.superleadrope.client.model.geom.SLPModelLayers;
+import top.r3944realms.superleadrope.client.renderer.LeashRenderHandler;
+import top.r3944realms.superleadrope.client.renderer.SLPShaderRegistry;
 import top.r3944realms.superleadrope.client.renderer.entity.SuperLeashKnotRenderer;
 import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.util.PotatoMode;
+
+import java.io.IOException;
 
 import static top.r3944realms.superleadrope.core.util.PotatoModeHelper.getCurrentMode;
 
@@ -39,6 +45,13 @@ import static top.r3944realms.superleadrope.core.util.PotatoModeHelper.getCurren
 public class ClientEventHandler {
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, value = Dist.CLIENT, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
     public static class Game {
+        @SubscribeEvent
+        public static void onLevelRenderer (RenderLevelStageEvent event) {
+            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+                return;
+            }
+            LeashRenderHandler.onRenderLevelStage(event.getPoseStack(), event.getPartialTick());
+        }
         // 未使用-注释
         @SubscribeEvent
         public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
@@ -70,6 +83,10 @@ public class ClientEventHandler {
         @SubscribeEvent
         public static void onRegisterRenderer (EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(SLPEntityTypes.SUPER_LEAD_KNOT.get(), SuperLeashKnotRenderer::new);
+        }
+        @SubscribeEvent
+        public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
+            SLPShaderRegistry.registerShaders(event);
         }
     }
 }

@@ -18,7 +18,7 @@ package top.r3944realms.superleadrope.core.punishment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import top.r3944realms.superleadrope.core.register.ObligationCompletionRegistry;
+import top.r3944realms.superleadrope.core.register.SLPObligationCompletionRegistry;
 
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public interface IObligationCompletion {
      * 获取注册 ID
      */
     default String getId() {
-        for (Map.Entry<String, IObligationCompletion> entry : ObligationCompletionRegistry.getAll().entrySet()) {
+        for (Map.Entry<String, IObligationCompletion> entry : SLPObligationCompletionRegistry.getAll().entrySet()) {
             if (entry.getValue() == this) return entry.getKey();
         }
         return "none";
@@ -58,7 +58,7 @@ public interface IObligationCompletion {
 
     static IObligationCompletion fromNetwork(FriendlyByteBuf buf) {
         String id = buf.readUtf();
-        return ObligationCompletionRegistry.byId(id); // 如果没找到，返回 NONE
+        return SLPObligationCompletionRegistry.byId(id); // 如果没找到，返回 NONE
     }
     /**
      * 一个便捷的静态空实现（默认永不完成）

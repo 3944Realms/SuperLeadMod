@@ -25,6 +25,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.ItemStack;
@@ -44,6 +45,7 @@ import top.r3944realms.superleadrope.util.riding.RindingLeash;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -83,10 +85,11 @@ public class LeashDataImpl implements ILeashDataCapability {
     private static final double LEASH_EXTREME_SNAP_DIST_FACTOR = 2.0; // 断裂距离 = 最大距离 * 2 //TODO:未来可配置
     private static final float SPRING_DAMPENING = 0.7f; // 阻尼系数
     private static final Vec3 AXIS_SPECIFIC_ELASTICITY = new Vec3(0.8, 0.2, 0.8); // 轴向弹性系数（Y轴较弱）
-    private static final int MAX_LEASHES_PER_ENTITY = 3;//一个实体最多链接多少个拴绳 //TODO:未来可配置
+    private static final int MAX_LEASHES_PER_ENTITY = 6;//一个实体最多链接多少个拴绳 //TODO:未来可配置
     private final Entity entity;
     private boolean needsSync = false;
     private long lastSyncTime;
+    private final Set<UUID> delayedHolders = new CopyOnWriteArraySet<>();
     private final Map<UUID, LeashInfo> leashHolders = new ConcurrentHashMap<>();
     // 引入解决 绳结不保存导致第二进入持有者不存在的问题
     private final Map<BlockPos, LeashInfo> leashKnots = new ConcurrentHashMap<>();
@@ -144,8 +147,15 @@ public class LeashDataImpl implements ILeashDataCapability {
     @Override
     public boolean addLeash(Entity holder, ItemStack leashStack, double maxDistance, double elasticDistance, int maxKeepLeashTicks) {
         boolean isSuperKnot = holder instanceof SuperLeashKnotEntity;
-        if (!canBeLeashed() || (!isSuperKnot && leashHolders.containsKey(holder.getUUID()) || (isSuperKnot && leashKnots.containsKey(((SuperLeashKnotEntity) holder).getPos())))) {
+        if ((!isSuperKnot && leashHolders.containsKey(holder.getUUID()) || (isSuperKnot && leashKnots.containsKey(((SuperLeashKnotEntity) holder).getPos())))) {
             return false;
+        }
+        if (!canBeLeashed()) {
+            Optional<UUID> uuidOptional = occupyLeash();
+            if (uuidOptional.isEmpty()) {
+                return false;
+            }
+            removeLeash(uuidOptional.get());
         }
         LeashInfo info = LeashInfo.CreateLeashInfo(
                 holder,
@@ -167,6 +177,16 @@ public class LeashDataImpl implements ILeashDataCapability {
     @Override
     public boolean addLeash(Entity holder, LeashInfo leashInfo) {
         return addLeash(holder, ItemStack.EMPTY, leashInfo.maxDistance(), leashInfo.elasticDistance(), leashInfo.maxKeepLeashTicks());
+    }
+
+    @Override
+    public boolean addDelayedLeash(Player holderPlayer) {
+        return delayedHolders.add(holderPlayer.getUUID());
+    }
+
+    @Override
+    public boolean removeDelayedLeash(UUID onceHolderUUID) {
+        return delayedHolders.remove(onceHolderUUID);
     }
 
     @Override
@@ -395,8 +415,10 @@ public class LeashDataImpl implements ILeashDataCapability {
         if (uuidHolder != null) {
             return calculateLeashForce(uuidHolder, entry);
         } else {
-            SuperLeadRope.logger.error("Could not apply leash forces for {}, because it is not found(it will be removed from list).", uuid);
-            leashHolders.remove(uuid);
+            if (!delayedHolders.contains(uuid)) {
+                SuperLeadRope.logger.error("Could not apply leash forces for {}, because it is not found(it will be removed from list).", uuid);
+                leashHolders.remove(uuid);
+            }
             return null;
         }
     }
@@ -518,6 +540,25 @@ public class LeashDataImpl implements ILeashDataCapability {
     }
 
     @Override
+    public void removeAllLeashes() {
+        leashHolders.clear();
+        leashKnots.clear();
+        markForSync();
+    }
+
+    @Override
+    public void removeAllHolderLeashes() {
+        leashHolders.clear();
+        markForSync();
+    }
+
+    @Override
+    public void removeAllKnotLeashes() {
+        leashKnots.clear();
+        markForSync();
+    }
+
+    @Override
     public boolean transferLeash(Entity holder, Entity newHolder) {
         return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
                 transferLeash(superLeashKnotEntity.getPos(), newHolder) :
@@ -591,6 +632,21 @@ public class LeashDataImpl implements ILeashDataCapability {
         return true;
     }
 
+    @Override
+    public boolean hasLeash() {
+        return !leashKnots.isEmpty() || !leashHolders.isEmpty();
+    }
+
+    @Override
+    public boolean hasKnotLeash() {
+        return !leashKnots.isEmpty();
+    }
+
+    @Override
+    public boolean hasHolderLeash() {
+        return !leashHolders.isEmpty();
+    }
+
     //只能系在这些实体上，在这里，其它情况一律忽略
     //TODO: 标签支持控制
     public static boolean isLeashable(Entity entity) {
@@ -626,6 +682,11 @@ public class LeashDataImpl implements ILeashDataCapability {
     }
 
     @Override
+    public boolean isInDelayedLeash(UUID holderUUID) {
+        return delayedHolders.contains(holderUUID);
+    }
+
+    @Override
     public Optional<LeashInfo> getLeashInfo(Entity holder) {
         return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
                 getLeashInfo(superLeashKnotEntity.getPos()) :
@@ -646,7 +707,7 @@ public class LeashDataImpl implements ILeashDataCapability {
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         ListTag holdersList = new ListTag();
-
+        ListTag delayedHolderList = new ListTag();
         for (LeashInfo info : leashHolders.values()) {
             CompoundTag infoTag = generateCompoundTagFromUUIDLeashInfo(info);
             holdersList.add(infoTag);
@@ -655,10 +716,19 @@ public class LeashDataImpl implements ILeashDataCapability {
             CompoundTag infoTag = generateCompoundTagFromBlockPosLeashInfo(info);
             holdersList.add(infoTag);
         }
+        for (UUID uuid : delayedHolders) {
+            CompoundTag infoTag = generateCompoundTagFromUUID(uuid);
+            delayedHolderList.add(infoTag);
+        }
         tag.put("LeashHolders", holdersList);
+        tag.put("DelayedHolders", delayedHolderList);
         return tag;
     }
-
+    private static @NotNull CompoundTag generateCompoundTagFromUUID(@NotNull UUID uuid) {
+        CompoundTag infoTag = new CompoundTag();
+        infoTag.putUUID("DelayHolderUUID", uuid);
+        return infoTag;
+    }
     private static @NotNull CompoundTag generateCompoundTagFromUUIDLeashInfo(@NotNull LeashInfo info) {
         CompoundTag infoTag = new CompoundTag();
         if (info.holderUUIDOpt().isEmpty()) {
@@ -699,6 +769,7 @@ public class LeashDataImpl implements ILeashDataCapability {
     public void deserializeNBT(@NotNull CompoundTag nbt) {
         leashHolders.clear();
         leashKnots.clear();
+        delayedHolders.clear();
         if (nbt.contains("LeashHolders", ListTag.TAG_LIST)) {
             ListTag holdersList = nbt.getList("LeashHolders", ListTag.TAG_COMPOUND);
 
@@ -713,13 +784,50 @@ public class LeashDataImpl implements ILeashDataCapability {
                 }
             }
         }
+        if (nbt.contains("DelayedHolders", ListTag.TAG_LIST)) {
+            ListTag delayedHolderList = nbt.getList("DelayedHolders", ListTag.TAG_COMPOUND);
+            for (int i = 0; i < delayedHolderList.size(); i++) {
+                CompoundTag infoTag = delayedHolderList.getCompound(i);
+                UUID delayedUUIDFormListTag = getDelayedUUIDFormListTag(infoTag);
+                delayedHolders.add(delayedUUIDFormListTag);
+            }
+        }
     }
 
     @Override
     public boolean canBeLeashed() {
-        return leashHolders.size() <= MAX_LEASHES_PER_ENTITY;
+        return (leashHolders.size() + leashKnots.size()) <= MAX_LEASHES_PER_ENTITY;
     }
 
+    @Override
+    public Optional<UUID> occupyLeash() {
+        if (canBeLeashed() || delayedHolders.isEmpty()) return Optional.empty();
+        // 从 Set 随机取一个 UUID
+        int size = delayedHolders.size();
+        int index = (int) (Math.random() * size); // 0 ~ size-1
+        UUID selected = null;
+        int i = 0;
+        for (UUID uuid : delayedHolders) {
+            if (i == index) {
+                selected = uuid;
+                break;
+            }
+            i++;
+        }
+
+        if (selected != null) {
+            delayedHolders.remove(selected);
+            return Optional.of(selected);
+        }
+
+        return Optional.empty(); // 理论上不会到这里
+    }
+
+    private static @NotNull UUID getDelayedUUIDFormListTag(@NotNull CompoundTag infoTag) {
+        if (infoTag.contains("DelayHolderUUID"))
+            return infoTag.getUUID("DelayHolderUUID");
+        throw new IllegalArgumentException("LeashInfo.intId is empty");
+    }
     @Contract("_ -> new")
     private static @NotNull LeashInfo getUUIDLeashDataFormListTag(@NotNull CompoundTag infoTag) {
         if (infoTag.contains("HolderUUID")){

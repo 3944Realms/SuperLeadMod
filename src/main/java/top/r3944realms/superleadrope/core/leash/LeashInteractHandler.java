@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
@@ -34,7 +35,7 @@ import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 
 public class LeashInteractHandler {
     //只有玩家可以互动触发（其它的暂不支持（考虑到0 Mixin)
-    public static void onEntityInteract (Level level, InteractionHand hand, Entity target , Player player, PlayerInteractEvent.EntityInteract event) {
+    public static void onEntityRightInteract(Level level, InteractionHand hand, Entity target , Player player, PlayerInteractEvent.EntityInteract event) {
         //WARNING: 主手和副手都会触发一次该事件
 
         // ===== 卫语句 =====
@@ -112,5 +113,26 @@ public class LeashInteractHandler {
             }
         }
 
+    }
+    public static void onEntityLeftInteract(Level level, Entity target , Player player, AttackEntityEvent event) {
+        boolean flag = LeashDataImpl.isLeashable(target) && player.getItemInHand(InteractionHand.MAIN_HAND).is(SLPItems.SUPER_LEAD_ROPE.get());
+        if (level.isClientSide) {
+            if (flag) {
+                event.setCanceled(true);
+            }
+        } else {
+            if (flag) {
+                target.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(leashDataCapability -> {
+                    if (leashDataCapability.hasLeash()){
+                        if (player.isSecondaryUseActive())
+                            leashDataCapability.removeAllLeashes();
+                        else
+                            leashDataCapability.removeAllHolderLeashes();
+                        target.playSound(SLPSoundEvents.LEAD_UNTIED.get());
+                    }
+                    event.setCanceled(true);
+                });
+            }
+        }
     }
 }

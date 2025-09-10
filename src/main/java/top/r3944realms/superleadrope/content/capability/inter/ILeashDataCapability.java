@@ -18,6 +18,7 @@ package top.r3944realms.superleadrope.content.capability.inter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -32,7 +33,8 @@ public interface ILeashDataCapability extends INBTSerializable<CompoundTag> {
     boolean addLeash(Entity holder, ItemStack leashStack, double maxDistance);
     boolean addLeash(Entity holder, ItemStack leashStack, double maxDistance, double elasticDistance, int maxKeepLeashTicks);
     boolean addLeash(Entity holder, LeashInfo leashInfo);
-
+    boolean addDelayedLeash(Player holderPlayer);
+    boolean removeDelayedLeash(UUID onceHolderPlayerUUID);
     boolean setMaxDistance(Entity holder, double newMaxDistance);
     boolean setMaxDistance(Entity holder,double newMaxDistance, int newMaxKeepLeashTicks);
     boolean setMaxDistance(UUID holderUUID, double newMaxDistance);
@@ -51,6 +53,9 @@ public interface ILeashDataCapability extends INBTSerializable<CompoundTag> {
     boolean removeLeash(Entity holder);
     boolean removeLeash(UUID holderUUID);
     boolean removeLeash(BlockPos knotPos);
+    void removeAllLeashes();
+    void removeAllHolderLeashes();
+    void removeAllKnotLeashes();
 
     boolean transferLeash(Entity holder, Entity newHolder);
     boolean transferLeash(Entity holder, Entity newHolder, ItemStack stack);
@@ -60,15 +65,25 @@ public interface ILeashDataCapability extends INBTSerializable<CompoundTag> {
     boolean transferLeash(BlockPos knotPos, Entity newHolder, ItemStack stack);
 
     // 查询方法
+    boolean hasLeash();
+    boolean hasKnotLeash();
+    boolean hasHolderLeash();
     Collection<LeashInfo> getAllLeashes();
     boolean isLeashedBy(Entity holder);
     boolean isLeashedBy(UUID holderUUID);
     boolean isLeashedBy(BlockPos knotPos);
+    boolean isInDelayedLeash(UUID holderUUID);
     Optional<LeashInfo> getLeashInfo(Entity holder);
     Optional<LeashInfo> getLeashInfo(UUID holderUUID);
     Optional<LeashInfo> getLeashInfo(BlockPos knotPos);
 
     boolean canBeLeashed();
+
+    /**
+     * 抢占位（已离线玩家）
+     * 用于解决玩家下线后所持有我对象，会移除持有者的问题（实际上是占用个弱集合）
+     */
+    Optional<UUID> occupyLeash();
     boolean canBeAttachedTo(Entity pEntity);
     void markForSync();
     void immediateSync();

@@ -30,12 +30,13 @@ public record SuperLeashRenderState(
         int color,             // 颜色(根据状态变化)
         float thickness,      // 线宽(根据张力变化)
         float swingAngle,     // 当前摆动角度(弧度)
-        float swingSpeed      // 摆动速度(弧度/tick)
+        float swingSpeed,      // 摆动速度(弧度/tick)
+        float maxDistance      // 最大距离
 ) {
     // 预定义颜色常量
-    public static final int COLOR_NORMAL = 0xFF8B4513;  // 棕色(正常)
-    public static final int COLOR_TENSION = 0xFFFFA500; // 橙色(紧张)
-    public static final int COLOR_CRITICAL = 0xFFFF0000; // 红色(临界)
+    public static final int COLOR_NORMAL = 0xFF6B4E2E; // 深棕色（木绳色，温暖自然）
+    public static final int COLOR_TENSION = 0xFFD9A066; // 黄色偏橙（张力稍高时微亮）
+    public static final int COLOR_CRITICAL = 0xFFB03A2E; // 暗红色（即将断裂，警告色）
 
     /**
      * 计算当前帧的摆动偏移量(用于波浪效果)

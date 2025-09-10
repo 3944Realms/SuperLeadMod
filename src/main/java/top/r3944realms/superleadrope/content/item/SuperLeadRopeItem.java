@@ -186,16 +186,15 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
                     knot = SuperLeashKnotEntity.getOrCreateKnot(level, pos);
                     knot.playPlacementSound();
                 }
-                AtomicBoolean canBeAttachedTo = new AtomicBoolean(false);
                 SuperLeashKnotEntity finalKnot = knot;
                 LazyOptional<ILeashDataCapability> iLeashDataCapability = e.getCapability(CapabilityHandler.LEASH_DATA_CAP);
-                iLeashDataCapability.ifPresent(i -> canBeAttachedTo.set(i.canBeAttachedTo(finalKnot)));
-                if(canBeAttachedTo.get()) {//canBeAttachedTo
-                    iLeashDataCapability.ifPresent(i -> {
-                            i.transferLeash(uuid, finalKnot);
-                            isSuccess.set(true);
-                    });
-                }
+                iLeashDataCapability.ifPresent(i -> {
+                    boolean flag = i.canBeAttachedTo(finalKnot);
+                    if (flag) {
+                        i.transferLeash(uuid, finalKnot);
+                        isSuccess.set(true);
+                    }
+                });
             }
         }
         if (isSuccess.get()) {

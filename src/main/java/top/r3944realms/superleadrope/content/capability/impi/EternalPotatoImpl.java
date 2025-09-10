@@ -23,7 +23,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 import top.r3944realms.superleadrope.core.punishment.IObligationCompletion;
 import top.r3944realms.superleadrope.core.punishment.PunishmentDefinition;
-import top.r3944realms.superleadrope.core.register.ObligationCompletionRegistry;
+import top.r3944realms.superleadrope.core.register.SLPObligationCompletionRegistry;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.EternalPotatoSyncCapPacket;
 
@@ -298,7 +298,7 @@ public class EternalPotatoImpl implements IEternalPotato {
         // 完成规则反序列化
         if (nbt.contains(TAG_COMPLETION_ID)) {
             String id = nbt.getString(TAG_COMPLETION_ID);
-            IObligationCompletion rule = ObligationCompletionRegistry.byId(id);
+            IObligationCompletion rule = SLPObligationCompletionRegistry.byId(id);
             completionRule = rule != null ? rule : IObligationCompletion.NONE;
         }
     }

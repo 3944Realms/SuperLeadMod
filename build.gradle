@@ -39,6 +39,7 @@ base {
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 repositories {
+
     maven { url = "https://libraries.minecraft.net/" }
     maven { url = "https://neoforged.forgecdn.net/releases" }
     maven { url = "https://neoforged.forgecdn.net/mojang-meta" }
@@ -70,6 +71,7 @@ repositories {
             includeModule 'me.lucko', 'spark-api'
         }
     }
+    mavenCentral()
     flatDir {
         dir "libs"
     }
@@ -94,6 +96,15 @@ legacyForge {
             devLogin = true
             client()
             systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+//            // 设置 RenderDoc library 路径
+//            // 系统属性，使用项目相对路径
+//            systemProperty 'neoforge.rendernurse.renderdoc.library', file('RenderDoc_1.40_64/renderdoc.dll').absolutePath
+//
+//            // JVM 参数
+//            jvmArgument "-javaagent:${file('libs/RenderNurse-0.0.9.jar').absolutePath}"
+//            jvmArgument "--enable-preview"
+//            jvmArgument "--enable-native-access=ALL-UNNAMED"
+
         }
         client {
             client()
@@ -252,6 +263,42 @@ afterEvaluate {
         }
     }
 }
+
+tasks.register("runWithRenderDoc", Exec) {
+    group = "minecraft"
+    description = "Run Minecraft with RenderDoc using runClientAuth configuration"
+    dependsOn("classes") // 确保源码编译完成
+    def jdwpArgs = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    
+    def renderDocCmd = file("RenderDoc_1.40_64/renderdoccmd.exe").absolutePath
+    def captureDir = file("$buildDir/renderdoc/capture").absolutePath
+
+    def runClientTask = tasks.named("runClientAuth", JavaExec).get()
+    def javaLauncher = runClientTask.getJavaLauncher().get()
+    def javaExecPath = new File(javaLauncher.metadata.installationPath.asFile, "bin/java.exe").absolutePath
+
+    commandLine = [
+            renderDocCmd,
+            "capture",
+            "--opt-hook-children",
+            "--wait-for-exit",
+            "--working-dir", "$projectDir/run",
+            "--capture-file", "${captureDir}/minecraft_capture",
+            javaExecPath,
+            jdwpArgs,
+            "@${buildDir}/moddev/clientRunVmArgs.txt",      // JVM 参数
+            "@${buildDir}/moddev/clientRunProgramArgs.txt"  // Program 参数
+    ]
+
+    environment "MOD_CLASSES", "superleadrope%%${buildDir}/classes/java/main;superleadrope%%${buildDir}/resources/main"
+
+    doFirst {
+        println "Using JVM: ${javaExecPath}"
+        println "RenderDoc capture dir: ${captureDir}"
+        println "Environment MOD_CLASSES: ${environment['MOD_CLASSES']}"
+    }
+}
+
 
 // IDEA 支持
 idea {

@@ -43,3 +43,4 @@ bin/
 .DS_Store
 # Ignore Gradle build output directory
 build
+/RenderDoc_1.40_64/

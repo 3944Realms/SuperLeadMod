@@ -28,6 +28,7 @@ public enum ModPartEnum {
     AUTHOR,
     TITLE,
     NAME,
+    GAME_RULE,
     DESCRIPTION,
     INFO,
     MESSAGE,

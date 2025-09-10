@@ -20,6 +20,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
+import top.r3944realms.superleadrope.SuperLeadRope;
 
 public class SLPRenderType extends RenderType {
     public SLPRenderType(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
@@ -35,6 +37,7 @@ public class SLPRenderType extends RenderType {
                 ImmutableMap.<String, VertexFormatElement>builder()
                         .put("Position", DefaultVertexFormat.ELEMENT_POSITION)
                         .put("Color", DefaultVertexFormat.ELEMENT_COLOR)
+                        .put("UV0", DefaultVertexFormat.ELEMENT_UV0)      // 纹理坐标
                         .put("UV2", DefaultVertexFormat.ELEMENT_UV2)       // 光照
                         .put("Normal", DefaultVertexFormat.ELEMENT_NORMAL) // 法线
                         .put("Padding", DefaultVertexFormat.ELEMENT_PADDING)
@@ -47,8 +50,8 @@ public class SLPRenderType extends RenderType {
                 false, // not used for crumbling
                 false, // sortOnUpload
                 CompositeState.builder()
-                        .setShaderState(RENDERTYPE_LEASH_SHADER) // 使用实体着色器
-                        .setTextureState(NO_TEXTURE) // 无纹理
+                        .setShaderState(new ShaderStateShard(() -> SLPShaderRegistry.ROPE_SHADER)) // 使用实体着色器
+                        .setTextureState(new TextureStateShard(new ResourceLocation(SuperLeadRope.MOD_ID, "textures/rope/rope_leash.png"), false, false))
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setLightmapState(LIGHTMAP) // 启用光照
                         .setCullState(NO_CULL) // 双面渲染

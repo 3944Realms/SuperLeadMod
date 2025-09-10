@@ -25,7 +25,7 @@ import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapabili
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
 import java.util.*;
-
+//TODO: 未来实现更高级的渲染
 public class SuperLeashStateResolver {
     private static final float MAX_TENSION = 1.5f;
     private static final float THICKNESS_BASE = 0.1f;
@@ -68,7 +68,7 @@ public class SuperLeashStateResolver {
         double distance = currentHolderPos.distanceTo(currentEntityPos);
         double maxDistance = leashInfo.maxDistance();
         double elasticDistance = leashInfo.elasticDistance();
-        float tension = calculateTension(distance, maxDistance, elasticDistance);
+        float tension = calculateTension(distance, maxDistance, elasticDistance);//这里暂时没用上
         float stretchRatio = (float) (distance / maxDistance);
         boolean isCritical = distance > maxDistance * 1.5;
 
@@ -97,7 +97,8 @@ public class SuperLeashStateResolver {
                 selectColor(tension, isCritical),
                 THICKNESS_BASE + (tension * THICKNESS_TENSION),
                 swing.angle(),
-                swing.speed()
+                swing.speed(),
+                (float) leashInfo.maxDistance()
         ));
     }
 

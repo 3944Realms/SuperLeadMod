@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * IObligationCompletion 注册与反序列化管理器
  */
-public class ObligationCompletionRegistry {
+public class SLPObligationCompletionRegistry {
 
     /** ID -> IObligationCompletion 实例 */
     private static final Map<String, IObligationCompletion> REGISTRY = new HashMap<>();

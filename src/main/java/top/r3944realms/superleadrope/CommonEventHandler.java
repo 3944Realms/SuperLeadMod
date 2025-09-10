@@ -40,6 +40,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -54,11 +55,13 @@ import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedPlayers;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 import top.r3944realms.superleadrope.core.leash.LeashInteractHandler;
 import top.r3944realms.superleadrope.core.leash.LeashSyncManager;
 import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
+import top.r3944realms.superleadrope.core.register.SLPGameruleRegistry;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.util.PotatoMode;
 import top.r3944realms.superleadrope.core.util.PotatoModeHelper;
@@ -84,6 +87,13 @@ public class CommonEventHandler {
             if (entity.level().isClientSide) return;
             if (entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart) {
                 entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager::track);
+                if (entity instanceof ServerPlayer serverPlayer) {
+                    LeashSyncManager.forEach(i -> {
+                        if (i.isLeashedBy(serverPlayer) && i.isInDelayedLeash(serverPlayer.getUUID())) {
+                            i.removeDelayedLeash(serverPlayer.getUUID());//重新加入去除延迟
+                        }
+                    });
+                }
             }
         }
 
@@ -92,6 +102,13 @@ public class CommonEventHandler {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) return;
             if (entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart) {
+                if (entity instanceof ServerPlayer serverPlayer) {
+                    LeashSyncManager.forEach(i -> {
+                        if(i.isLeashedBy(serverPlayer)) {
+                            i.addDelayedLeash(serverPlayer); //添加延迟
+                        }
+                    });
+                }
                 entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager::untrack);
             }
         }
@@ -230,7 +247,11 @@ public class CommonEventHandler {
 
             // 获取范围内可被拴住实体
             List<Entity> entities = LeashDataImpl.leashableInArea(telEntity);
-
+            //规则关闭则禁止
+            if(!SLPGameruleRegistry.getGameruleBoolValue(event.getEntity().level(), TeleportWithLeashedPlayers.ID)) {
+                entities.forEach(i -> i.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(j -> j.removeLeash(i)));
+                return;
+            }
             for (Entity beLeashedEntity : entities) {
                 // --- 保存状态快照 ---
                 Pose originalPose = beLeashedEntity.getPose();
@@ -244,6 +265,7 @@ public class CommonEventHandler {
                     originalLeashInfo.set(cap.getLeashInfo(telEntity).orElse(null));
                     cap.removeLeash(telEntity);
                 });
+
 
                 // --- 保存骑乘关系（可修改列表） ---
                 RidingRelationship originalRidingRelationship = RidingSaver.save(beLeashedEntity, true);
@@ -309,10 +331,13 @@ public class CommonEventHandler {
                 LeashSyncManager.forEach(ILeashDataCapability::applyLeashForces);
             }
         }
-
+        @SubscribeEvent
+        public static void onEntityAttack (AttackEntityEvent event) {
+            LeashInteractHandler.onEntityLeftInteract(event.getEntity().level(), event.getTarget(), event.getEntity(), event);
+        }
         @SubscribeEvent
         public static void onEntityInteract (PlayerInteractEvent.EntityInteract event) {
-            LeashInteractHandler.onEntityInteract(event.getLevel(), event.getHand(), event.getTarget(), event.getEntity(), event); //处理实体互动
+            LeashInteractHandler.onEntityRightInteract(event.getLevel(), event.getHand(), event.getTarget(), event.getEntity(), event); //处理实体互动
         }
 
         @SubscribeEvent
@@ -324,8 +349,7 @@ public class CommonEventHandler {
     public static class Mod {
         @SubscribeEvent
         public static void onCommonInit (FMLCommonSetupEvent event) {
-            event.enqueueWork(() -> {
-            });
+            event.enqueueWork(SLPGameruleRegistry::register);//规则注册
         }
         @SubscribeEvent
         public static void registerCapability(RegisterCapabilitiesEvent event) {

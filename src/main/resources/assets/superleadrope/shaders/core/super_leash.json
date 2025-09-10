@@ -1,0 +1,34 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
+  "vertex": "superleadrope:super_leash",
+  "fragment": "superleadrope:super_leash",
+  "attributes": [
+    "Position",
+    "Normal",
+    "UV0",
+    "Color",
+    "UV2"
+  ],
+  "samplers": [
+    { "name": "Sampler2", "file": "superleadrope:textures/rope/rope_leash" },
+    { "name": "LightmapSampler", "file": "minecraft:textures/misc/lightmap" }
+  ],
+  "uniforms": [
+    { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0] },
+    { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0] },
+    { "name": "ColorModulator", "type": "float", "count": 4, "values": [1.0,1.0,1.0,1.0] },
+    { "name": "FogStart", "type": "float", "count": 1, "values": [0.0] },
+    { "name": "FogEnd", "type": "float", "count": 1, "values": [100.0] },
+    { "name": "FogColor", "type": "float", "count": 4, "values": [0.8,0.8,0.8,1.0] },
+    { "name": "FogShape", "type": "int", "count": 1, "values": [0] },
+    { "name": "Time", "type": "float", "count": 1, "values": [0.0] },
+    { "name": "HolderPos", "type": "float", "count": 3, "values": [0.0,0.0,0.0] },
+    { "name": "EntityPos", "type": "float", "count": 3, "values": [0.0,0.0,0.0] },
+    { "name": "MaxDistance", "type": "float", "count": 1, "values": [16.0] },
+    { "name": "AlphaMultiplier", "type": "float", "count": 1, "values": [1.0] }
+  ]
+}

@@ -19,7 +19,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import top.r3944realms.superleadrope.content.gamerule.SLPGamerules;
-import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedPlayers;
+import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +70,7 @@ public enum SLPGameruleRegistry {
         gameruleDataTypes.put(gameruleName, RuleDataType.INTEGER);
     }
     public static void register() {
-        TeleportWithLeashedPlayers.register();
+        TeleportWithLeashedEntities.register();
     }
 
 }

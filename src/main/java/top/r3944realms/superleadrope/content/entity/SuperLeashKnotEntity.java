@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
+import top.r3944realms.superleadrope.util.capability.LeashUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -81,9 +82,9 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
                 this.markHurt();
                 this.playSound(SoundEvents.LEASH_KNOT_BREAK);
                 List<Entity> entities = LeashDataImpl.leashableInArea(this.level(), pos.getCenter(), entity -> LeashDataImpl.isLeashHolder(entity, this));
-                entities.forEach(entity -> entity
-                        .getCapability(CapabilityHandler.LEASH_DATA_CAP)
-                        .map(iLeashDataCapability -> iLeashDataCapability.removeLeash(this))
+                entities.forEach(entity ->
+                        LeashUtil.getLeashData(entity)
+                                .map(iLeashDataCapability -> iLeashDataCapability.removeLeash(this))
                 );
             }
 
@@ -168,11 +169,11 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         List<Entity> entities = LeashDataImpl.leashableInArea(player);
         for(Entity entity : entities) {
             if (LeashDataImpl.isLeashHolder(entity, player.getUUID()))
-                entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> {
-                    i.transferLeash(player.getUUID(), this);
-                    isTransferLeash.set(true);
-                });
-
+                LeashUtil.getLeashData(entity)
+                    .ifPresent(i -> {
+                        i.transferLeash(player.getUUID(), this);
+                        isTransferLeash.set(true);
+                    });
         }
         AtomicBoolean isRemoveLeashKnot = new AtomicBoolean(false);
         if (!isTransferLeash.get()) {
@@ -180,14 +181,14 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
                 this.playSound(SoundEvents.LEASH_KNOT_BREAK);
                 this.discard();
                 List<Entity> entities1 = LeashDataImpl.leashableInArea(this);
-                entities1.forEach(
-                        entity -> entity
-                                .getCapability(CapabilityHandler.LEASH_DATA_CAP)
-                                .ifPresent(iLeashDataCapability -> {
-                                    iLeashDataCapability.removeLeash(this);
-                                    isRemoveLeashKnot.set(true);
-                                }
-                ));
+                entities1.forEach(entity ->
+                                LeashUtil.getLeashData(entity)
+                                    .ifPresent(iLeashDataCapability -> {
+                                        iLeashDataCapability.removeLeash(this);
+                                        isRemoveLeashKnot.set(true);
+                                    }
+                                )
+                );
             }
         } else {
             this.playSound(SoundEvents.LEASH_KNOT_PLACE);

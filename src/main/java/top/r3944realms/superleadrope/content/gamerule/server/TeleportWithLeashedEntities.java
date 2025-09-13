@@ -20,11 +20,11 @@ import top.r3944realms.superleadrope.content.gamerule.SLPGamerules;
 
 import static top.r3944realms.superleadrope.content.gamerule.SLPGamerules.GAMERULE_REGISTRY;
 
-public class TeleportWithLeashedPlayers {
+public class TeleportWithLeashedEntities {
     public static final boolean DEFAULT_VALUE = true;
-    public static final String ID = SLPGamerules.getGameruleName(TeleportWithLeashedPlayers.class);
-    public static final String DESCRIPTION_KEY = SLPGamerules.getDescriptionKey(TeleportWithLeashedPlayers.class);
-    public static final String NAME_KEY = SLPGamerules.getNameKey(TeleportWithLeashedPlayers.class);
+    public static final String ID = SLPGamerules.getGameruleName(TeleportWithLeashedEntities.class);
+    public static final String DESCRIPTION_KEY = SLPGamerules.getDescriptionKey(TeleportWithLeashedEntities.class);
+    public static final String NAME_KEY = SLPGamerules.getNameKey(TeleportWithLeashedEntities.class);
     public static final GameRules.Category CATEGORY = GameRules.Category.PLAYER;
 
     public static void register() {

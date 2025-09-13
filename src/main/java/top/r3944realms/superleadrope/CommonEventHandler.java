@@ -15,6 +15,8 @@
 
 package top.r3944realms.superleadrope;
 
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,6 +37,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
@@ -53,9 +56,11 @@ import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.CapabilityRemainder;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
-import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedPlayers;
+import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 import top.r3944realms.superleadrope.core.leash.LeashInteractHandler;
@@ -86,9 +91,10 @@ public class CommonEventHandler {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) return;
             if (entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart) {
-                entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager::track);
+                entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager.Data::track);
+                entity.getCapability(CapabilityHandler.LEASH_STATE_CAP).ifPresent(LeashSyncManager.State::track);
                 if (entity instanceof ServerPlayer serverPlayer) {
-                    LeashSyncManager.forEach(i -> {
+                    LeashSyncManager.Data.forEach(i -> {
                         if (i.isLeashedBy(serverPlayer) && i.isInDelayedLeash(serverPlayer.getUUID())) {
                             i.removeDelayedLeash(serverPlayer.getUUID());//重新加入去除延迟
                         }
@@ -103,13 +109,14 @@ public class CommonEventHandler {
             if (entity.level().isClientSide) return;
             if (entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart) {
                 if (entity instanceof ServerPlayer serverPlayer) {
-                    LeashSyncManager.forEach(i -> {
+                    LeashSyncManager.Data.forEach(i -> {
                         if(i.isLeashedBy(serverPlayer)) {
                             i.addDelayedLeash(serverPlayer); //添加延迟
                         }
                     });
                 }
-                entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager::untrack);
+                entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager.Data::untrack);
+                entity.getCapability(CapabilityHandler.LEASH_STATE_CAP).ifPresent(LeashSyncManager.State::untrack);
             }
         }
         @SubscribeEvent
@@ -142,7 +149,7 @@ public class CommonEventHandler {
             if (SuperLeashKnotEntity.isSupportBlock(blockState)) {
                 boolean shouldConsume = SuperLeadRopeItem.bindToBlock(player, level, blockPos, event.getItemStack(), itemInHand.is(SLPItems.SUPER_LEAD_ROPE.get()));
                 if (shouldConsume) {
-                    event.setCancellationResult(InteractionResult.CONSUME);
+                    event.setCancellationResult(InteractionResult.SUCCESS);
                     event.setCanceled(true);
                 }
             }
@@ -248,7 +255,7 @@ public class CommonEventHandler {
             // 获取范围内可被拴住实体
             List<Entity> entities = LeashDataImpl.leashableInArea(telEntity);
             //规则关闭则禁止
-            if(!SLPGameruleRegistry.getGameruleBoolValue(event.getEntity().level(), TeleportWithLeashedPlayers.ID)) {
+            if(!SLPGameruleRegistry.getGameruleBoolValue(event.getEntity().level(), TeleportWithLeashedEntities.ID)) {
                 entities.forEach(i -> i.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(j -> j.removeLeash(i)));
                 return;
             }
@@ -260,7 +267,7 @@ public class CommonEventHandler {
                 float originalPitch = beLeashedEntity.getXRot();
                 Vec3 originalDeltaMovement = beLeashedEntity.getDeltaMovement();
 
-                AtomicReference<ILeashDataCapability.LeashInfo> originalLeashInfo = new AtomicReference<>();
+                AtomicReference<ILeashData.LeashInfo> originalLeashInfo = new AtomicReference<>();
                 beLeashedEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(cap -> {
                     originalLeashInfo.set(cap.getLeashInfo(telEntity).orElse(null));
                     cap.removeLeash(telEntity);
@@ -296,9 +303,9 @@ public class CommonEventHandler {
                 }
 
                 // --- 恢复拴绳 ---
-                ILeashDataCapability.LeashInfo leashInfo = Optional.ofNullable(originalLeashInfo.get())
+                ILeashData.LeashInfo leashInfo = Optional.ofNullable(originalLeashInfo.get())
                         .map(info -> info.transferHolder(telEntity))
-                        .orElse(ILeashDataCapability.LeashInfo.EMPTY);
+                        .orElse(ILeashData.LeashInfo.EMPTY);
 
                 beLeashedEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(
                         cap -> cap.addLeash(telEntity, leashInfo)
@@ -321,14 +328,16 @@ public class CommonEventHandler {
 
                 // 每10 tick标记为脏（needsSync）
                 if (tickCounter % 10 == 0) {
-                    LeashSyncManager.forEach(ILeashDataCapability::markForSync);
+                    LeashSyncManager.Data.forEach(ILeashData::markForSync);
+                    LeashSyncManager.State.forEach(ILeashState::markForSync);
                 }
 
                 // 定期同步检查
-                LeashSyncManager.forEach(ILeashDataCapability::checkSync);
+                LeashSyncManager.Data.forEach(ILeashData::checkSync);
+                LeashSyncManager.State.forEach(ILeashState::checkSync);
 
                 // 应用物理拉力/效果
-                LeashSyncManager.forEach(ILeashDataCapability::applyLeashForces);
+                LeashSyncManager.Data.forEach(ILeashData::applyLeashForces);
             }
         }
         @SubscribeEvent
@@ -343,6 +352,11 @@ public class CommonEventHandler {
         @SubscribeEvent
         public static void attachCapability(AttachCapabilitiesEvent<?> event) {
             CapabilityHandler.attachCapability(event);
+        }
+        @SubscribeEvent
+        public static void onRegisterCommand (RegisterCommandsEvent event) {
+            CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+            MotionCommand.register(dispatcher);
         }
     }
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, bus= net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.MOD)

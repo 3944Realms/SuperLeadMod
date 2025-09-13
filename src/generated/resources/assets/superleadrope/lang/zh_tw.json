@@ -2,6 +2,8 @@
   "death.attack.eternal_potato_not_complete": "§c%1$s 因使用非自己綁定物品，受到閃電懲罰！",
   "death.attack.eternal_potato_not_owner": "§c%1$s 因使用非自己綁定物品，受到閃電懲罰！",
   "entity.superleadrope.super_lead_knot": "超級拴繩結",
+  "gamerule.slp.TeleportWithLeashedEntities": "被拴实体随玩家持有者傳送",
+  "gamerule.slp.TeleportWithLeashedEntities.description": "將被拴实体將隨持有者一起傳送",
   "item.eternal_potato.msg.bind_msg": "§6已與你綁定，成為全服共有之人。",
   "item.eternal_potato.msg.cannot_drop": "§c永恆土豆不可丟棄，懲罰數加%d！",
   "item.eternal_potato.msg.obligation_countdown": "懲罰倒計時: §a%d §f秒",
@@ -22,5 +24,8 @@
   "item.superleadrope.super_lead_rope": "超級拴繩",
   "sound.superleadrope.subtitle.lead_break": "拴繩斷裂",
   "sound.superleadrope.subtitle.lead_tied": "拴繩係上",
-  "sound.superleadrope.subtitle.lead_untied": "拴繩解開"
+  "sound.superleadrope.subtitle.lead_untied": "拴繩解開",
+  "superleadrope.command.motion.message.adder.successful": "§b添加成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+  "superleadrope.command.motion.message.multiply.successful": "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+  "superleadrope.command.motion.message.setter.successful": "§b設置成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
 }

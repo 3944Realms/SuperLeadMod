@@ -26,20 +26,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.content.capability.impi.LeashStateImpl;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
 
-public class LeashDataProvider implements ICapabilitySerializable<CompoundTag> {
-    public static final ResourceLocation LEASH_DATA_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_data");
-    private final ILeashData instance;
-    private final LazyOptional<ILeashData> optional;
-    public LeashDataProvider(Entity entity) {
-        this.instance = new LeashDataImpl(entity);
+public class LeashStateProvider implements ICapabilitySerializable<CompoundTag> {
+    public static final ResourceLocation LEASH_STATE_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_state");
+    private final ILeashState instance;
+    private final LazyOptional<ILeashState> optional;
+    public LeashStateProvider(Entity entity) {
+        this.instance = new LeashStateImpl(entity);
         this.optional = LazyOptional.of(() -> instance);
     }
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        return CapabilityHandler.LEASH_DATA_CAP.orEmpty(cap, optional);
+        return CapabilityHandler.LEASH_STATE_CAP.orEmpty(cap, optional);
     }
 
     @Override

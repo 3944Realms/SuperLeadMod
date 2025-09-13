@@ -16,6 +16,7 @@
 package top.r3944realms.superleadrope;
 
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -47,5 +48,16 @@ public class SuperLeadRope {
         ConfigUtil.createFile(new String[]{c});
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         ConfigUtil.registerConfig(modLoadingContext, ModConfig.Type.COMMON, LeashCommonConfig.SPEC, c, "leash");
+    }
+
+    public static class ModInfo {
+        public static final String VERSION;
+        static {
+            // 从 ModList 获取当前 ModContainer 的元数据
+            VERSION = ModList.get()
+                    .getModContainerById(MOD_ID)
+                    .map(c -> c.getModInfo().getVersion().toString())
+                    .orElse("UNKNOWN");
+        }
     }
 }

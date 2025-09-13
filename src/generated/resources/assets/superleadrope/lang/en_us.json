@@ -2,6 +2,8 @@
   "death.attack.eternal_potato_not_complete": "§c%1$s was not the rightful owner, struck by lightning!",
   "death.attack.eternal_potato_not_owner": "§c%1$s was not the rightful owner, struck by lightning!",
   "entity.superleadrope.super_lead_knot": "Super Lead Knot",
+  "gamerule.slp.TeleportWithLeashedEntities": "Teleport leashed player with player holder",
+  "gamerule.slp.TeleportWithLeashedEntities.description": "Holder will teleport with their leashed players ",
   "item.eternal_potato.msg.bind_msg": "§6Bound to you as the server-wide shared person.",
   "item.eternal_potato.msg.cannot_drop": "§cThe Eternal Potato cannot be dropped! +%d punishments.",
   "item.eternal_potato.msg.obligation_countdown": "Punish Countdown: §a%d §fseconds remaining",
@@ -22,5 +24,8 @@
   "item.superleadrope.super_lead_rope": "Super Lead Rope",
   "sound.superleadrope.subtitle.lead_break": "Lead Break",
   "sound.superleadrope.subtitle.lead_tied": "Lead Tied",
-  "sound.superleadrope.subtitle.lead_untied": "Lead Untie"
+  "sound.superleadrope.subtitle.lead_untied": "Lead Untie",
+  "superleadrope.command.motion.message.adder.successful": "§bAdd Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
+  "superleadrope.command.motion.message.multiply.successful": "§bMultiply Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
+  "superleadrope.command.motion.message.setter.successful": "§bSet Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r"
 }

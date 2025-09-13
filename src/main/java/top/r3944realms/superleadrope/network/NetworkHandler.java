@@ -22,20 +22,16 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.network.toClient.EternalPotatoSyncCapPacket;
-import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
-import top.r3944realms.superleadrope.network.toClient.PacketEternalPotatoRemovePacket;
-import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
+import top.r3944realms.superleadrope.network.toClient.*;
 
 
 public class NetworkHandler {
-    private static final String PROTOCOL_VERSION = "1";
     private static int cid = 0;
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(SuperLeadRope.MOD_ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
+            () -> SuperLeadRope.ModInfo.VERSION,
+            SuperLeadRope.ModInfo.VERSION::equals,
+            SuperLeadRope.ModInfo.VERSION::equals
     );
     public static void register() {
         INSTANCE.messageBuilder(LeashDataSyncPacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
@@ -57,6 +53,11 @@ public class NetworkHandler {
                 .decoder(PacketEternalPotatoRemovePacket::decode)
                 .encoder(PacketEternalPotatoRemovePacket::encode)
                 .consumerNetworkThread(PacketEternalPotatoRemovePacket::handle)
+                .add();
+        INSTANCE.messageBuilder(LeashStateSyncPacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(LeashStateSyncPacket::decode)
+                .encoder(LeashStateSyncPacket::encode)
+                .consumerNetworkThread(LeashStateSyncPacket::handle)
                 .add();
     }
     public static <MSG> void sendToPlayer(MSG message, ServerPlayer player){

@@ -15,7 +15,8 @@
 
 package top.r3944realms.superleadrope.core.leash;
 
-import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
 
 import java.util.Collections;
 import java.util.Set;
@@ -24,16 +25,29 @@ import java.util.function.Consumer;
 
 // 全局LeashData同步管理器
 public class LeashSyncManager {
-    static final Set<ILeashDataCapability> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());
-
-    public static void track(ILeashDataCapability instance) {
-        INSTANCES.add(instance);
+    static final Set<ILeashData> LEASH_DATA = Collections.newSetFromMap(new WeakHashMap<>());
+    static final Set<ILeashState> LEASH_STATES = Collections.newSetFromMap(new WeakHashMap<>());
+    public static class Data {
+        public static void track(ILeashData instance) {
+            LEASH_DATA.add(instance);
+        }
+        public static void untrack(ILeashData instance) {
+            LEASH_DATA.remove(instance);
+        }
+        public static void forEach(Consumer<ILeashData> consumer) {
+            LEASH_DATA.forEach(consumer);
+        }
     }
-    public static void untrack(ILeashDataCapability instance) {
-        INSTANCES.remove(instance);
-    }
-    public static void forEach(Consumer<ILeashDataCapability> consumer) {
-        INSTANCES.forEach(consumer);
+    public static class State {
+        public static void track(ILeashState instance) {
+            LEASH_STATES.add(instance);
+        }
+        public static void untrack(ILeashState instance) {
+            LEASH_STATES.remove(instance);
+        }
+        public static void forEach(Consumer<ILeashState> consumer) {
+            LEASH_STATES.forEach(consumer);
+        }
     }
 
 }

@@ -24,17 +24,21 @@ import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
 import top.r3944realms.superleadrope.content.capability.provider.EternalPotatoProvider;
 import top.r3944realms.superleadrope.content.capability.provider.LeashDataProvider;
+import top.r3944realms.superleadrope.content.capability.provider.LeashStateProvider;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 
 public class CapabilityHandler {
-    public static final Capability<ILeashDataCapability> LEASH_DATA_CAP = CapabilityManager.get(new CapabilityToken<>(){});
+    public static final Capability<ILeashData> LEASH_DATA_CAP = CapabilityManager.get(new CapabilityToken<>(){});
+    public static Capability<ILeashState> LEASH_STATE_CAP = CapabilityManager.get(new CapabilityToken<>() {});
     public static Capability<IEternalPotato> ETERNAL_POTATO_CAP = CapabilityManager.get(new CapabilityToken<>() {});
     public static void registerCapability(RegisterCapabilitiesEvent event) {
-        event.register(ILeashDataCapability.class);
+        event.register(ILeashData.class);
         event.register(IEternalPotato.class);
+        event.register(ILeashState.class);
     }
 
     public static void attachCapability(AttachCapabilitiesEvent<?> event) {
@@ -43,6 +47,7 @@ public class CapabilityHandler {
                 (LeashDataImpl.isLeashable(entity))//只对活体 船 矿车添加CAP
         ) {
             event.addCapability(LeashDataProvider.LEASH_DATA_REL, new LeashDataProvider(entity));
+            event.addCapability(LeashStateProvider.LEASH_STATE_REL, new LeashStateProvider(entity));
         } else if (object instanceof ItemStack stack && stack.getItem() instanceof EternalPotatoItem) {
             event.addCapability(EternalPotatoProvider.ETERNAL_POTATO_DATA_REL, new EternalPotatoProvider(stack));
         }

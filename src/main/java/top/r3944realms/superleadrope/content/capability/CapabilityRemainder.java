@@ -15,12 +15,25 @@
 
 package top.r3944realms.superleadrope.content.capability;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import top.r3944realms.superleadrope.util.capability.LeashUtil;
 
 public class CapabilityRemainder {
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        if (event.isWasDeath()) {
-            //
+        Player newEntity = event.getEntity();
+        if(newEntity instanceof ServerPlayer newPlayer) {
+            Player original = event.getOriginal();
+            original.reviveCaps();
+            LeashUtil.getLeashState(original)
+                    .ifPresent(oldCap ->
+                            LeashUtil.getLeashState(newPlayer)
+                                    .ifPresent(newData ->
+                                            newData.copy(oldCap, newEntity)
+                                    )
+                    );
+            original.invalidateCaps();
         }
     }
 }

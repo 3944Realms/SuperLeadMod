@@ -18,6 +18,7 @@ package top.r3944realms.superleadrope.content.capability.impi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -28,7 +29,6 @@ import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -36,17 +36,21 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.config.LeashCommonConfig;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
+import top.r3944realms.superleadrope.util.capability.LeashUtil;
+import top.r3944realms.superleadrope.util.nbt.NBTReader;
+import top.r3944realms.superleadrope.util.nbt.NBTWriter;
 import top.r3944realms.superleadrope.util.riding.RindingLeash;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -80,12 +84,35 @@ import java.util.stream.Stream;
  *     </tbody>
  * </table>
  */
-public class LeashDataImpl implements ILeashDataCapability {
-    private static final double LEASH_ELASTIC_DIST = 6.0; // 弹性距离
-    private static final double LEASH_EXTREME_SNAP_DIST_FACTOR = 2.0; // 断裂距离 = 最大距离 * 2 //TODO:未来可配置
-    private static final float SPRING_DAMPENING = 0.7f; // 阻尼系数
-    private static final Vec3 AXIS_SPECIFIC_ELASTICITY = new Vec3(0.8, 0.2, 0.8); // 轴向弹性系数（Y轴较弱）
-    private static final int MAX_LEASHES_PER_ENTITY = 6;//一个实体最多链接多少个拴绳 //TODO:未来可配置
+public class LeashDataImpl implements ILeashData {
+    private static final class Config {
+        private Config() {} // 私有构造防止实例化
+
+        static double maxLeashDistance() {
+            return LeashCommonConfig.COMMON.maxLeashLength.get();
+        }
+
+        static double leashElasticDist() {
+            return LeashCommonConfig.COMMON.elasticDistance.get();
+        }
+
+        static double leashExtremeSnapDistFactor() {
+            return LeashCommonConfig.COMMON.extremeSnapFactor.get();
+        }
+
+        static double springDampening() {
+            return LeashCommonConfig.COMMON.springDampening.get();
+        }
+
+        static Vec3 axisSpecificElasticity() {
+            List<? extends Double> list = LeashCommonConfig.COMMON.axisSpecificElasticity.get();
+            return new Vec3(list.get(0), list.get(1), list.get(2));
+        }
+
+        static int maxLeashesPerEntity() {
+            return LeashCommonConfig.COMMON.maxLeashesPerEntity.get();
+        }
+    }
     private final Entity entity;
     private boolean needsSync = false;
     private long lastSyncTime;
@@ -93,11 +120,11 @@ public class LeashDataImpl implements ILeashDataCapability {
     private final Map<UUID, LeashInfo> leashHolders = new ConcurrentHashMap<>();
     // 引入解决 绳结不保存导致第二进入持有者不存在的问题
     private final Map<BlockPos, LeashInfo> leashKnots = new ConcurrentHashMap<>();
-//    private CompoundTag lastSyncedData = new CompoundTag();
 
     public LeashDataImpl(Entity entity) {
         this.entity = entity;
     }
+
     @Override
     public void markForSync() {
         if (!entity.level().isClientSide) {
@@ -106,13 +133,17 @@ public class LeashDataImpl implements ILeashDataCapability {
         }
     }
 
-    /** 立即同步，无视时间间隔 */
+    /**
+     * 立即同步，无视时间间隔
+     */
     @Override
     public void immediateSync() {
         syncNow();
     }
 
-    /** 定期调用，每 tick 或每几秒检测 */
+    /**
+     * 定期调用，每 tick 或每几秒检测
+     */
     @Override
     public void checkSync() {
         if (!needsSync || entity.level().isClientSide) return;
@@ -124,7 +155,9 @@ public class LeashDataImpl implements ILeashDataCapability {
         }
     }
 
-    /** 内部统一同步方法，避免重复逻辑 */
+    /**
+     * 内部统一同步方法，避免重复逻辑
+     */
     private void syncNow() {
         CompoundTag currentData = serializeNBT();
 
@@ -137,19 +170,44 @@ public class LeashDataImpl implements ILeashDataCapability {
         needsSync = false;
     }
 
+    @Override
+    public boolean addLeash(Entity holder) {
+        return addLeash(holder, Config.maxLeashDistance());
+    }
+
+    @Override
+    public boolean addLeash(Entity holder, String reserved) {
+        return addLeash(holder, Config.maxLeashDistance(), reserved);
+    }
+
+    // 添加拴绳（支持自定义最大长度）
+    @Override
+    public boolean addLeash(Entity holder, double maxDistance) {
+        return addLeash(holder, maxDistance, Config.leashElasticDist(), 0, "");
+    }
+
     // 添加拴绳（支持自定义最大长度和弹性距离）
     @Override
-    public boolean addLeash(Entity holder, ItemStack leashStack, double maxDistance) {
-        boolean result = addLeash(holder, leashStack, maxDistance, LEASH_ELASTIC_DIST, 0);
-        if (result) markForSync();
-        return result;
+    public boolean addLeash(Entity holder, double maxDistance, double elasticDistance, int maxKeepLeashTicks) {
+        return addLeash(holder, maxDistance, elasticDistance, maxKeepLeashTicks, "");
     }
+
+    // 添加拴绳（支持自定义最大长度 + reserved 字段）
     @Override
-    public boolean addLeash(Entity holder, ItemStack leashStack, double maxDistance, double elasticDistance, int maxKeepLeashTicks) {
+    public boolean addLeash(Entity holder, double maxDistance, String reserved) {
+        return addLeash(holder, maxDistance, Config.leashElasticDist(), 0, reserved);
+    }
+
+    // 添加拴绳（最终实现：支持最大长度、弹性距离、保持 Tick、reserved）
+    @Override
+    public boolean addLeash(Entity holder, double maxDistance,
+                            double elasticDistance, int maxKeepLeashTicks, String reserved) {
         boolean isSuperKnot = holder instanceof SuperLeashKnotEntity;
-        if ((!isSuperKnot && leashHolders.containsKey(holder.getUUID()) || (isSuperKnot && leashKnots.containsKey(((SuperLeashKnotEntity) holder).getPos())))) {
+        if ((!isSuperKnot && leashHolders.containsKey(holder.getUUID()))
+                || (isSuperKnot && leashKnots.containsKey(((SuperLeashKnotEntity) holder).getPos()))) {
             return false;
         }
+
         if (!canBeLeashed()) {
             Optional<UUID> uuidOptional = occupyLeash();
             if (uuidOptional.isEmpty()) {
@@ -157,36 +215,62 @@ public class LeashDataImpl implements ILeashDataCapability {
             }
             removeLeash(uuidOptional.get());
         }
-        LeashInfo info = LeashInfo.CreateLeashInfo(
+
+        LeashInfo info = LeashInfo.create(
                 holder,
-                leashStack.getItem().getDescription().toString(),
+                reserved,
                 calculateAttachOffset(entity),
                 maxDistance,
                 elasticDistance,
                 maxKeepLeashTicks,
                 maxKeepLeashTicks
         );
-        if (holder instanceof SuperLeashKnotEntity s) {
-            leashKnots.put(s.getPos(), info);
+
+        if (isSuperKnot) {
+            leashKnots.put(((SuperLeashKnotEntity) holder).getPos(), info);
+        } else {
+            leashHolders.put(holder.getUUID(), info);
         }
-        else leashHolders.put(holder.getUUID(), info);
+
         markForSync();
         return true;
     }
 
+    // 使用已有的 LeashInfo 添加拴绳（直接走最终实现）
     @Override
-    public boolean addLeash(Entity holder, LeashInfo leashInfo) {
-        return addLeash(holder, ItemStack.EMPTY, leashInfo.maxDistance(), leashInfo.elasticDistance(), leashInfo.maxKeepLeashTicks());
+    public void addLeash(Entity holder, LeashInfo leashInfo) {
+        addLeash(holder,
+                leashInfo.maxDistance(),
+                leashInfo.elasticDistance(),
+                leashInfo.maxKeepLeashTicks(),
+                leashInfo.reserved()
+        );
     }
 
     @Override
-    public boolean addDelayedLeash(Player holderPlayer) {
-        return delayedHolders.add(holderPlayer.getUUID());
+    public void addDelayedLeash(Player holderPlayer) {
+        delayedHolders.add(holderPlayer.getUUID());
     }
 
     @Override
-    public boolean removeDelayedLeash(UUID onceHolderUUID) {
-        return delayedHolders.remove(onceHolderUUID);
+    public void removeDelayedLeash(UUID onceHolderUUID) {
+        delayedHolders.remove(onceHolderUUID);
+    }
+
+    private <K> boolean updateLeashInfo(
+            Map<K, LeashInfo> map,
+            K key,
+            Function<LeashInfo, LeashInfo> updater
+    ) {
+        LeashInfo old = map.get(key);
+        if (old == null || old.holderIdOpt().isEmpty()) return false;
+
+        LeashInfo updated = updater.apply(old);
+        if (updated == null) return false;
+
+        map.put(key, updated);
+        markForSync();
+        return true;
     }
 
     @Override
@@ -203,76 +287,101 @@ public class LeashDataImpl implements ILeashDataCapability {
                 setMaxDistance(holder.getUUID(), newMaxDistance, newMaxKeepLeashTicks);
     }
 
-    // 动态修改最大拴绳长度
+    @Override
+    public boolean setMaxDistance(Entity holder, double distance, int maxKeepTicks, String reserved) {
+        return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
+                setMaxDistance(superLeashKnotEntity.getPos(), distance, maxKeepTicks, reserved) :
+                setMaxDistance(holder.getUUID(), distance, maxKeepTicks, reserved);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public boolean setMaxDistance(UUID holderUUID, double newMaxDistance) {
-        LeashInfo info = leashHolders.get(holderUUID);
-        if (info == null || info.holderUUIDOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-        leashHolders.put(holderUUID, new LeashInfo(
-                info.holderUUIDOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
+        return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
+                old.holderUUIDOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
                 newMaxDistance,
-                info.elasticDistance(), // 保持原有弹性距离
-                info.keepLeashTicks(),
-                info.maxKeepLeashTicks()
+                old.elasticDistance(),
+                old.keepLeashTicks(),
+                old.maxKeepLeashTicks()
         ));
-        markForSync();
-        return true;
     }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public boolean setMaxDistance(UUID holderUUID, double newMaxDistance, int newMaxKeepLeashTicks) {
-        LeashInfo info = leashHolders.get(holderUUID);
-        if (info == null || info.holderUUIDOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-        leashHolders.put(holderUUID, new LeashInfo(
-                info.holderUUIDOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
+        return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
+                old.holderUUIDOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
                 newMaxDistance,
-                info.elasticDistance(), // 保持原有弹性距离
-                newMaxKeepLeashTicks,
-                info.maxKeepLeashTicks()
-        ));
-        markForSync();
-        return true;
-    }
-
-    @Override
-    public boolean setMaxDistance(BlockPos knotPos, double newMaxDistance) {
-        LeashInfo info = leashKnots.get(knotPos);
-        if (info == null || info.blockPosOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-        leashKnots.put(knotPos, new LeashInfo(
-                info.blockPosOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
-                newMaxDistance,
-                info.elasticDistance(), // 保持原有弹性距离
-                info.keepLeashTicks(),
-                info.maxKeepLeashTicks()
-        ));
-        markForSync();
-        return true;
-    }
-
-    @Override
-    public boolean setMaxDistance(BlockPos knotPos, double newMaxDistance, int newMaxKeepLeashTicks) {
-        LeashInfo info = leashKnots.get(knotPos);
-        if (info == null || info.blockPosOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-        leashKnots.put(knotPos, new LeashInfo(
-                info.blockPosOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
-                newMaxDistance,
-                info.elasticDistance(), // 保持原有弹性距离
-                info.keepLeashTicks(),
+                old.elasticDistance(),
+                Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
                 newMaxKeepLeashTicks
         ));
-        markForSync();
-        return true;
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setMaxDistance(UUID holderUUID, double distance, int maxKeepTicks, String reserved) {
+        return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
+                old.holderUUIDOpt().get(),
+                old.holderIdOpt().get(),
+                reserved,
+                old.attachOffset(),
+                distance,
+                old.elasticDistance(),
+                Math.min(old.keepLeashTicks(), maxKeepTicks),
+                maxKeepTicks
+        ));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setMaxDistance(BlockPos knotPos, double newMaxDistance) {
+        return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
+                old.blockPosOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
+                newMaxDistance,
+                old.elasticDistance(),
+                old.keepLeashTicks(),
+                old.maxKeepLeashTicks()
+        ));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setMaxDistance(BlockPos knotPos, double newMaxDistance, int newMaxKeepLeashTicks) {
+        return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
+                old.blockPosOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
+                newMaxDistance,
+                old.elasticDistance(),
+                Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
+                newMaxKeepLeashTicks
+        ));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setMaxDistance(BlockPos knotPos, double distance, int maxKeepTicks, String reserved) {
+        return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
+                old.blockPosOpt().get(),
+                old.holderIdOpt().get(),
+                reserved,
+                old.attachOffset(),
+                distance,
+                old.elasticDistance(),
+                Math.min(old.keepLeashTicks(), maxKeepTicks),
+                maxKeepTicks
+        ));
     }
 
     @Override
@@ -283,42 +392,34 @@ public class LeashDataImpl implements ILeashDataCapability {
     }
 
     // 动态修改弹性距离
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public boolean setElasticDistance(UUID holderUUID, double newElasticDistance) {
-        LeashInfo info = leashHolders.get(holderUUID);
-        if (info == null || info.holderUUIDOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-
-        leashHolders.put(holderUUID, new LeashInfo(
-                info.holderUUIDOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
-                info.maxDistance(),
+        return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
+                old.holderUUIDOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
+                old.maxDistance(),
                 newElasticDistance,
-                info.keepLeashTicks(),
-                info.maxKeepLeashTicks()
+                old.keepLeashTicks(),
+                old.maxKeepLeashTicks()
         ));
-        markForSync();
-        return true;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public boolean setElasticDistance(BlockPos knotPos, double newElasticDistance) {
-        LeashInfo info = leashKnots.get(knotPos);
-        if (info == null || info.blockPosOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-
-        leashKnots.put(knotPos, new LeashInfo(
-                info.blockPosOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
-                info.maxDistance(),
+        return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
+                old.blockPosOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
+                old.maxDistance(),
                 newElasticDistance,
-                info.keepLeashTicks(),
-                info.maxKeepLeashTicks()
+                old.keepLeashTicks(),
+                old.maxKeepLeashTicks()
         ));
-        markForSync();
-        return true;
     }
 
     @Override
@@ -328,41 +429,72 @@ public class LeashDataImpl implements ILeashDataCapability {
                 setElasticDistance(holder.getUUID(), newElasticDistance, newMaxKeepLeashTicks);
     }
 
-    // 动态修改弹性距离
     @Override
-    public boolean setElasticDistance(UUID holderUUID, double newElasticDistance, int newMaxKeepLeashTicks) {
-        LeashInfo info = leashHolders.get(holderUUID);
-        if (info == null || info.holderUUIDOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-
-        leashHolders.put(holderUUID, new LeashInfo(
-                info.holderUUIDOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
-                info.maxDistance(),
-                newElasticDistance,
-                Math.min(info.keepLeashTicks(), newMaxKeepLeashTicks), // 限制剩余Tick不超过新最大值
-                newMaxKeepLeashTicks
-        ));
-        return true;
+    public boolean setElasticDistance(Entity holder, double distance, int maxKeepTicks, String reserved) {
+        return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
+                setElasticDistance(superLeashKnotEntity.getPos(), distance, maxKeepTicks, reserved) :
+                setElasticDistance(holder.getUUID(), distance, maxKeepTicks, reserved);
     }
 
+    // 动态修改弹性距离
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
-    public boolean setElasticDistance(BlockPos knotPos, double newElasticDistance, int newMaxKeepLeashTicks) {
-        LeashInfo info = leashKnots.get(knotPos);
-        if (info == null || info.blockPosOpt().isEmpty() || info.holderIdOpt().isEmpty()) return false;
-
-        leashKnots.put(knotPos, new LeashInfo(
-                info.blockPosOpt().get(),
-                info.holderIdOpt().get(),
-                info.reserved(),
-                info.attachOffset(),
-                info.maxDistance(),
+    public boolean setElasticDistance(UUID holderUUID, double newElasticDistance, int newMaxKeepLeashTicks) {
+        return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
+                old.holderUUIDOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
+                old.maxDistance(),
                 newElasticDistance,
-                Math.min(info.keepLeashTicks(), newMaxKeepLeashTicks), // 限制剩余Tick不超过新最大值
+                Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
                 newMaxKeepLeashTicks
         ));
-        return true;
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setElasticDistance(UUID holderUUID, double distance, int maxKeepTicks, String reserved) {
+        return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
+                old.holderUUIDOpt().get(),
+                old.holderIdOpt().get(),
+                reserved,
+                old.attachOffset(),
+                old.maxDistance(),
+                distance,
+                Math.min(old.keepLeashTicks(), maxKeepTicks),
+                maxKeepTicks
+        ));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setElasticDistance(BlockPos knotPos, double newElasticDistance, int newMaxKeepLeashTicks) {
+        return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
+                old.blockPosOpt().get(),
+                old.holderIdOpt().get(),
+                old.reserved(),
+                old.attachOffset(),
+                old.maxDistance(),
+                newElasticDistance,
+                old.keepLeashTicks(),
+                old.maxKeepLeashTicks()
+        ));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setElasticDistance(BlockPos knotPos, double newElasticDistance, int newMaxKeepLeashTicks, String reserved) {
+        return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
+                old.blockPosOpt().get(),
+                old.holderIdOpt().get(),
+                reserved,
+                old.attachOffset(),
+                old.maxDistance(),
+                newElasticDistance,
+                Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
+                newMaxKeepLeashTicks
+        ));
     }
 
     /**
@@ -439,14 +571,14 @@ public class LeashDataImpl implements ILeashDataCapability {
         LeashInfo info = entry.getValue();
         Vec3 entityPos = entity.position().add(info.attachOffset());
         double distance = holderPos.distanceTo(entityPos);
-        double extremeSnapDist = info.maxDistance() * LEASH_EXTREME_SNAP_DIST_FACTOR;
+        double extremeSnapDist = info.maxDistance() * Config.leashExtremeSnapDistFactor();
 
         // 1. 检查是否超出断裂距离
         if (distance > extremeSnapDist) {
             if (info.keepLeashTicks() > 0) {
                 // 计算临界拉力
                 Vec3 pullForce = calculateCriticalPullForce(holderPos, entityPos, distance, info);
-                entry.setValue(info.decrementKeepLeashTicks());
+                entry.setValue(info.decrementKeepTicks());
                 return pullForce;
             }
             // 断裂
@@ -471,7 +603,7 @@ public class LeashDataImpl implements ILeashDataCapability {
 
         // 3. 重置缓冲Tick
         if (distance <= info.maxDistance() && info.keepLeashTicks() < info.maxKeepLeashTicks()) {
-            entry.setValue(info.resetKeepLeashTicks());
+            entry.setValue(info.resetKeepTicks());
         }
 
         return pullForce;
@@ -489,13 +621,13 @@ public class LeashDataImpl implements ILeashDataCapability {
         }
 
         Vec3 pullForce = pullDirection.scale(
-                (distance - info.elasticDistance()) * pullStrength * SPRING_DAMPENING
+                (distance - info.elasticDistance()) * pullStrength * Config.springDampening()
         );
 
         return new Vec3(
-                pullForce.x * AXIS_SPECIFIC_ELASTICITY.x,
-                pullForce.y * AXIS_SPECIFIC_ELASTICITY.y,
-                pullForce.z * AXIS_SPECIFIC_ELASTICITY.z
+                pullForce.x * Config.axisSpecificElasticity().x,
+                pullForce.y * Config.axisSpecificElasticity().y,
+                pullForce.z * Config.axisSpecificElasticity().z
         );
     }
 
@@ -506,13 +638,13 @@ public class LeashDataImpl implements ILeashDataCapability {
         double pullStrength = 1.0 + excessRatio * 2.0;
 
         Vec3 pullForce = pullDirection.scale(
-                (distance - info.elasticDistance()) * pullStrength * SPRING_DAMPENING
+                (distance - info.elasticDistance()) * pullStrength * Config.springDampening()
         );
 
         return new Vec3(
-                pullForce.x * AXIS_SPECIFIC_ELASTICITY.x,
-                pullForce.y * AXIS_SPECIFIC_ELASTICITY.y,
-                pullForce.z * AXIS_SPECIFIC_ELASTICITY.z
+                pullForce.x * Config.axisSpecificElasticity().x,
+                pullForce.y * Config.axisSpecificElasticity().y,
+                pullForce.z * Config.axisSpecificElasticity().z
         );
     }
 
@@ -566,10 +698,10 @@ public class LeashDataImpl implements ILeashDataCapability {
     }
 
     @Override
-    public boolean transferLeash(Entity holder, Entity newHolder, ItemStack stack) {
+    public boolean transferLeash(Entity holder, Entity newHolder, String reserved) {
         return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
-                transferLeash(superLeashKnotEntity.getPos(), newHolder, stack) :
-                transferLeash(holder.getUUID(), newHolder, stack);
+                transferLeash(superLeashKnotEntity.getPos(), newHolder, reserved) :
+                transferLeash(holder.getUUID(), newHolder, reserved);
     }
 
     // 将拴绳持有者转移到新实体(非拴绳结 -> 任意)
@@ -588,14 +720,14 @@ public class LeashDataImpl implements ILeashDataCapability {
         return true;
     }
     @Override
-    public boolean transferLeash(UUID oldHolderUUID, Entity newHolder, ItemStack stack) {
+    public boolean transferLeash(UUID oldHolderUUID, Entity newHolder, String reserved) {
         LeashInfo info = leashHolders.remove(oldHolderUUID);
         if (info == null || newHolder == null) return false;
         if(newHolder instanceof SuperLeashKnotEntity superLeashKnotEntity) {
-            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, stack.getDescriptionId());
+            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, reserved);
             leashKnots.put(superLeashKnotEntity.getPos(), leashInfo);
         } else {
-            LeashInfo leashInfo = info.transferHolder(newHolder, stack.getDescriptionId());
+            LeashInfo leashInfo = info.transferHolder(newHolder, reserved);
             leashHolders.put(newHolder.getUUID(), leashInfo);
         }
         markForSync();
@@ -618,14 +750,14 @@ public class LeashDataImpl implements ILeashDataCapability {
     }
 
     @Override
-    public boolean transferLeash(BlockPos knotPos, Entity newHolder, ItemStack stack) {
+    public boolean transferLeash(BlockPos knotPos, Entity newHolder, String reserved) {
         LeashInfo info = leashKnots.remove(knotPos);
         if (info == null || newHolder == null) return false;
         if(newHolder instanceof SuperLeashKnotEntity superLeashKnotEntity) {
-            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, stack.getDescriptionId());
+            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, reserved);
             leashKnots.put(superLeashKnotEntity.getPos(), leashInfo);
         } else {
-            LeashInfo leashInfo = info.transferHolder(newHolder, stack.getDescriptionId());
+            LeashInfo leashInfo = info.transferHolder(newHolder, reserved);
             leashHolders.put(newHolder.getUUID(), leashInfo);
         }
         markForSync();
@@ -743,9 +875,7 @@ public class LeashDataImpl implements ILeashDataCapability {
             throw new IllegalArgumentException("LeashInfo.blockPos is empty");
         }
         BlockPos blockPos = info.blockPosOpt().get();
-        infoTag.putInt("HolderX", blockPos.getX());
-        infoTag.putInt("HolderY", blockPos.getY());
-        infoTag.putInt("HolderZ", blockPos.getZ());
+        infoTag.put("KnotBlockPos", NbtUtils.writeBlockPos(blockPos));
         return getCommonCompoundTag(info, infoTag);
     }
 
@@ -755,9 +885,7 @@ public class LeashDataImpl implements ILeashDataCapability {
         }
         infoTag.putInt("HolderID", info.holderIdOpt().get());
         infoTag.putString("LeashItem", info.reserved());
-        infoTag.putDouble("OffsetX", info.attachOffset().x);
-        infoTag.putDouble("OffsetY", info.attachOffset().y);
-        infoTag.putDouble("OffsetZ", info.attachOffset().z);
+        infoTag.put("Offset", NBTWriter.writeVec3(info.attachOffset()));
         infoTag.putDouble("MaxDistance", info.maxDistance());
         infoTag.putDouble("ElasticDistance", info.elasticDistance());
         infoTag.putInt("KeepLeashTicks", info.keepLeashTicks());
@@ -793,10 +921,47 @@ public class LeashDataImpl implements ILeashDataCapability {
             }
         }
     }
+    private static @NotNull UUID getDelayedUUIDFormListTag(@NotNull CompoundTag infoTag) {
+        if (infoTag.contains("DelayHolderUUID"))
+            return infoTag.getUUID("DelayHolderUUID");
+        throw new IllegalArgumentException("LeashInfo.intId is empty");
+    }
+    @Contract("_ -> new")
+    private static @NotNull LeashInfo getUUIDLeashDataFormListTag(@NotNull CompoundTag infoTag) {
+        if (infoTag.contains("HolderUUID")){
+            return new LeashInfo(
+                    infoTag.getUUID("HolderUUID"),
+                    infoTag.getInt("HolderID"),
+                    infoTag.getString("LeashItem"),
+                    NBTReader.readVec3(infoTag.getCompound("Offset")),
+                    infoTag.getDouble("MaxDistance"),
+                    infoTag.contains("ElasticDistance") ? infoTag.getDouble("ElasticDistance") : 6.0,
+                    infoTag.getInt("KeepLeashTicks"),
+                    infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
+            );
+        } else
+            throw new IllegalArgumentException("Unknown LeashInfo");
+    }
+    @Contract("_ -> new")
+    private static @NotNull LeashInfo getBlockPosLeashDataFormListTag(@NotNull CompoundTag infoTag) {
+        if (infoTag.contains("KnotBlockPos")) {
+            return new LeashInfo(
+                    NbtUtils.readBlockPos(infoTag.getCompound("KnotBlockPos")),
+                    infoTag.getInt("HolderID"),
+                    infoTag.getString("LeashItem"),
+                    NBTReader.readVec3(infoTag.getCompound("Offset")),
+                    infoTag.getDouble("MaxDistance"),
+                    infoTag.contains("ElasticDistance") ? infoTag.getDouble("ElasticDistance") : 6.0,
+                    infoTag.getInt("KeepLeashTicks"),
+                    infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
+            );
+        } else
+            throw new IllegalArgumentException("Unknown LeashInfo");
+    }
 
     @Override
     public boolean canBeLeashed() {
-        return (leashHolders.size() + leashKnots.size()) <= MAX_LEASHES_PER_ENTITY;
+        return (leashHolders.size() + leashKnots.size()) <= Config.maxLeashesPerEntity();
     }
 
     @Override
@@ -823,43 +988,7 @@ public class LeashDataImpl implements ILeashDataCapability {
         return Optional.empty(); // 理论上不会到这里
     }
 
-    private static @NotNull UUID getDelayedUUIDFormListTag(@NotNull CompoundTag infoTag) {
-        if (infoTag.contains("DelayHolderUUID"))
-            return infoTag.getUUID("DelayHolderUUID");
-        throw new IllegalArgumentException("LeashInfo.intId is empty");
-    }
-    @Contract("_ -> new")
-    private static @NotNull LeashInfo getUUIDLeashDataFormListTag(@NotNull CompoundTag infoTag) {
-        if (infoTag.contains("HolderUUID")){
-            return new LeashInfo(
-                    infoTag.getUUID("HolderUUID"),
-                    infoTag.getInt("HolderID"),
-                    infoTag.getString("LeashItem"),
-                    new Vec3(infoTag.getDouble("OffsetX"), infoTag.getDouble("OffsetY"), infoTag.getDouble("OffsetZ")),
-                    infoTag.getDouble("MaxDistance"),
-                    infoTag.contains("ElasticDistance") ? infoTag.getDouble("ElasticDistance") : 6.0,
-                    infoTag.getInt("KeepLeashTicks"),
-                    infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
-            );
-        } else
-            throw new IllegalArgumentException("Unknown LeashInfo");
-    }
-    @Contract("_ -> new")
-    private static @NotNull LeashInfo getBlockPosLeashDataFormListTag(@NotNull CompoundTag infoTag) {
-        if (infoTag.contains("HolderX")) {
-            return new LeashInfo(
-                    new BlockPos(infoTag.getInt("HolderX"), infoTag.getInt("HolderY"), infoTag.getInt("HolderZ")),
-                    infoTag.getInt("HolderID"),
-                    infoTag.getString("LeashItem"),
-                    new Vec3(infoTag.getDouble("OffsetX"), infoTag.getDouble("OffsetY"), infoTag.getDouble("OffsetZ")),
-                    infoTag.getDouble("MaxDistance"),
-                    infoTag.contains("ElasticDistance") ? infoTag.getDouble("ElasticDistance") : 6.0,
-                    infoTag.getInt("KeepLeashTicks"),
-                    infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
-            );
-        } else
-            throw new IllegalArgumentException("Unknown LeashInfo");
-    }
+
 
     public static @NotNull List<Entity> leashableInArea(Level pLevel, Vec3 pPos, Predicate<Entity> filter) {
         return leashableInArea(pLevel, pPos, filter, 1024D);
@@ -882,17 +1011,23 @@ public class LeashDataImpl implements ILeashDataCapability {
             return false;
         } else {
             Optional<LeashInfo> leashInfo = getLeashInfo(pEntity);
-            return leashInfo.isEmpty() && (entity.distanceTo(pEntity) <= LEASH_ELASTIC_DIST * LEASH_EXTREME_SNAP_DIST_FACTOR) && canBeLeashed();//距离最大,则不可以被固定或转移
+            return leashInfo.isEmpty() && (entity.distanceTo(pEntity) <= Config.leashElasticDist() * Config.leashExtremeSnapDistFactor()) && canBeLeashed();//距离最大,则不可以被固定或转移
         }
     }
     public static boolean isLeashHolder(@NotNull Entity pEntity, UUID pHolderUUID) {
         AtomicBoolean isTarget = new AtomicBoolean(false);
-        pEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> isTarget.set(i.isLeashedBy(pHolderUUID)));
+        LeashUtil.getLeashData(pEntity)
+                .ifPresent(i ->
+                        isTarget.set(i.isLeashedBy(pHolderUUID))
+                );
         return isTarget.get();
     }
     public static boolean isLeashHolder(@NotNull Entity pEntity, BlockPos pKnotPos) {
         AtomicBoolean isTarget = new AtomicBoolean(false);
-        pEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(i -> isTarget.set(i.isLeashedBy(pKnotPos)));
+        LeashUtil.getLeashData(pEntity)
+                .ifPresent(i ->
+                        isTarget.set(i.isLeashedBy(pKnotPos))
+                );
         return isTarget.get();
     }
     public static boolean isLeashHolder(@NotNull Entity pEntity, Entity pTestHolder) {

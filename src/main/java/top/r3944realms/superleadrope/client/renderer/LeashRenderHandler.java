@@ -25,7 +25,7 @@ import net.minecraft.world.level.Level;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.client.renderer.resolver.SuperLeashStateResolver;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
 import java.util.Optional;
@@ -49,15 +49,15 @@ public class LeashRenderHandler {
                 cameraEntity.getBoundingBox().inflate(50))) {
 
             entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(leashData -> {
-                if(leashData instanceof ILeashDataCapability) {}
-                for (ILeashDataCapability.LeashInfo leashInfo : leashData.getAllLeashes()) {
+                if(leashData instanceof ILeashData) {}
+                for (ILeashData.LeashInfo leashInfo : leashData.getAllLeashes()) {
                     renderLeashFromInfo(entity, leashInfo, poseStack, bufferSource, partialTick);
                 }
             });
         }
     }
 
-    private static void renderLeashFromInfo(Entity entity, ILeashDataCapability.LeashInfo leashInfo,
+    private static void renderLeashFromInfo(Entity entity, ILeashData.LeashInfo leashInfo,
                                             PoseStack poseStack, MultiBufferSource bufferSource,
                                             float partialTick) {
         try {
@@ -67,7 +67,7 @@ public class LeashRenderHandler {
             Entity holder = holderOpt.get();
 
             // 构建渲染状态
-            SuperLeashStateResolver.resolve(entity, holder, leashInfo, partialTick).ifPresent(
+            SuperLeashStateResolver.resolve(holder, entity, leashInfo, partialTick).ifPresent(
                     leashRenderState -> SuperLeashRenderer.renderLeash(leashRenderState, poseStack, bufferSource)
             );
 
@@ -77,7 +77,7 @@ public class LeashRenderHandler {
         }
     }
 
-    private static Optional<Entity> getHolderFromLeashInfo(Level level, ILeashDataCapability.LeashInfo leashInfo) {
+    private static Optional<Entity> getHolderFromLeashInfo(Level level, ILeashData.LeashInfo leashInfo) {
         if (leashInfo.blockPosOpt().isPresent()) {
             BlockPos pos = leashInfo.blockPosOpt().get();
             return Optional.of(SuperLeashKnotEntity.getOrCreateKnot(level, pos));

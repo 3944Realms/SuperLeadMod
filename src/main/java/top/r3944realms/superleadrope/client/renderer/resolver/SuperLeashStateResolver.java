@@ -20,11 +20,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.client.renderer.state.SuperLeashRenderState;
+import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.util.capability.LeashUtil;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+
 //TODO: 未来实现更高级的渲染
 public class SuperLeashStateResolver {
     private static final float MAX_TENSION = 1.5f;
@@ -44,18 +48,37 @@ public class SuperLeashStateResolver {
     public static Optional<SuperLeashRenderState> resolve(
             Entity holder,
             Entity leashedEntity,
-            ILeashDataCapability.LeashInfo leashInfo,
+            ILeashData.LeashInfo leashInfo,
             float partialTicks) {
 
         if (holder == null || leashedEntity == null) {
             return Optional.empty();
         }
+        AtomicReference<Vec3> holderOffset = new AtomicReference<>();
+        AtomicReference<Vec3> entityOffset = new AtomicReference<>();
+        LeashUtil.getLeashState(leashedEntity).ifPresent(state ->
+                state
+                    .getLeashState(holder)
+                    .ifPresent(ls -> {
+                                holderOffset.set(
+                                        Optional.ofNullable(ls.holderLocationOffset())
+                                                .orElse(ls.defaultHolderLocationOffset())
+                                );
+                                entityOffset.set(
+                                        Optional.ofNullable(ls.applyEntityLocationOffset())
+                                                .orElse(
+                                                        state
+                                                        .getLeashApplyEntityLocationOffset()
+                                                        .orElse(state.getDefaultLeashApplyEntityLocationOffset())
+                                                )
+                                );
+                            }
+                    ));
 
         // 获取当前帧位置(带插值)
-        Vec3 currentHolderPos = getInterpolatedPosition(holder, partialTicks)
-                .add(0, holder.getBbHeight() * 0.7, 0);
-        Vec3 currentEntityPos = getInterpolatedPosition(leashedEntity, partialTicks)
-                .add(leashInfo.attachOffset());
+        Vec3 currentHolderPos = getInterpolatedPosition(holder, partialTicks).add(holderOffset.get());
+        Vec3 currentEntityPos = getInterpolatedPosition(leashedEntity, partialTicks).add(entityOffset.get());
+
 
         // 获取上一帧数据
         FrameCache cache = frameCacheMap.get(leashedEntity.getUUID());
@@ -77,7 +100,7 @@ public class SuperLeashStateResolver {
                 currentHolderPos, currentEntityPos,
                 lastHolderPos, lastEntityPos,
                 lastAngle, lastSpeed,
-                tension, partialTicks);
+                tension);
 
         // 更新缓存
         frameCacheMap.put(leashedEntity.getUUID(),
@@ -108,7 +131,7 @@ public class SuperLeashStateResolver {
             Vec3 currentStart, Vec3 currentEnd,
             Vec3 lastStart, Vec3 lastEnd,
             float lastAngle, float lastSpeed,
-            float tension, float partialTicks) {
+            float tension) {
 
         // 计算当前方向向量
         Vec3 currentDir = currentEnd.subtract(currentStart).normalize();
@@ -182,7 +205,7 @@ public class SuperLeashStateResolver {
         List<SuperLeashRenderState> states = new ArrayList<>();
         Level level = leashedEntity.level();
 
-        for (ILeashDataCapability.LeashInfo leashInfo : leashData.getAllLeashes()) {
+        for (ILeashData.LeashInfo leashInfo : leashData.getAllLeashes()) {
             Entity holder = null;
             if (leashInfo.blockPosOpt().isEmpty() && leashInfo.holderIdOpt().isPresent()){
                holder = level.getEntity(leashInfo.holderIdOpt().get());

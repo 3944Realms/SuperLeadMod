@@ -1,0 +1,315 @@
+/*
+ *  Super Lead rope mod
+ *  Copyright (C)  2025  R3944Realms
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package top.r3944realms.superleadrope.content.capability.impi;
+
+import com.google.common.collect.Maps;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.network.NetworkHandler;
+import top.r3944realms.superleadrope.network.toClient.LeashStateSyncPacket;
+import top.r3944realms.superleadrope.util.nbt.NBTReader;
+import top.r3944realms.superleadrope.util.nbt.NBTWriter;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+//TODO: 将拴绳状态与数据联系在一起
+public class LeashStateImpl implements ILeashState {
+    private Entity entity;
+    private boolean needsSync = false;
+    private long lastSyncTime;
+    private final Map<UUID, ILeashState.LeashState> leashHolders = new ConcurrentHashMap<>();
+    private final Map<BlockPos, ILeashState.LeashState> leashKnots = new ConcurrentHashMap<>();
+    private volatile Vec3 staticApplyEntityLocationOffset;
+    private volatile Vec3 defaultApplyEntityLocationOffset = new Vec3(0 , 0.45, 0);
+    public LeashStateImpl(Entity entity) {
+        this.entity = entity;
+    }
+
+    @Override
+    public void markForSync() {
+        if (!entity.level().isClientSide) {
+            needsSync = true;
+            immediateSync(); // 立即同步一次
+        }
+    }
+
+    @Override
+    public void immediateSync() {
+        syncNow();
+    }
+
+    @Override
+    public void checkSync() {
+        if (!needsSync || entity.level().isClientSide) return;
+
+        long now = System.currentTimeMillis();
+        // 每隔 2 秒同步一次
+        if (now - lastSyncTime > 2000) {
+            syncNow();
+        }
+    }
+
+    private void syncNow() {
+        CompoundTag currentData = serializeNBT();
+
+        NetworkHandler.sendToPlayer(
+                new LeashStateSyncPacket(entity.getId(), currentData),
+                entity,
+                PacketDistributor.TRACKING_ENTITY_AND_SELF
+        );
+        lastSyncTime = System.currentTimeMillis();
+        needsSync = false;
+    }
+
+    @Override
+    public Map<UUID, LeashState> getHolderLeashStates() {
+        ConcurrentMap<UUID, LeashState> retMap = Maps.newConcurrentMap();
+        retMap.putAll(leashHolders);
+        return retMap;
+    }
+
+    @Override
+    public Map<BlockPos, LeashState> getKnotLeashStates() {
+        ConcurrentMap<BlockPos, LeashState> retMap = Maps.newConcurrentMap();
+        retMap.putAll(leashKnots);
+        return retMap;
+    }
+
+    @Override
+    public Optional<LeashState> getLeashState(Entity holder) {
+        return holder instanceof SuperLeashKnotEntity leashKnot ? getLeashState(leashKnot.getPos())
+                : getLeashState(holder.getUUID());
+    }
+
+    @Override
+    public Optional<LeashState> getLeashState(UUID uuid) {
+        return leashHolders.containsKey(uuid) ? Optional.of(leashHolders.get(uuid)) : Optional.empty();
+    }
+
+    @Override
+    public Optional<LeashState> getLeashState(BlockPos pos) {
+        return leashKnots.containsKey(pos) ? Optional.of(leashKnots.get(pos)) : Optional.empty();
+    }
+
+    @Override
+    public Vec3 getDefaultLeashApplyEntityLocationOffset() {
+        return defaultApplyEntityLocationOffset;
+    }
+    @Override
+    public Optional<Vec3> getLeashApplyEntityLocationOffset() {
+        return Optional.ofNullable(staticApplyEntityLocationOffset);
+    }
+
+    @Override
+    public void resetLeashHolderLocationOffset(Entity holder) {
+        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+            resetLeashHolderLocationOffset(leashKnot.getPos());
+        } else resetLeashHolderLocationOffset(holder.getUUID());
+    }
+
+    @Override
+    public void resetLeashHolderLocationOffset(UUID holderUUID) {
+        leashHolders.computeIfPresent(holderUUID, (uuid, state) -> state.resetHolderLocationOffset());
+        markForSync();
+    }
+
+    @Override
+    public void resetLeashHolderLocationOffset(BlockPos knotPos) {
+        leashKnots.computeIfPresent(knotPos, (blockPos, state) -> state.resetHolderLocationOffset());
+        markForSync();
+    }
+
+    @Override
+    public void setLeashHolderLocationOffset(Entity holder, Vec3 offset) {
+        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+            setLeashHolderLocationOffset(leashKnot.getPos(), offset);
+        } else setLeashHolderLocationOffset(holder.getUUID(), offset);
+    }
+
+    @Override
+    public void setLeashHolderLocationOffset(UUID holderUUID, Vec3 offset) {
+        leashHolders.computeIfPresent(holderUUID, (uuid, state) -> state.setHolderLocationOffset(offset));
+        markForSync();
+    }
+
+    @Override
+    public void setLeashHolderLocationOffset(BlockPos knotPos, Vec3 leashHolderLocationOffset) {
+        leashKnots.computeIfPresent(knotPos, (blockPos, state) -> state.setHolderLocationOffset(leashHolderLocationOffset));
+        markForSync();
+    }
+
+    @Override
+    public void addLeashHolderLocationOffset(Entity holder, Vec3 offset) {
+        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+            addLeashHolderLocationOffset(leashKnot.getPos(), offset);
+        } else addLeashHolderLocationOffset(holder.getUUID(), offset);
+    }
+
+    @Override
+    public void addLeashHolderLocationOffset(UUID holderUUID, Vec3 offset) {
+        leashHolders.computeIfPresent(holderUUID, (uuid, state) -> state.setHolderLocationOffset(state.holderLocationOffset().add(offset)));
+        markForSync();
+    }
+
+    @Override
+    public void addLeashHolderLocationOffset(BlockPos knotPos, Vec3 offset) {
+        leashKnots.computeIfPresent(knotPos, (blockPos, state) -> state.setHolderLocationOffset(state.holderLocationOffset().add(offset)));
+        markForSync();
+    }
+
+    @Override
+    public void removeLeashHolderLocationOffset(Entity holder) {
+        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+            removeLeashHolderLocationOffset(leashKnot.getPos());
+        } else removeLeashHolderLocationOffset(holder.getUUID());
+    }
+
+    @Override
+    public void removeLeashHolderLocationOffset(UUID holderUUID) {
+        leashHolders.remove(holderUUID);
+        markForSync();
+    }
+
+    @Override
+    public void removeLeashHolderLocationOffset(BlockPos knotPos) {
+        leashKnots.remove(knotPos);
+        markForSync();
+    }
+
+    @Override
+    public void resetAllLeashHolderLocationsOffset() {
+        leashKnots.replaceAll((pos, leashState) -> leashState.resetHolderLocationOffset());
+        leashHolders.replaceAll((uuid, leashState) -> leashState.resetHolderLocationOffset());
+        markForSync();
+    }
+
+    @Override
+    public void resetAllLeashApplyEntityLocationsOffset() {
+        leashKnots.replaceAll((pos, leashState) -> leashState.setApplyEntityLocationOffset(defaultApplyEntityLocationOffset));
+        leashHolders.replaceAll((uuid, leashState) -> leashState.setApplyEntityLocationOffset(defaultApplyEntityLocationOffset));
+        markForSync();
+    }
+
+    @Override
+    public void removeLeashApplyEntityLocationOffset() {
+        staticApplyEntityLocationOffset = null;
+        markForSync();
+    }
+
+    @Override
+    public void setLeashApplyEntityLocationOffset(Vec3 leashHolderLocationOffset) {
+        staticApplyEntityLocationOffset = leashHolderLocationOffset;
+        markForSync();
+    }
+
+    @Override
+    public void addLeashApplyEntityLocationOffset(Vec3 offset) {
+        Optional.ofNullable(this.staticApplyEntityLocationOffset)
+                .ifPresentOrElse(vec3 -> vec3.add(offset), () -> this.staticApplyEntityLocationOffset = offset);
+        markForSync();
+    }
+
+    @Override
+    public void copy(ILeashState other, Entity newEntity) {
+        this.entity = newEntity;
+        this.defaultApplyEntityLocationOffset = other.getDefaultLeashApplyEntityLocationOffset();
+        this.staticApplyEntityLocationOffset = other.getLeashApplyEntityLocationOffset().orElse(null);
+    }
+
+    @Override
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        ListTag holdersList = new ListTag();
+        leashHolders.forEach((uuid, state ) -> {
+            CompoundTag infoTag = generateCompoundTagFromUUIDLeashInfo(uuid, state);
+            holdersList.add(infoTag);
+        });
+        leashKnots.forEach((blockPos, state ) -> {
+            CompoundTag infoTag = generateCompoundTagFromBlockPosLeashState(blockPos, state);
+            holdersList.add(infoTag);
+        });
+        tag.put("LeashHolders", holdersList);
+        if (staticApplyEntityLocationOffset != null) {
+            tag.put("StaticApplyEntityLocationOffset", NBTWriter.writeVec3(staticApplyEntityLocationOffset));
+        }
+        tag.put("DefaultApplyEntityLocationOffset", NBTWriter.writeVec3(defaultApplyEntityLocationOffset));
+        return tag;
+    }
+    private static @NotNull CompoundTag generateCompoundTagFromUUIDLeashInfo(@NotNull UUID uuid, @NotNull ILeashState.LeashState info) {
+        CompoundTag infoTag = new CompoundTag();
+        infoTag.putUUID("HolderUUID", uuid);
+        return getCommonCompoundTag(info ,infoTag);
+    }
+    private static @NotNull CompoundTag generateCompoundTagFromBlockPosLeashState(@NotNull BlockPos blockpos, @NotNull ILeashState.LeashState info) {
+        CompoundTag infoTag = new CompoundTag();
+        infoTag.put("KnotBlockPos", NbtUtils.writeBlockPos(blockpos));
+        return getCommonCompoundTag(info, infoTag);
+    }
+
+    private static @NotNull CompoundTag getCommonCompoundTag(@NotNull ILeashState.LeashState info, CompoundTag infoTag) {
+        infoTag.put("ApplyEntityLocationOffset", NBTWriter.writeVec3(info.applyEntityLocationOffset()));
+        infoTag.put("HolderEntityLocationOffset", NBTWriter.writeVec3(info.holderLocationOffset()));
+        infoTag.put("DefaultHolderLocationOffset",  NBTWriter.writeVec3(info.defaultHolderLocationOffset()));
+        return infoTag;
+    }
+
+    @Override
+    public void deserializeNBT(@NotNull CompoundTag nbt) {
+        leashHolders.clear();
+        leashKnots.clear();
+        if (nbt.contains("LeashHolders", ListTag.TAG_LIST)) {
+            ListTag holdersList = nbt.getList("LeashHolders", ListTag.TAG_COMPOUND);
+            if(nbt.contains("StaticApplyEntityLocationOffset")) {
+                staticApplyEntityLocationOffset = NBTReader.readVec3(nbt.getCompound("StaticApplyEntityLocationOffset"));
+            }
+            if (nbt.contains("DefaultApplyEntityLocationOffset")) {
+                defaultApplyEntityLocationOffset = NBTReader.readVec3(nbt.getCompound("DefaultApplyEntityLocationOffset"));
+            } else throw new IllegalArgumentException("Nbt Lost DefaultApplyEntityLocationOffset Value");
+            for (int i = 0; i < holdersList.size(); i++) {
+                CompoundTag infoTag = holdersList.getCompound(i);
+                if (infoTag.contains("HolderUUID")) {
+                    ILeashState.LeashState uuidLeashDataFormListTag = getUUIDLeashStateForm(infoTag);
+                    leashHolders.put(infoTag.getUUID("HolderUUID"), uuidLeashDataFormListTag);
+                } else {
+                    ILeashState.LeashState blockPosLeashDataFormListTag = getUUIDLeashStateForm(infoTag);
+                    leashKnots.put(NbtUtils.readBlockPos(infoTag.getCompound("KnotBlockPos")), blockPosLeashDataFormListTag);
+                }
+            }
+
+        }
+    }
+    @Contract("_ -> new")
+    private static @NotNull ILeashState.LeashState getUUIDLeashStateForm(@NotNull CompoundTag infoTag) {
+        return new ILeashState.LeashState(
+                NBTReader.readVec3(infoTag.getCompound("HolderEntityLocationOffset")),
+                NBTReader.readVec3(infoTag.getCompound("ApplyEntityLocationOffset")),
+                NBTReader.readVec3(infoTag.getCompound("DefaultHolderLocationOffset"))
+        );
+    }
+
+}

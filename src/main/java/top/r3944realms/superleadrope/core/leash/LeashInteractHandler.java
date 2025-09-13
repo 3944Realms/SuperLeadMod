@@ -16,6 +16,7 @@
 package top.r3944realms.superleadrope.core.leash;
 
 
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -28,7 +29,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashDataCapability;
+import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
@@ -45,7 +46,7 @@ public class LeashInteractHandler {
                     player.getItemInHand(InteractionHand.OFF_HAND).is(SLPItems.SUPER_LEAD_ROPE.get()))
             ) {
                 event.setCanceled(true);
-                event.setCancellationResult(InteractionResult.CONSUME);
+                event.setCancellationResult(InteractionResult.SUCCESS);
             }
             return;
         }
@@ -56,7 +57,7 @@ public class LeashInteractHandler {
         if (!LeashDataImpl.isLeashable(target)) {
             return;
         }
-        LazyOptional<ILeashDataCapability> LeashCap = target.getCapability(CapabilityHandler.LEASH_DATA_CAP);
+        LazyOptional<ILeashData> LeashCap = target.getCapability(CapabilityHandler.LEASH_DATA_CAP);
         if (!LeashCap.isPresent()) {
             return;
         }
@@ -67,14 +68,14 @@ public class LeashInteractHandler {
         if (
                 mainHandItem.isEmpty() && offHandItem.isEmpty() &&
                         target.isAlive() && player.isSecondaryUseActive() &&
-                        LeashCap.map(ILeashDataCapability::canBeLeashed).orElse(false)
+                        LeashCap.map(ILeashData::canBeLeashed).orElse(false)
 
         ) {
 
             boolean isSuccess = SuperLeadRopeItem.bindToEntity(target, player, player.level(), player.getOnPos(), ItemStack.EMPTY);
             if (isSuccess) {
                 event.setCanceled(true);
-                event.setCancellationResult(InteractionResult.CONSUME);
+                event.setCancellationResult(InteractionResult.SUCCESS);
             }
         } else {
             if (LeashDataImpl.isLeashHolder(target, player)) {
@@ -82,9 +83,9 @@ public class LeashInteractHandler {
                         iLeashDataCapability -> iLeashDataCapability.removeLeash(player.getUUID())
                 );
                 target.gameEvent(GameEvent.ENTITY_INTERACT, player);
-                target.playSound(SLPSoundEvents.LEAD_UNTIED.get());
+                level.playSound(null, target.getOnPos(), SLPSoundEvents.LEAD_UNTIED.get(), SoundSource.PLAYERS);
                 event.setCanceled(true);
-                event.setCancellationResult(InteractionResult.CONSUME);
+                event.setCancellationResult(InteractionResult.SUCCESS);
                 return;
             }
             ItemStack itemStack;
@@ -99,13 +100,13 @@ public class LeashInteractHandler {
                 if (itemStack.getItem() == SLPItems.SUPER_LEAD_ROPE.get()) {
                     LeashCap.ifPresent(iLeashDataCapability -> {
                         if (iLeashDataCapability.canBeAttachedTo(player)) {
-                            boolean success = iLeashDataCapability.addLeash(player, itemStack, 12);
+                            boolean success = iLeashDataCapability.addLeash(player);
                             if (success) {
                                 if(!player.isCreative())
                                     itemStack.hurtAndBreak(24, player, e->{});
-                                 target.playSound(SLPSoundEvents.LEAD_TIED.get());
-                                 event.setCanceled(true);
-                                 event.setCancellationResult(InteractionResult.CONSUME);
+                                level.playSound(null, target.getOnPos(), SLPSoundEvents.LEAD_TIED.get(), SoundSource.PLAYERS);
+                                event.setCanceled(true);
+                                event.setCancellationResult(InteractionResult.SUCCESS);
                              }
                         }
                     });
@@ -124,11 +125,12 @@ public class LeashInteractHandler {
             if (flag) {
                 target.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(leashDataCapability -> {
                     if (leashDataCapability.hasLeash()){
+                        int size = leashDataCapability.getAllLeashes().size();
                         if (player.isSecondaryUseActive())
                             leashDataCapability.removeAllLeashes();
                         else
-                            leashDataCapability.removeAllHolderLeashes();
-                        target.playSound(SLPSoundEvents.LEAD_UNTIED.get());
+                            leashDataCapability.removeAllKnotLeashes();
+                        if(size > leashDataCapability.getAllLeashes().size()) level.playSound(null, target.getOnPos(), SLPSoundEvents.LEAD_UNTIED.get(), SoundSource.PLAYERS);
                     }
                     event.setCanceled(true);
                 });

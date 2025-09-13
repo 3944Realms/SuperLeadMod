@@ -18,7 +18,8 @@ package top.r3944realms.superleadrope.datagen.data;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
-import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedPlayers;
+import top.r3944realms.superleadrope.content.command.MotionCommand;
+import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
@@ -187,15 +188,38 @@ public enum SLPLangKeyValue {
             SLPEntityTypes.getEntityNameKey("super_lead_knot"), ModPartEnum.ENTITY,
             "Super Lead Knot", "超级拴绳结", "超級拴繩結", "神駒羈縻索結"
     ),
-    TELEPORT_WITH_LEASHED_PLAYERS_NAME(TeleportWithLeashedPlayers.NAME_KEY, ModPartEnum.GAME_RULE,
+    TELEPORT_WITH_LEASHED_ENTITIES_NAME(TeleportWithLeashedEntities.NAME_KEY, ModPartEnum.GAME_RULE,
             "Teleport leashed player with player holder",
             "被拴实体随玩家持有者传送",
-            "被拴实体随玩家持有者傳送"
+            "被拴实体随玩家持有者傳送",
+            "繫畜隨持者傳送"
     ),
-    TELEPORT_WITH_LEASHED_DESCRIPTION(TeleportWithLeashedPlayers.DESCRIPTION_KEY, ModPartEnum.DESCRIPTION,
+    TELEPORT_WITH_LEASHED_DESCRIPTION(TeleportWithLeashedEntities.DESCRIPTION_KEY, ModPartEnum.DESCRIPTION,
             "Holder will teleport with their leashed players ",
-            "传送时将被拴玩家与持有者一起传送",
-            "將被拴玩家將隨持有者一起傳送"
+            "传送时将被拴实体与持有者一起传送",
+            "將被拴实体將隨持有者一起傳送",
+            "傳送時繫畜隨持者同傳"
+    ),
+    MESSAGE_MOTION_ADDER_SUCCESSFUL(
+            MotionCommand.MOTION_ADDER_SUCCESSFUL, ModPartEnum.COMMAND,
+            "§bAdd Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
+            "§b添加成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+            "§b添加成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+            "§b增益既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
+    ),
+    MESSAGE_MOTION_SETTER_SUCCESSFUL(
+            MotionCommand.MOTION_SETTER_SUCCESSFUL, ModPartEnum.COMMAND,
+            "§bSet Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
+            "§b设置成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+            "§b設置成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+            "§b定值既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
+    ),
+    MESSAGE_MOTION_MULTIPLY_SUCCESSFUL(
+            MotionCommand.MOTION_MULTIPLY_SUCCESSFUL, ModPartEnum.COMMAND,
+            "§bMultiply Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
+            "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+            "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
+            "§b倍乘既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
 
     ;

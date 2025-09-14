@@ -36,6 +36,10 @@
 -keepclassmembers class cpw.mods.** { *; }
 -dontwarn cpw.mods.**
 
+-keep class mezz.jei.**
+-keepclassmembers class mezz.jei.**{ *; }
+-dontwarn mezz.jei.**
+
 #---------------------------------------
 # 保留资源文件 (mods.toml / assets / data / pack.mcmeta)
 #---------------------------------------

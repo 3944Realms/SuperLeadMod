@@ -24,12 +24,12 @@ public class SLPGamerules {
     public static final SLPGameruleRegistry GAMERULE_REGISTRY = SLPGameruleRegistry.INSTANCE;
     public static final HashMap<String, Boolean> gamerulesBooleanValuesClient = new HashMap<>();
     public static final HashMap<String, Integer> gameruleIntegerValuesClient = new HashMap<>();
-    public static final String RULE_KEY_PERFix_ = "gamerule." + GAMERULE_PREFIX.toLowerCase();
+    public static final String RULE_KEY_PERFiX_ = "gamerule." + GAMERULE_PREFIX.toLowerCase();
     public static String getDescriptionKey(Class<?> gameRuleClass) {
-        return RULE_KEY_PERFix_ + gameRuleClass.getSimpleName() + ".description";
+        return RULE_KEY_PERFiX_ + gameRuleClass.getSimpleName() + ".description";
     }
     public static String getDescriptionKey(String gameRuleName) {
-        return RULE_KEY_PERFix_ + gameRuleName + ".description";
+        return RULE_KEY_PERFiX_ + gameRuleName + ".description";
     }
     public static String getGameruleName(Class<?> clazz) {
         return SLPGamerules.GAMERULE_PREFIX + clazz.getSimpleName();
@@ -39,7 +39,7 @@ public class SLPGamerules {
     }
 
     public static String getNameKey(Class<?> gameRuleClass) {
-        return RULE_KEY_PERFix_ + gameRuleClass.getSimpleName();
+        return RULE_KEY_PERFiX_ + gameRuleClass.getSimpleName();
     }
 
 }

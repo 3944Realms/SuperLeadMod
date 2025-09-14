@@ -20,7 +20,6 @@ import net.minecraft.world.phys.Vec3;
 public record SuperLeashRenderState(
         Vec3 startPos,          // 当前帧起点位置
         Vec3 endPos,            // 当前帧终点位置
-        Vec3 attachOffset,      // 拴绳附着点偏移
         Vec3 lastStartPos,      // 上一帧起点位置(用于摆动计算)
         Vec3 lastEndPos,        // 上一帧终点位置(用于摆动计算)
         float tension,         // 张力强度(0.0-1.0)

@@ -29,15 +29,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.common.extensions.IForgeItem;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.content.SLPToolTier;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
-import top.r3944realms.superleadrope.util.capability.LeashUtil;
+import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
 
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +81,7 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
     }
 
     public static boolean canUse(ItemStack itemStack) {
-        return itemStack.getDamageValue() < 974;
+        return itemStack.getDamageValue() < 1200;
     }
 
     @Override
@@ -106,11 +104,10 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
      * @param newHolder 新实体
      * @param player 明确持有玩家
      * @param level 维度世界
-     * @param leashStack 拴绳物品实例
      * @return 是否成功
      */
-    public static boolean bindToEntity(Entity newHolder, Player player, Level level, ItemStack leashStack) {
-        return bindToEntity(newHolder, player, level, player.getOnPos(), leashStack);
+    public static boolean bindToEntity(Entity newHolder, Player player, Level level) {
+        return bindToEntity(newHolder, player, level, player.getOnPos());
     }
     /**
      * 右键蹲下绑定到另一实体上
@@ -118,10 +115,9 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
      * @param player 明确持有玩家
      * @param level 维度世界
      * @param pos 坐标（一般是明确持有玩家的位置）
-     * @param leashStack 拴绳物品实例
      * @return 是否成功
      */
-    public static boolean bindToEntity(Entity newHolder, Player player, Level level, BlockPos pos, ItemStack leashStack) {
+    public static boolean bindToEntity(Entity newHolder, Player player, Level level, BlockPos pos) {
         boolean isSuccess = false;
 
         // 查找当前玩家持有的可拴生物
@@ -131,7 +127,7 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         );
 
         for (Entity e : list) {
-            Optional<ILeashData> leashDataOpt = LeashUtil.getLeashData(e);
+            Optional<ILeashData> leashDataOpt = LeashDataAPI.getLeashData(e);
 
             if (leashDataOpt.map(i -> i.canBeAttachedTo(newHolder)).orElse(false)) {
                 leashDataOpt.ifPresent(i -> i.transferLeash(player.getUUID(), newHolder));
@@ -182,16 +178,16 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
             if (leashStack.isEmpty() || !canUse(leashStack)) {
                 return false;
             }
-            knot = SuperLeashKnotEntity.getOrCreateKnot(level, pos);
-            knot.playPlacementSound();
+                knot = SuperLeashKnotEntity.getOrCreateKnot(level, pos);
+                knot.playPlacementSound();
 
-            SuperLeashKnotEntity finalKnot = knot;
-            LeashUtil.getLeashData(player).ifPresent(i -> {
-                if (i.canBeAttachedTo(finalKnot)) {
-                    i.addLeash(finalKnot);
-                    isSuccess.set(true);
-                }
-            });
+                SuperLeashKnotEntity finalKnot = knot;
+                LeashDataAPI.getLeashData(player).ifPresent(i -> {
+                    if (i.canBeAttachedTo(finalKnot)) {
+                        if (!level.isClientSide) i.addLeash(finalKnot);
+                        isSuccess.set(true);
+                    }
+                });
         }
         // 情况二：把已有生物拴到 knot
         else if (!list.isEmpty()) {
@@ -202,9 +198,9 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
                 }
                 SuperLeashKnotEntity finalKnot = knot;
 
-                LeashUtil.getLeashData(e).ifPresent(i -> {
+                LeashDataAPI.getLeashData(e).ifPresent(i -> {
                     if (i.canBeAttachedTo(finalKnot)) {
-                        i.transferLeash(uuid, finalKnot);
+                        if (!level.isClientSide) i.transferLeash(uuid, finalKnot);
                         isSuccess.set(true);
                     }
                 });

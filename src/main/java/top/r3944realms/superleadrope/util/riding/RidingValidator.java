@@ -15,52 +15,12 @@
 
 package top.r3944realms.superleadrope.util.riding;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import top.r3944realms.superleadrope.config.LeashCommonConfig;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class RidingValidator {
-    /**
-     * 是否在配置白名单里
-     */
-    @SuppressWarnings("deprecation")
-    public static boolean isInWhitelist(EntityType<?> type) {
-        String key = type.builtInRegistryHolder().key().location().toString();
-        String modid = key.split(":")[0];
-
-        for (String entry : LeashCommonConfig.COMMON.teleportWhitelist.get()) {
-            if (entry.startsWith("#")) {
-                String body = entry.substring(1);
-
-                // Case 1: #modid → allow all entities from this mod
-                if (!body.contains(":")) {
-                    if (modid.equals(body)) {
-                        return true;
-                    }
-                }
-                // Case 2: #modid:tag_name → allow all entities under this tag
-                else {
-                    ResourceLocation tagId = new ResourceLocation(body);
-                    TagKey<EntityType<?>> tag = TagKey.create(Registries.ENTITY_TYPE, tagId);
-                    if (type.builtInRegistryHolder().is(tag)) {
-                        return true;
-                    }
-                }
-            } else {
-                // Case 3: modid:entity_name → allow a specific entity
-                if (entry.equals(key)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
     /**
      * 检查骑乘是否会产生循环引用
      */

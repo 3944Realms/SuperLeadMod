@@ -33,6 +33,7 @@ import top.r3944realms.superleadrope.util.file.ConfigUtil;
 @Mod(value = SuperLeadRope.MOD_ID)
 public class SuperLeadRope {
     public static final Logger logger = LoggerFactory.getLogger(SuperLeadRope.class);
+
     public static final String MOD_ID = "superleadrope";
     public SuperLeadRope() {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -41,6 +42,7 @@ public class SuperLeadRope {
         SLPSoundEvents.register(eventBus);
         NetworkHandler.register();
         initialize();
+
     }
     public static void initialize() {
         logger.info("Initializing SuperLeadRope");

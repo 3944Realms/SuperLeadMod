@@ -16,6 +16,7 @@
 package top.r3944realms.superleadrope.util.riding;
 
 import net.minecraft.world.entity.Entity;
+import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.core.exception.RidingCycleException;
 import top.r3944realms.superleadrope.util.model.RidingRelationship;
@@ -55,7 +56,7 @@ public class RidingApplier {
             if (entity == null) continue;
 
             // ---------- 白名单保护 ----------
-            if (!RidingValidator.isInWhitelist(entity.getType())) {
+            if (!CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(entity)) {
                 // 不在白名单，跳过本节点，但保留其乘客挂回上层
                 if (vehicle != null) {
                     // 将当前节点的乘客挂回上层载具
@@ -75,7 +76,7 @@ public class RidingApplier {
             }
 
             // 如果有指定的载具，尝试上车
-            if (vehicle != null && RidingValidator.isInWhitelist(vehicle.getType())) {
+            if (vehicle != null && CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(vehicle)) {
                 if (RidingValidator.wouldCreateCycle(entity, vehicle)) {
                     throw new RidingCycleException(entityId, vehicleId);
                 }

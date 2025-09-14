@@ -17,6 +17,7 @@ package top.r3944realms.superleadrope.util.riding;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.core.exception.RidingCycleException;
 import top.r3944realms.superleadrope.core.util.ImmutablePair;
 import top.r3944realms.superleadrope.util.model.RidingRelationship;
@@ -72,7 +73,7 @@ public class RidingSaver {
                         processedEntities.add(passengerId);
 
                         // ✅ 校验白名单
-                        if (!RidingValidator.isInWhitelist(passenger.getType())) {
+                        if (!CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(passenger.getType())) {
                             // ❌ 不在白名单，直接截断
                             continue;
                         }
@@ -105,7 +106,7 @@ public class RidingSaver {
         if (relationship == null) return null;
 
         // 如果当前根节点在白名单，则直接处理子节点
-        if (RidingValidator.isInWhitelist(Objects.requireNonNull(getEntityType(relationship.getEntityId())))) {
+        if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(Objects.requireNonNull(getEntityType(relationship.getEntityId())))) {
             RidingRelationship filtered = new RidingRelationship();
             filtered.setEntityId(relationship.getEntityId());
             filtered.setVehicleId(relationship.getVehicleId());
@@ -114,7 +115,7 @@ public class RidingSaver {
         } else {
             // 根节点不在白名单，尝试找到合法的子节点作为新的根
             for (RidingRelationship child : relationship.getPassengers()) {
-                if (RidingValidator.isInWhitelist(Objects.requireNonNull(getEntityType(child.getEntityId())))) {
+                if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(Objects.requireNonNull(getEntityType(child.getEntityId())))) {
                     // 设置父节点为当前节点的父（倒二叉逻辑）
                     RidingRelationship newRoot = new RidingRelationship();
                     newRoot.setEntityId(child.getEntityId());

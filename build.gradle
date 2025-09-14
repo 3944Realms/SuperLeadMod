@@ -135,7 +135,10 @@ legacyForge {
 }
 
 // 源码资源目录
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    srcDir 'src/main/resources' // 记得加这一行，把 coremods 包含进去
+}
 
 // ========== 依赖 ==========
 configurations {
@@ -150,8 +153,10 @@ dependencies {
     modRuntimeOnly("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
     modRuntimeOnly("curse.maven:spark-361579:4738952")
     compileOnly ('me.lucko:spark-api:0.1-SNAPSHOT')
-
-
+    implementation 'org.ow2.asm:asm:9.6'
+    implementation 'org.ow2.asm:asm-tree:9.6'
+    implementation 'org.ow2.asm:asm-commons:9.6'
+    implementation 'org.ow2.asm:asm-util:9.6'
 }
 
 // ========== 编译配置 ==========
@@ -221,6 +226,14 @@ publishing {
         }
     }
 }
+// 新建一个可解析配置专门给 ProGuard
+configurations {
+    proguardLibs {
+        canBeResolved = true
+        canBeConsumed = false
+        extendsFrom modCompileOnly
+    }
+}
 
 // ========== ProGuard 配置 ==========
 tasks.register('proguard', ProGuardTask) {
@@ -231,8 +244,8 @@ tasks.register('proguard', ProGuardTask) {
     // JDK jmods 库
     libraryjars "${System.getProperty('java.home')}/jmods"
 
-    // 项目依赖作为库输入
-    configurations.compileClasspath.files.each { file ->
+    // 使用可解析配置
+    configurations.proguardLibs.resolve().each { file ->
         libraryjars file.absolutePath
     }
 
@@ -298,7 +311,14 @@ tasks.register("runWithRenderDoc", Exec) {
         println "Environment MOD_CLASSES: ${environment['MOD_CLASSES']}"
     }
 }
+tasks.register("copyCoreMods", Copy) {
+    from("src/main/resources/coremods")  // 源目录
+    into("$buildDir/classes/java/main/coremods")  // 目标目录
+}
 
+tasks.named("classes") {
+    dependsOn("copyCoreMods")
+}
 
 // IDEA 支持
 idea {

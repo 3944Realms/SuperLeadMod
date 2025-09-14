@@ -52,7 +52,7 @@ public class SuperLeashRenderer {
         int skyLightEnd     = getSkyLight(BlockPos.containing(endWorld));
 
         // 差向量 + 偏移
-        Offsets offsets = computeOffsets(state, startWorld, endWorld);
+        Offsets offsets = computeOffsets(startWorld, endWorld);
 
         // pass1: 0 → N
         for (int i = 0; i <= LEASH_STEPS; i++) {
@@ -76,7 +76,7 @@ public class SuperLeashRenderer {
 
 
     /** 计算差向量和偏移 */
-    private static Offsets computeOffsets(SuperLeashRenderState state, Vec3 start, Vec3 end) {
+    private static Offsets computeOffsets(Vec3 start, Vec3 end) {
         float dx = (float) (end.x - start.x);
         float dy = (float) (end.y - start.y);
         float dz = (float) (end.z - start.z);

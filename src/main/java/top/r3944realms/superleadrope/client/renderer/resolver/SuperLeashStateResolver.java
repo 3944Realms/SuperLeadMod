@@ -20,11 +20,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.client.renderer.state.SuperLeashRenderState;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
-import top.r3944realms.superleadrope.util.capability.LeashUtil;
+import top.r3944realms.superleadrope.util.capability.LeashStateAPI;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,7 +55,7 @@ public class SuperLeashStateResolver {
         }
         AtomicReference<Vec3> holderOffset = new AtomicReference<>();
         AtomicReference<Vec3> entityOffset = new AtomicReference<>();
-        LeashUtil.getLeashState(leashedEntity).ifPresent(state ->
+        LeashStateAPI.getLeashState(leashedEntity).ifPresent(state ->
                 state
                     .getLeashState(holder)
                     .ifPresent(ls -> {
@@ -110,7 +109,6 @@ public class SuperLeashStateResolver {
         return Optional.of(new SuperLeashRenderState(
                 currentHolderPos,
                 currentEntityPos,
-                leashInfo.attachOffset(),
                 lastHolderPos,
                 lastEntityPos,
                 tension,

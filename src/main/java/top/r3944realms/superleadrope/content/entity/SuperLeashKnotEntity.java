@@ -34,13 +34,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
-import top.r3944realms.superleadrope.util.capability.LeashUtil;
+import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
@@ -83,7 +83,7 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
                 this.playSound(SoundEvents.LEASH_KNOT_BREAK);
                 List<Entity> entities = LeashDataImpl.leashableInArea(this.level(), pos.getCenter(), entity -> LeashDataImpl.isLeashHolder(entity, this));
                 entities.forEach(entity ->
-                        LeashUtil.getLeashData(entity)
+                        LeashDataAPI.getLeashData(entity)
                                 .map(iLeashDataCapability -> iLeashDataCapability.removeLeash(this))
                 );
             }
@@ -119,6 +119,27 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         SuperLeashKnotEntity superLeashKnotEntity1 = new SuperLeashKnotEntity(pLevel, pPos);
         pLevel.addFreshEntity(superLeashKnotEntity1);
         return superLeashKnotEntity1;
+    }
+    public static @NotNull Optional<SuperLeashKnotEntity> get(@NotNull Level level, @NotNull BlockPos pos) {
+        AABB searchArea = new AABB(pos).inflate(1.0D);
+
+        return level.getEntitiesOfClass(SuperLeashKnotEntity.class, searchArea)
+                .stream()
+                .filter(knot -> knot.getPos().equals(pos))
+                .findFirst();
+    }
+
+    /**
+     * 创建拴绳结，请不用直接调用这个，除非你知道自己在干上面
+     * @return 拴绳结
+     */
+    public static @NotNull SuperLeashKnotEntity createKnot(@NotNull Level pLevel, @NotNull BlockPos pPos, boolean isEmpty) {
+        if(isEmpty) {
+            SuperLeashKnotEntity superLeashKnotEntity1 = new SuperLeashKnotEntity(pLevel, pPos);
+            pLevel.addFreshEntity(superLeashKnotEntity1);
+            return superLeashKnotEntity1;
+        }
+        throw new IllegalArgumentException("Cannot create Knot Entity of type " + SuperLeashKnotEntity.class.getSimpleName());
     }
 
     @Override
@@ -169,7 +190,7 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         List<Entity> entities = LeashDataImpl.leashableInArea(player);
         for(Entity entity : entities) {
             if (LeashDataImpl.isLeashHolder(entity, player.getUUID()))
-                LeashUtil.getLeashData(entity)
+                LeashDataAPI.getLeashData(entity)
                     .ifPresent(i -> {
                         i.transferLeash(player.getUUID(), this);
                         isTransferLeash.set(true);
@@ -182,7 +203,7 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
                 this.discard();
                 List<Entity> entities1 = LeashDataImpl.leashableInArea(this);
                 entities1.forEach(entity ->
-                                LeashUtil.getLeashData(entity)
+                                LeashDataAPI.getLeashData(entity)
                                     .ifPresent(iLeashDataCapability -> {
                                         iLeashDataCapability.removeLeash(this);
                                         isRemoveLeashKnot.set(true);

@@ -69,7 +69,7 @@ public class ClientEventHandler {
                         (itemStack, clientLevel, livingEntity, i) -> {
                             if (!itemStack.isDamageableItem()) return 0.0F;
 
-                            return itemStack.getDamageValue() > 1024 - 50 ? 1.0F : 0.0F; // 损坏 → 返回 1.0（触发 override）
+                            return itemStack.getDamageValue() > 1024 - 33 ? 1.0F : 0.0F; // 损坏 → 返回 1.0（触发 override）
                         }
                 );
                 PotatoMode mode = getCurrentMode();

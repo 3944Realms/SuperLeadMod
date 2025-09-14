@@ -13,12 +13,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.util.coremods;
+package top.r3944realms.superleadropetest;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
 
-@OnlyIn(Dist.CLIENT)
-public class InvokerMethod {
+public class Placeholder {
 
 }

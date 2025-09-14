@@ -67,6 +67,9 @@ public interface ILeashState extends INBTSerializable<CompoundTag> {
     void removeLeashHolderLocationOffset(Entity holder);
     void removeLeashHolderLocationOffset(UUID holderUUID);
     void removeLeashHolderLocationOffset(BlockPos knotPos);
+    void removeAllLeashHolderLocationOffset();
+    void removeAllLeashHolderUUIDLocationOffset();
+    void removeAllLeashHolderBlockPosLocationOffset();
 
     /* ----------------------
      * Apply-entity offset

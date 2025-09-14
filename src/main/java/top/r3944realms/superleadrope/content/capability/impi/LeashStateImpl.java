@@ -127,7 +127,7 @@ public class LeashStateImpl implements ILeashState {
 
     @Override
     public void resetLeashHolderLocationOffset(Entity holder) {
-        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+        if (holder instanceof SuperLeashKnotEntity leashKnot) {
             resetLeashHolderLocationOffset(leashKnot.getPos());
         } else resetLeashHolderLocationOffset(holder.getUUID());
     }
@@ -146,45 +146,97 @@ public class LeashStateImpl implements ILeashState {
 
     @Override
     public void setLeashHolderLocationOffset(Entity holder, Vec3 offset) {
-        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+        if (holder instanceof SuperLeashKnotEntity leashKnot) {
             setLeashHolderLocationOffset(leashKnot.getPos(), offset);
         } else setLeashHolderLocationOffset(holder.getUUID(), offset);
     }
 
     @Override
     public void setLeashHolderLocationOffset(UUID holderUUID, Vec3 offset) {
-        leashHolders.computeIfPresent(holderUUID, (uuid, state) -> state.setHolderLocationOffset(offset));
+        LeashState currentState = leashHolders.get(holderUUID);
+        if (currentState == null) {
+            // 创建新的状态，使用默认的应用实体偏移量
+            leashHolders.put(holderUUID, new LeashState(
+                    offset,
+                    getDefaultLeashApplyEntityLocationOffset(),
+                    Vec3.ZERO // 或者合适的默认值
+            ));
+        } else {
+            // 更新现有状态
+            leashHolders.put(holderUUID,
+                    currentState.setHolderLocationOffset(offset)
+            );
+        }
         markForSync();
     }
 
     @Override
-    public void setLeashHolderLocationOffset(BlockPos knotPos, Vec3 leashHolderLocationOffset) {
-        leashKnots.computeIfPresent(knotPos, (blockPos, state) -> state.setHolderLocationOffset(leashHolderLocationOffset));
+    public void setLeashHolderLocationOffset(BlockPos knotPos, Vec3 offset) {
+        LeashState currentState = leashKnots.get(knotPos);
+        if (currentState == null) {
+            // 创建新的状态
+            leashKnots.put(knotPos, new LeashState(
+                    offset,
+                    getDefaultLeashApplyEntityLocationOffset(),
+                    Vec3.ZERO
+            ));
+        } else {
+            // 更新现有状态
+            leashKnots.put(knotPos,
+                    currentState.setHolderLocationOffset(offset)
+            );
+        }
         markForSync();
     }
 
     @Override
     public void addLeashHolderLocationOffset(Entity holder, Vec3 offset) {
-        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+        if (holder instanceof SuperLeashKnotEntity leashKnot) {
             addLeashHolderLocationOffset(leashKnot.getPos(), offset);
         } else addLeashHolderLocationOffset(holder.getUUID(), offset);
     }
 
     @Override
     public void addLeashHolderLocationOffset(UUID holderUUID, Vec3 offset) {
-        leashHolders.computeIfPresent(holderUUID, (uuid, state) -> state.setHolderLocationOffset(state.holderLocationOffset().add(offset)));
+        LeashState currentState = leashHolders.get(holderUUID);
+        if (currentState == null) {
+            // 创建新的状态，使用默认的应用实体偏移量
+            leashHolders.put(holderUUID, new LeashState(
+                    offset,
+                    getDefaultLeashApplyEntityLocationOffset(),
+                    Vec3.ZERO // 或者合适的默认值
+            ));
+        } else {
+            // 更新现有状态
+            leashHolders.put(holderUUID,
+                    currentState.setHolderLocationOffset(currentState.holderLocationOffset().add(offset))
+            );
+        }
         markForSync();
     }
 
     @Override
     public void addLeashHolderLocationOffset(BlockPos knotPos, Vec3 offset) {
-        leashKnots.computeIfPresent(knotPos, (blockPos, state) -> state.setHolderLocationOffset(state.holderLocationOffset().add(offset)));
+        LeashState currentState = leashKnots.get(knotPos);
+        if (currentState == null) {
+            // 创建新的状态
+            leashKnots.put(knotPos, new LeashState(
+                    offset,
+                    getDefaultLeashApplyEntityLocationOffset(),
+                    Vec3.ZERO
+            ));
+        } else {
+            // 更新现有状态
+            leashKnots.put(knotPos,
+                    currentState.setHolderLocationOffset(currentState.holderLocationOffset().add(offset))
+            );
+        }
         markForSync();
     }
 
     @Override
     public void removeLeashHolderLocationOffset(Entity holder) {
-        if (entity instanceof SuperLeashKnotEntity leashKnot) {
+        if (holder instanceof SuperLeashKnotEntity leashKnot) {
             removeLeashHolderLocationOffset(leashKnot.getPos());
         } else removeLeashHolderLocationOffset(holder.getUUID());
     }
@@ -198,6 +250,25 @@ public class LeashStateImpl implements ILeashState {
     @Override
     public void removeLeashHolderLocationOffset(BlockPos knotPos) {
         leashKnots.remove(knotPos);
+        markForSync();
+    }
+
+    @Override
+    public void removeAllLeashHolderLocationOffset() {
+        leashKnots.clear();
+        leashHolders.clear();
+        markForSync();
+    }
+
+    @Override
+    public void removeAllLeashHolderUUIDLocationOffset() {
+        leashHolders.clear();
+        markForSync();
+    }
+
+    @Override
+    public void removeAllLeashHolderBlockPosLocationOffset() {
+        leashKnots.clear();
         markForSync();
     }
 

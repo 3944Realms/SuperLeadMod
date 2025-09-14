@@ -24,9 +24,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.client.renderer.resolver.SuperLeashStateResolver;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -46,10 +46,9 @@ public class LeashRenderHandler {
 
         // 遍历摄像机附近所有实体
         for (Entity entity : level.getEntitiesOfClass(Entity.class,
-                cameraEntity.getBoundingBox().inflate(50))) {
+                cameraEntity.getBoundingBox().inflate(100))) {
 
-            entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(leashData -> {
-                if(leashData instanceof ILeashData) {}
+            LeashDataAPI.getLeashData(entity).ifPresent(leashData -> {
                 for (ILeashData.LeashInfo leashInfo : leashData.getAllLeashes()) {
                     renderLeashFromInfo(entity, leashInfo, poseStack, bufferSource, partialTick);
                 }

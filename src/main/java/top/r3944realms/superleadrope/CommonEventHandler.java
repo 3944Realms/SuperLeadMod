@@ -50,8 +50,11 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.config.LeashCommonConfig;
+import top.r3944realms.superleadrope.config.LeashConfigManager;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.CapabilityRemainder;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
@@ -71,6 +74,8 @@ import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.util.PotatoMode;
 import top.r3944realms.superleadrope.core.util.PotatoModeHelper;
 import top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue;
+import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashStateAPI;
 import top.r3944realms.superleadrope.util.model.RidingRelationship;
 import top.r3944realms.superleadrope.util.riding.RidingApplier;
 import top.r3944realms.superleadrope.util.riding.RidingDismounts;
@@ -84,6 +89,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CommonEventHandler {
+    public volatile static LeashConfigManager leashConfigManager;
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
     public static class Game {
         @SubscribeEvent
@@ -91,8 +97,8 @@ public class CommonEventHandler {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) return;
             if (entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart) {
-                entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager.Data::track);
-                entity.getCapability(CapabilityHandler.LEASH_STATE_CAP).ifPresent(LeashSyncManager.State::track);
+                LeashDataAPI.getLeashData(entity).ifPresent(LeashSyncManager.Data::track);
+                LeashStateAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::track);
                 if (entity instanceof ServerPlayer serverPlayer) {
                     LeashSyncManager.Data.forEach(i -> {
                         if (i.isLeashedBy(serverPlayer) && i.isInDelayedLeash(serverPlayer.getUUID())) {
@@ -115,8 +121,8 @@ public class CommonEventHandler {
                         }
                     });
                 }
-                entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(LeashSyncManager.Data::untrack);
-                entity.getCapability(CapabilityHandler.LEASH_STATE_CAP).ifPresent(LeashSyncManager.State::untrack);
+                LeashDataAPI.getLeashData(entity).ifPresent(LeashSyncManager.Data::untrack);
+                LeashStateAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::untrack);
             }
         }
         @SubscribeEvent
@@ -139,9 +145,6 @@ public class CommonEventHandler {
         @SubscribeEvent
         public static void onPlayerRightHitOnBlock(PlayerInteractEvent.RightClickBlock event) {
             Level level = event.getLevel();
-            if (level.isClientSide) {
-                return;
-            }
             BlockPos blockPos = event.getHitVec().getBlockPos();
             BlockState blockState = level.getBlockState(blockPos);
             Player player = event.getEntity();
@@ -256,7 +259,7 @@ public class CommonEventHandler {
             List<Entity> entities = LeashDataImpl.leashableInArea(telEntity);
             //规则关闭则禁止
             if(!SLPGameruleRegistry.getGameruleBoolValue(event.getEntity().level(), TeleportWithLeashedEntities.ID)) {
-                entities.forEach(i -> i.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(j -> j.removeLeash(i)));
+                entities.forEach(entity -> LeashDataAPI.LeashOperations.detach(entity, telEntity));
                 return;
             }
             for (Entity beLeashedEntity : entities) {
@@ -268,9 +271,9 @@ public class CommonEventHandler {
                 Vec3 originalDeltaMovement = beLeashedEntity.getDeltaMovement();
 
                 AtomicReference<ILeashData.LeashInfo> originalLeashInfo = new AtomicReference<>();
-                beLeashedEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(cap -> {
-                    originalLeashInfo.set(cap.getLeashInfo(telEntity).orElse(null));
-                    cap.removeLeash(telEntity);
+                LeashDataAPI.getLeashData(beLeashedEntity).ifPresent(data -> {
+                    originalLeashInfo.set(data.getLeashInfo(telEntity).orElse(null));
+                    data.removeLeash(telEntity);
                 });
 
 
@@ -302,14 +305,11 @@ public class CommonEventHandler {
                     entity.setPose(originalPose);
                 }
 
-                // --- 恢复拴绳 ---
+                // --- 将holder替换 ---
                 ILeashData.LeashInfo leashInfo = Optional.ofNullable(originalLeashInfo.get())
-                        .map(info -> info.transferHolder(telEntity))
                         .orElse(ILeashData.LeashInfo.EMPTY);
 
-                beLeashedEntity.getCapability(CapabilityHandler.LEASH_DATA_CAP).ifPresent(
-                        cap -> cap.addLeash(telEntity, leashInfo)
-                );
+                LeashDataAPI.LeashOperations.attachWithInfo(beLeashedEntity, telEntity, leashInfo);
 
                 // --- 重新应用骑乘关系，仅保留白名单根载具 ---
                 RidingRelationship filteredRelationship = RidingSaver.filterByWhitelistRoot(originalRidingRelationship);
@@ -362,7 +362,8 @@ public class CommonEventHandler {
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, bus= net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.MOD)
     public static class Mod {
         @SubscribeEvent
-        public static void onCommonInit (FMLCommonSetupEvent event) {
+        public static void onFMLCommonInit(FMLCommonSetupEvent event) {
+            event.enqueueWork(Mod::checkAndSet);
             event.enqueueWork(SLPGameruleRegistry::register);//规则注册
         }
         @SubscribeEvent
@@ -375,6 +376,43 @@ public class CommonEventHandler {
                 event.accept(SLPItems.SUPER_LEAD_ROPE);
             }
         }
+        @SubscribeEvent
+        public void onConfigReloading(ModConfigEvent.Reloading event) {
+            if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
+                SuperLeadRope.logger.debug("Config reloading detected...");
+            }
+        }
+        private static void checkAndSet() {
+            if (leashConfigManager == null) {
+                synchronized (LeashConfigManager.class) {
+                    if (leashConfigManager == null) {
+                        leashConfigManager = new LeashConfigManager();
+                    }
+                }
+            }
+        }
 
+        @SubscribeEvent
+        public void onConfigLoaded(ModConfigEvent.Loading event) {
+            if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
+                checkAndSet();
+                LeashConfigManager.loading(leashConfigManager);
+            }
+        }
+
+        @SubscribeEvent
+        public void onConfigReloaded(ModConfigEvent.Reloading event) {
+            if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
+                checkAndSet();
+                LeashConfigManager.reloading(leashConfigManager);
+            }
+        }
+
+        @SubscribeEvent
+        public void onConfigUnloaded(ModConfigEvent.Unloading event) {
+            if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
+                LeashConfigManager.unloading(leashConfigManager);
+            }
+        }
     }
 }

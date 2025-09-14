@@ -19,13 +19,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import org.jetbrains.annotations.Nullable;
-import top.r3944realms.superleadrope.config.LeashCommonConfig;
+import top.r3944realms.superleadrope.CommonEventHandler;
 
 import java.util.List;
 
 public class Command {
-    public static final String PREFIX = LeashCommonConfig.COMMON.SLPModCommandPrefix.get();
-    public static boolean SHOULD_USE_PREFIX = LeashCommonConfig.COMMON.EnableSLPModCommandPrefix.get();
+    public static final String PREFIX = CommonEventHandler.leashConfigManager.getCommandPrefix();
+    public static boolean SHOULD_USE_PREFIX = CommonEventHandler.leashConfigManager.isCommandPrefixEnabled();
     static LiteralArgumentBuilder<CommandSourceStack> getLiterArgumentBuilderOfCSS(String name, boolean shouldAddToList, @Nullable List<LiteralArgumentBuilder<CommandSourceStack>> list) {
         LiteralArgumentBuilder<CommandSourceStack> literal = Commands.literal(name);
         if (shouldAddToList) {

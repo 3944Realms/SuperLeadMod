@@ -19,7 +19,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
@@ -142,7 +141,6 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
             Optional<UUID> holderUUIDOpt,
             Optional<Integer> holderIdOpt, // Only for client side use
             String reserved,               // 保留字段
-            Vec3 attachOffset,
             double maxDistance,
             double elasticDistance,
             int keepLeashTicks,            // 剩余 Tick 数
@@ -150,14 +148,13 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
     ) {
         public static final LeashInfo EMPTY = new LeashInfo(
                 Optional.empty(), Optional.empty(), Optional.empty(),
-                "", Vec3.ZERO, 12.0D, 6.0D, 0, 0
+                "", 12.0D, 6.0D, 0, 0
         );
 
         /* ---------- Factory ---------- */
         public static LeashInfo create(
                 Entity entity,
                 String reserved,
-                Vec3 offset,
                 double maxDistance,
                 double elasticDistance,
                 int keepTicks,
@@ -165,32 +162,31 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
         ) {
             return entity instanceof SuperLeashKnotEntity knot
                     ? new LeashInfo(knot.getPos(), entity.getId(), reserved,
-                    offset, maxDistance, elasticDistance, keepTicks, maxKeepTicks)
-                    : new LeashInfo(entity.getUUID(), entity.getId(), reserved,
-                    offset, maxDistance, elasticDistance, keepTicks, maxKeepTicks);
+                    maxDistance, elasticDistance, keepTicks, maxKeepTicks)
+                    : new LeashInfo(entity.getUUID(), entity.getId(), reserved, maxDistance, elasticDistance, keepTicks, maxKeepTicks);
         }
 
-        public LeashInfo(UUID holderUUID, int holderId, String reserved, Vec3 offset,
+        public LeashInfo(UUID holderUUID, int holderId, String reserved,
                          double maxDistance, double elasticDistance, int keepTicks, int maxKeepTicks) {
             this(Optional.empty(), Optional.of(holderUUID), Optional.of(holderId),
-                    reserved, offset, maxDistance, elasticDistance, keepTicks, maxKeepTicks);
+                    reserved, maxDistance, elasticDistance, keepTicks, maxKeepTicks);
         }
 
-        public LeashInfo(BlockPos knotPos, int holderId, String reserved, Vec3 offset,
+        public LeashInfo(BlockPos knotPos, int holderId, String reserved,
                          double maxDistance, double elasticDistance, int keepTicks, int maxKeepTicks) {
             this(Optional.of(knotPos), Optional.empty(), Optional.of(holderId),
-                    reserved, offset, maxDistance, elasticDistance, keepTicks, maxKeepTicks);
+                    reserved, maxDistance, elasticDistance, keepTicks, maxKeepTicks);
         }
 
         /* ---------- State updates ---------- */
         public LeashInfo decrementKeepTicks() {
-            return new LeashInfo(blockPosOpt, holderUUIDOpt, holderIdOpt, reserved, attachOffset,
+            return new LeashInfo(blockPosOpt, holderUUIDOpt, holderIdOpt, reserved,
                     maxDistance, elasticDistance,
                     Math.max(0, keepLeashTicks - 1), maxKeepLeashTicks);
         }
 
         public LeashInfo resetKeepTicks() {
-            return new LeashInfo(blockPosOpt, holderUUIDOpt, holderIdOpt, reserved, attachOffset,
+            return new LeashInfo(blockPosOpt, holderUUIDOpt, holderIdOpt, reserved,
                     maxDistance, elasticDistance,
                     maxKeepLeashTicks, maxKeepLeashTicks);
         }
@@ -205,7 +201,7 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
                     isKnot ? Optional.of(((SuperLeashKnotEntity) entity).getPos()) : Optional.empty(),
                     !isKnot ? Optional.of(entity.getUUID()) : Optional.empty(),
                     Optional.of(entity.getId()),
-                    newReserved, attachOffset, maxDistance, elasticDistance,
+                    newReserved, maxDistance, elasticDistance,
                     keepLeashTicks, maxKeepLeashTicks
             );
         }

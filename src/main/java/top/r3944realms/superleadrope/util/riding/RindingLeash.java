@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
 
@@ -37,7 +38,7 @@ public class RindingLeash {
 
         Entity current = root;
         while (current != null) {
-            if (RidingValidator.isInWhitelist(current.getType())) {
+            if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(current.getType())) {
                 return current; // 找到白名单载具
             }
             current = current.getVehicle();
@@ -60,7 +61,7 @@ public class RindingLeash {
 
         Entity current = root;
         while (current != null) {
-            if (RidingValidator.isInWhitelist(current.getType())) {
+            if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(current.getType())) {
                 return current; // 找到白名单载具
             }
             current = current.getVehicle();

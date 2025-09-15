@@ -30,9 +30,9 @@ import java.util.regex.Matcher;
 import static top.r3944realms.superleadrope.config.LeashCommonConfig.Common.OFFSET_PATTERN;
 
 public class LeashConfigManager {
-    private final Map<String, double[]> entityOffsetMap = new ConcurrentHashMap<>();
-    private final Map<String, double[]> tagOffsetMap = new ConcurrentHashMap<>();
-    private final Map<String, double[]> modOffsetMap = new ConcurrentHashMap<>();
+    private final Map<String, double[]> entityHolderOffsetMap = new ConcurrentHashMap<>(), entityLeashOffsetMap = new ConcurrentHashMap<>();
+    private final Map<String, double[]> tagHolderOffsetMap = new ConcurrentHashMap<>(), tagLeashOffsetMap = new ConcurrentHashMap<>();
+    private final Map<String, double[]> modHolderOffsetMap = new ConcurrentHashMap<>(), modLeashOffsetMap = new ConcurrentHashMap<>();
 
     // 缓存常用配置值以提高性能
     private volatile List<String> teleportWhitelistCache;
@@ -53,12 +53,13 @@ public class LeashConfigManager {
      * 解析偏移配置（线程安全）
      */
     public void parseOffsetConfig() {
-        Map<String, double[]> newEntityOffsetMap = new HashMap<>();
-        Map<String, double[]> newTagOffsetMap = new HashMap<>();
-        Map<String, double[]> newModOffsetMap = new HashMap<>();
+        // --- Holder ---
+        Map<String, double[]> holderEntityMap = new HashMap<>();
+        Map<String, double[]> holderTagMap = new HashMap<>();
+        Map<String, double[]> holderModMap = new HashMap<>();
 
-        List<? extends String> offsets = LeashCommonConfig.COMMON.defaultApplyEntityLocationOffset.get();
-        for (String offsetConfig : offsets) {
+        List<? extends String> holderOffsets = LeashCommonConfig.COMMON.defaultHolderLocationOffset.get();
+        for (String offsetConfig : holderOffsets) {
             Matcher matcher = OFFSET_PATTERN.matcher(offsetConfig);
             if (!matcher.matches()) continue;
 
@@ -69,36 +70,79 @@ public class LeashConfigManager {
                 double[] offset = new double[]{x, y, z};
 
                 String entityList = matcher.group(4);
-                String[] entities = entityList.split(",");
-
-                for (String entity : entities) {
+                for (String entity : entityList.split(",")) {
                     String trimmed = entity.trim();
-                    if (trimmed.startsWith("#")) {
+                    if (trimmed.equals("*")) {
+                        // special case: apply to all entities
+                        holderModMap.put("*", offset);
+                    } else if (trimmed.startsWith("#")) {
                         String body = trimmed.substring(1).trim();
                         if (body.contains(":")) {
-                            newTagOffsetMap.put(body, offset);
+                            holderTagMap.put(body, offset);
                         } else {
-                            newModOffsetMap.put(body, offset);
+                            holderModMap.put(body, offset);
                         }
                     } else {
-                        newEntityOffsetMap.put(trimmed, offset);
+                        holderEntityMap.put(trimmed, offset);
                     }
                 }
             } catch (NumberFormatException e) {
-                System.err.println("Invalid offset config: " + offsetConfig);
+                SuperLeadRope.logger.error("Invalid holder offset config: {}", offsetConfig);
             }
         }
 
-        // 原子性更新映射
-        entityOffsetMap.clear();
-        entityOffsetMap.putAll(newEntityOffsetMap);
+        entityHolderOffsetMap.clear();
+        entityHolderOffsetMap.putAll(holderEntityMap);
+        tagHolderOffsetMap.clear();
+        tagHolderOffsetMap.putAll(holderTagMap);
+        modHolderOffsetMap.clear();
+        modHolderOffsetMap.putAll(holderModMap);
 
-        tagOffsetMap.clear();
-        tagOffsetMap.putAll(newTagOffsetMap);
+        // --- Leash ---
+        Map<String, double[]> leashEntityMap = new HashMap<>();
+        Map<String, double[]> leashTagMap = new HashMap<>();
+        Map<String, double[]> leashModMap = new HashMap<>();
 
-        modOffsetMap.clear();
-        modOffsetMap.putAll(newModOffsetMap);
+        List<? extends String> leashOffsets = LeashCommonConfig.COMMON.defaultApplyEntityLocationOffset.get();
+        for (String offsetConfig : leashOffsets) {
+            Matcher matcher = OFFSET_PATTERN.matcher(offsetConfig);
+            if (!matcher.matches()) continue;
+
+            try {
+                double x = Double.parseDouble(matcher.group(1).trim());
+                double y = Double.parseDouble(matcher.group(2).trim());
+                double z = Double.parseDouble(matcher.group(3).trim());
+                double[] offset = new double[]{x, y, z};
+
+                String entityList = matcher.group(4);
+                for (String entity : entityList.split(",")) {
+                    String trimmed = entity.trim();
+                    if (trimmed.equals("*")) {
+                        leashModMap.put("*", offset);
+                    } else if (trimmed.startsWith("#")) {
+                        String body = trimmed.substring(1).trim();
+                        if (body.contains(":")) {
+                            leashTagMap.put(body, offset);
+                        } else {
+                            leashModMap.put(body, offset);
+                        }
+                    } else {
+                        leashEntityMap.put(trimmed, offset);
+                    }
+                }
+            } catch (NumberFormatException e) {
+                SuperLeadRope.logger.error("Invalid leash offset config: {}", offsetConfig);
+            }
+        }
+
+        entityLeashOffsetMap.clear();
+        entityLeashOffsetMap.putAll(leashEntityMap);
+        tagLeashOffsetMap.clear();
+        tagLeashOffsetMap.putAll(leashTagMap);
+        modLeashOffsetMap.clear();
+        modLeashOffsetMap.putAll(leashModMap);
     }
+
 
     /**
      * 重新加载所有配置值到缓存
@@ -127,7 +171,7 @@ public class LeashConfigManager {
      * 获取实体类型的偏移量
      */
     @SuppressWarnings("deprecation")
-    public Vec3 getEntityOffset(EntityType<?> entityType) {
+    public Vec3 getDefaultEntityOffset(EntityType<?> entityType) {
         String entityId = entityType.builtInRegistryHolder().key().location().toString();
         String modId = entityId.split(":")[0]; // 从实体ID提取modId
 
@@ -137,37 +181,95 @@ public class LeashConfigManager {
             tagStrings.add(tag.location().toString());
         }
 
-        double[] offset = getEntityOffset(entityId, modId, tagStrings);
+        double[] offset = getDefaultEntityOffset(entityId, modId, tagStrings);
         return offset != null ? new Vec3(offset[0], offset[1], offset[2]) : Vec3.ZERO;
     }
 
     /**
      * 获取实体对象的偏移量（便捷方法）
      */
-    public Vec3 getEntityOffset(Entity entity) {
-        return getEntityOffset(entity.getType());
+    public Vec3 getDefaultEntityOffset(Entity entity) {
+        return getDefaultEntityOffset(entity.getType());
     }
 
 
     /**
      * 获取实体偏移量（原始数据）
      */
-    public double[] getEntityOffset(String entityId, String modId, List<String> tags) {
+    public double[] getDefaultEntityOffset(String entityId, String modId, List<String> tags) {
         // 1. 首先检查特定实体
-        if (entityOffsetMap.containsKey(entityId)) {
-            return entityOffsetMap.get(entityId);
+        if (entityLeashOffsetMap.containsKey(entityId)) {
+            return entityLeashOffsetMap.get(entityId);
         }
 
         // 2. 检查标签
         for (String tag : tags) {
-            if (tagOffsetMap.containsKey(tag)) {
-                return tagOffsetMap.get(tag);
+            if (tagLeashOffsetMap.containsKey(tag)) {
+                return tagHolderOffsetMap.get(tag);
             }
         }
 
         // 3. 检查模组
-        if (modOffsetMap.containsKey(modId)) {
-            return modOffsetMap.get(modId);
+        if (modLeashOffsetMap.containsKey(modId)) {
+            return modLeashOffsetMap.get(modId);
+        }
+
+        //4. 通配符
+        if (modLeashOffsetMap.containsKey("*")) {
+            return modLeashOffsetMap.get("*");
+        }
+        return null;
+    }
+    /**
+     * 获取实体类型的偏移量
+     */
+    @SuppressWarnings("deprecation")
+    public Vec3 getDefaultHolderOffset(EntityType<?> entityType) {
+        String entityId = entityType.builtInRegistryHolder().key().location().toString();
+        String modId = entityId.split(":")[0]; // 从实体ID提取modId
+
+        // 获取实体的标签
+        List<String> tagStrings = new ArrayList<>();
+        for (var tag : entityType.builtInRegistryHolder().tags().toList()) {
+            tagStrings.add(tag.location().toString());
+        }
+
+        double[] offset = getDefaultHolderOffset(entityId, modId, tagStrings);
+        return offset != null ? new Vec3(offset[0], offset[1], offset[2]) : Vec3.ZERO;
+    }
+
+    /**
+     * 获取实体对象的偏移量（便捷方法）
+     */
+    public Vec3 getDefaultHolderOffset(Entity entity) {
+        return getDefaultHolderOffset(entity.getType());
+    }
+
+
+    /**
+     * 获取实体偏移量（原始数据）
+     */
+    public double[] getDefaultHolderOffset(String entityId, String modId, List<String> tags) {
+        // 1. 首先检查特定实体
+        if (entityHolderOffsetMap.containsKey(entityId)) {
+            return entityHolderOffsetMap.get(entityId);
+        }
+
+        // 2. 检查标签
+        for (String tag : tags) {
+            if (tagHolderOffsetMap.containsKey(tag)) {
+                return tagHolderOffsetMap.get(tag);
+            }
+        }
+
+        // 3. 检查模组
+        if (modHolderOffsetMap.containsKey(modId)) {
+            return modHolderOffsetMap.get(modId);
+        }
+
+        //4. 通配符
+        if (modLeashOffsetMap.containsKey("*")) {
+            return modHolderOffsetMap.get("*");
         }
 
         return null;
@@ -335,15 +437,16 @@ public class LeashConfigManager {
     }
 
     public void clear() {
-        entityOffsetMap.clear();
-        tagOffsetMap.clear();
-        modOffsetMap.clear();
+        entityHolderOffsetMap.clear();entityLeashOffsetMap.clear();
+        tagHolderOffsetMap.clear();tagLeashOffsetMap.clear();
+        modHolderOffsetMap.clear();modLeashOffsetMap.clear();
         teleportWhitelistCache = Collections.emptyList();
     }
 
     public String getStats() {
-        return String.format("Entities: %d, Tags: %d, Mods: %d, TeleportWhitelist: %d",
-                entityOffsetMap.size(), tagOffsetMap.size(), modOffsetMap.size(),
+        return String.format("Holder: Entities: %d, Tags: %d, Mods: %d \n Leash: Entities: %d, Tags: %d, Mods: %d, TeleportWhitelist: %d",
+                entityHolderOffsetMap.size(), tagHolderOffsetMap.size(), modHolderOffsetMap.size(),
+                entityLeashOffsetMap.size(), tagLeashOffsetMap.size(), modLeashOffsetMap.size(),
                 teleportWhitelistCache.size());
     }
 
@@ -356,6 +459,7 @@ public class LeashConfigManager {
     }
 
     public static void unloading(LeashConfigManager manager) {
-        manager.clear();
+        if(manager != null)
+            manager.clear();
     }
 }

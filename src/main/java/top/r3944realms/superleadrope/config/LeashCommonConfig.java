@@ -40,7 +40,7 @@ public class LeashCommonConfig {
         public final ForgeConfigSpec.DoubleValue springDampening;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> axisSpecificElasticity;
         public final ForgeConfigSpec.IntValue maxLeashesPerEntity;
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> defaultApplyEntityLocationOffset;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> defaultApplyEntityLocationOffset, defaultHolderLocationOffset;
         // 正则表达式模式
         static final Pattern OFFSET_PATTERN = Pattern.compile(
                 "(?i)(?:vec3|vec3d|vector3|offset)\\s*\\(\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*,\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*,\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*\\)\\s*:\\s*\\[\\s*([^]]+?)\\s*]\\s*"        );
@@ -98,25 +98,45 @@ public class LeashCommonConfig {
             defaultApplyEntityLocationOffset = builder
                     .comment(
                             "Default leash attachment point offsets for entities.",
+                            "Reference point: the entity's eyeHeight (eye / head position).",
                             "Format: vec3(x,y,z) : [entity_list]",
-                            "Optional Name : vector3, vec3d, offset",
-                            "Entity list can contain:",
+                            "Optional names: vector3, vec3d, offset",
+                            "Entity list may contain:",
                             " - modid:entity_id       : specific entity (e.g. minecraft:bee)",
                             " - #modid:tag_name       : entity type tag (e.g. #minecraft:boats)",
-                            " - #modid                : mod-wide (e.g. #minecraft)",
-                            "Multiple entities can be separated by commas",
+                            " - #modid                : all entities from a mod (e.g. #minecraft)",
+                            " - *                     : all entities",
+                            "Multiple entries can be separated by commas",
                             "Example: vec3(0,0.2,0) : [minecraft:bee, minecraft:horse]",
-                            "Priority: specific entity > tag > mod"
+                            "Priority order: specific entity > tag > mod > *"
                     )
                     .defineListAllowEmpty(
                             List.of("defaultApplyEntityLocationOffset"),
                             List.of(
-                                    "vec3(0,0.2,0) : [minecraft:bee]",
-                                    "vec3(0,1.0,0) : [minecraft:horse, minecraft:donkey]",
-                                    "vec3(0,0.5,0) : [#minecraft:boats]",
-                                    "vec3(0,0.4,0) : [#minecraft:minecarts]",
-                                    "vec3(0,0.3,0) : [#minecraft]",
-                                    "vec3(0,0.6,0) : [#modernlife]"
+                                    "vec3(0,-0.5,0) : [*]", "vec3(0,-0.42,0) : [minecraft:player]"
+                            ),
+                            o -> o instanceof String s && isValidOffsetRefFormat(s)
+                    );
+
+            defaultHolderLocationOffset = builder
+                    .comment(
+                            "Default leash holder attachment point offsets (where the leash attaches to the holder).",
+                            "Reference point: the entity's eyeHeight (eye / head position).",
+                            "Format: vec3(x,y,z) : [entity_list]",
+                            "Optional names: vector3, vec3d, offset",
+                            "Entity list may contain:",
+                            " - modid:entity_id       : specific entity (e.g. minecraft:player)",
+                            " - #modid:tag_name       : entity type tag (e.g. #minecraft:players)",
+                            " - #modid                : all entities from a mod (e.g. #minecraft)",
+                            " - *                     : all entities",
+                            "Multiple entries can be separated by commas",
+                            "Example: vec3(0,1.5,0) : [minecraft:player]",
+                            "Priority order: specific entity > tag > mod > *"
+                    )
+                    .defineListAllowEmpty(
+                            List.of("defaultHolderLocationOffset"),
+                            List.of(
+                                    "vec3(0,-0.5,0) : [*]"
                             ),
                             o -> o instanceof String s && isValidOffsetRefFormat(s)
                     );
@@ -124,6 +144,9 @@ public class LeashCommonConfig {
         }
 
         private static boolean isValidEntityRefFormat(String s) {
+            if ("*".equals(s)) {
+                return true; // 支持任意实体通配
+            }
             if (s.startsWith("#")) {
                 String body = s.substring(1);
                 // 支持 #modid （整个模组）或 #modid:tag_name （标签）

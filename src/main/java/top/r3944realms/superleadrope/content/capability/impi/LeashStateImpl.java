@@ -20,11 +20,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.network.NetworkHandler;
@@ -44,10 +47,12 @@ public class LeashStateImpl implements ILeashState {
     private long lastSyncTime;
     private final Map<UUID, ILeashState.LeashState> leashHolders = new ConcurrentHashMap<>();
     private final Map<BlockPos, ILeashState.LeashState> leashKnots = new ConcurrentHashMap<>();
+    @Nullable
     private volatile Vec3 staticApplyEntityLocationOffset;
-    private volatile Vec3 defaultApplyEntityLocationOffset = new Vec3(0 , 0.45, 0);
-    public LeashStateImpl(Entity entity) {
+    private volatile Vec3 defaultApplyEntityLocationOffset;
+    public LeashStateImpl(Entity entity, Vec3 defaultApplyEntityLocationOffset) {
         this.entity = entity;
+        this.defaultApplyEntityLocationOffset = defaultApplyEntityLocationOffset;
     }
 
     @Override
@@ -87,6 +92,11 @@ public class LeashStateImpl implements ILeashState {
     }
 
     @Override
+    public boolean hasLeashState() {
+        return !leashKnots.isEmpty() || !leashHolders.isEmpty();
+    }
+
+    @Override
     public Map<UUID, LeashState> getHolderLeashStates() {
         ConcurrentMap<UUID, LeashState> retMap = Maps.newConcurrentMap();
         retMap.putAll(leashHolders);
@@ -114,6 +124,22 @@ public class LeashStateImpl implements ILeashState {
     @Override
     public Optional<LeashState> getLeashState(BlockPos pos) {
         return leashKnots.containsKey(pos) ? Optional.of(leashKnots.get(pos)) : Optional.empty();
+    }
+
+    @Override
+    public Optional<Vec3> getHolderLocationOffset(Entity entity) {
+        return (entity instanceof SuperLeashKnotEntity leashKnot) ?
+                getHolderLocationOffset(leashKnot.getPos()) : getHolderLocationOffset(entity.getUUID());
+    }
+
+    @Override
+    public Optional<Vec3> getHolderLocationOffset(UUID uuid) {
+        return Optional.ofNullable(leashHolders.get(uuid)).map(LeashState::holderLocationOffset);
+    }
+
+    @Override
+    public Optional<Vec3> getHolderLocationOffset(BlockPos pos) {
+        return Optional.ofNullable(leashKnots.get(pos)).map(LeashState::holderLocationOffset);
     }
 
     @Override
@@ -145,7 +171,7 @@ public class LeashStateImpl implements ILeashState {
     }
 
     @Override
-    public void setLeashHolderLocationOffset(Entity holder, Vec3 offset) {
+    public void setLeashHolderLocationOffset(Entity holder, @Nullable Vec3 offset) {
         if (holder instanceof SuperLeashKnotEntity leashKnot) {
             setLeashHolderLocationOffset(leashKnot.getPos(), offset);
         } else setLeashHolderLocationOffset(holder.getUUID(), offset);
@@ -153,40 +179,51 @@ public class LeashStateImpl implements ILeashState {
 
     @Override
     public void setLeashHolderLocationOffset(UUID holderUUID, Vec3 offset) {
-        LeashState currentState = leashHolders.get(holderUUID);
-        if (currentState == null) {
-            // 创建新的状态，使用默认的应用实体偏移量
-            leashHolders.put(holderUUID, new LeashState(
-                    offset,
-                    getDefaultLeashApplyEntityLocationOffset(),
-                    Vec3.ZERO // 或者合适的默认值
-            ));
-        } else {
-            // 更新现有状态
-            leashHolders.put(holderUUID,
-                    currentState.setHolderLocationOffset(offset)
-            );
+        if (entity.level() instanceof ServerLevel level) {
+            LeashState currentState = leashHolders.get(holderUUID);
+            if (currentState == null) {
+                Entity holder = level.getEntity(holderUUID);
+                Vec3 defaultHolderLocationOffset = Vec3.ZERO;
+                if(holder != null) {
+                    defaultHolderLocationOffset = CommonEventHandler.leashConfigManager.getDefaultHolderOffset(holder);
+                }
+                // 创建新的状态，使用默认的应用实体偏移量
+                leashHolders.put(holderUUID, new LeashState(
+                        offset,
+                        Vec3.ZERO,
+                        defaultHolderLocationOffset
+                ));
+            } else {
+                // 更新现有状态
+                leashHolders.put(holderUUID,
+                        currentState.setHolderLocationOffset(offset)
+                );
+            }
+            markForSync();
         }
-        markForSync();
     }
 
     @Override
     public void setLeashHolderLocationOffset(BlockPos knotPos, Vec3 offset) {
-        LeashState currentState = leashKnots.get(knotPos);
-        if (currentState == null) {
-            // 创建新的状态
-            leashKnots.put(knotPos, new LeashState(
-                    offset,
-                    getDefaultLeashApplyEntityLocationOffset(),
-                    Vec3.ZERO
-            ));
-        } else {
-            // 更新现有状态
-            leashKnots.put(knotPos,
-                    currentState.setHolderLocationOffset(offset)
-            );
+        if (entity.level() instanceof ServerLevel level) {
+            LeashState currentState = leashKnots.get(knotPos);
+            if (currentState == null) {
+                // 创建新的状态
+                leashKnots.put(knotPos, new LeashState(
+                        offset,
+                        Vec3.ZERO,
+                        SuperLeashKnotEntity.get(level, knotPos)
+                                .map(CommonEventHandler.leashConfigManager::getDefaultHolderOffset)
+                                .orElse(Vec3.ZERO)
+                ));
+            } else {
+                // 更新现有状态
+                leashKnots.put(knotPos,
+                        currentState.setHolderLocationOffset(offset)
+                );
+            }
+            markForSync();
         }
-        markForSync();
     }
 
     @Override
@@ -199,17 +236,13 @@ public class LeashStateImpl implements ILeashState {
     @Override
     public void addLeashHolderLocationOffset(UUID holderUUID, Vec3 offset) {
         LeashState currentState = leashHolders.get(holderUUID);
-        if (currentState == null) {
-            // 创建新的状态，使用默认的应用实体偏移量
-            leashHolders.put(holderUUID, new LeashState(
-                    offset,
-                    getDefaultLeashApplyEntityLocationOffset(),
-                    Vec3.ZERO // 或者合适的默认值
-            ));
-        } else {
-            // 更新现有状态
+        if (currentState != null) {
+            Vec3 newHolderLocationOffset;
+            if (currentState.holderLocationOffset() == null) {
+                newHolderLocationOffset = currentState.defaultHolderLocationOffset().add(offset);
+            } else  newHolderLocationOffset = currentState.holderLocationOffset().add(offset);
             leashHolders.put(holderUUID,
-                    currentState.setHolderLocationOffset(currentState.holderLocationOffset().add(offset))
+                    currentState.setHolderLocationOffset(newHolderLocationOffset)
             );
         }
         markForSync();
@@ -218,17 +251,13 @@ public class LeashStateImpl implements ILeashState {
     @Override
     public void addLeashHolderLocationOffset(BlockPos knotPos, Vec3 offset) {
         LeashState currentState = leashKnots.get(knotPos);
-        if (currentState == null) {
-            // 创建新的状态
-            leashKnots.put(knotPos, new LeashState(
-                    offset,
-                    getDefaultLeashApplyEntityLocationOffset(),
-                    Vec3.ZERO
-            ));
-        } else {
-            // 更新现有状态
+        if (currentState != null) {
+            Vec3 newHolderLocationOffset;
+            if (currentState.holderLocationOffset() == null) {
+                newHolderLocationOffset = currentState.defaultHolderLocationOffset().add(offset);
+            } else  newHolderLocationOffset = currentState.holderLocationOffset().add(offset);
             leashKnots.put(knotPos,
-                    currentState.setHolderLocationOffset(currentState.holderLocationOffset().add(offset))
+                    currentState.setHolderLocationOffset(newHolderLocationOffset)
             );
         }
         markForSync();
@@ -344,7 +373,7 @@ public class LeashStateImpl implements ILeashState {
 
     private static @NotNull CompoundTag getCommonCompoundTag(@NotNull ILeashState.LeashState info, CompoundTag infoTag) {
         infoTag.put("ApplyEntityLocationOffset", NBTWriter.writeVec3(info.applyEntityLocationOffset()));
-        infoTag.put("HolderEntityLocationOffset", NBTWriter.writeVec3(info.holderLocationOffset()));
+        if(info.holderLocationOffset() != null) infoTag.put("HolderEntityLocationOffset", NBTWriter.writeVec3(info.holderLocationOffset()));
         infoTag.put("DefaultHolderLocationOffset",  NBTWriter.writeVec3(info.defaultHolderLocationOffset()));
         return infoTag;
     }
@@ -377,7 +406,7 @@ public class LeashStateImpl implements ILeashState {
     @Contract("_ -> new")
     private static @NotNull ILeashState.LeashState getUUIDLeashStateForm(@NotNull CompoundTag infoTag) {
         return new ILeashState.LeashState(
-                NBTReader.readVec3(infoTag.getCompound("HolderEntityLocationOffset")),
+                infoTag.contains("HolderEntityLocationOffset") ? NBTReader.readVec3(infoTag.getCompound("HolderEntityLocationOffset")) : null,
                 NBTReader.readVec3(infoTag.getCompound("ApplyEntityLocationOffset")),
                 NBTReader.readVec3(infoTag.getCompound("DefaultHolderLocationOffset"))
         );

@@ -41,10 +41,10 @@ function initializeCoreMod() {
                                 new VarInsnNode(Opcodes.ALOAD, 1), // Mob
                                 new VarInsnNode(Opcodes.ALOAD, 2), // Frustum
                                 ASMAPI.buildMethodCall(
-                                    'your/package/LeashRenderHook',
+                                    'top/r3944realms/superleadrope/core/hook/LeashRenderHook',
                                     null,
                                     ASMAPI.MethodType.STATIC,
-                                    'shouldRenderExtraWithLog',
+                                    'shouldRenderExtra',
                                     '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;)Z',
                                     ASMAPI.MethodCallMode.STATIC
                                 )

@@ -24,6 +24,7 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.impi.LeashStateImpl;
@@ -34,7 +35,7 @@ public class LeashStateProvider implements ICapabilitySerializable<CompoundTag> 
     private final ILeashState instance;
     private final LazyOptional<ILeashState> optional;
     public LeashStateProvider(Entity entity) {
-        this.instance = new LeashStateImpl(entity);
+        this.instance = new LeashStateImpl(entity, CommonEventHandler.leashConfigManager.getDefaultEntityOffset(entity));
         this.optional = LazyOptional.of(() -> instance);
     }
     @Override

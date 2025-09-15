@@ -32,7 +32,7 @@ import java.util.UUID;
 public interface ILeashData extends INBTSerializable<CompoundTag> {
 
     /* ----------------------
-     * Add / remove leashes
+     * Add / removeApplyEntity leashes
      * ---------------------- */
     boolean addLeash(Entity holder);
     boolean addLeash(Entity holder, String reserved);

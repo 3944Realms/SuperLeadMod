@@ -310,14 +310,14 @@ public enum SLPLangKeyValue {
             "§7備註: §d%s"
     ),
     MESSAGE_LEASHDATA_ADD_SUCCESS(
-            "command.leashdata.add.success", ModPartEnum.COMMAND,
+            "command.leashdata.addApplyEntity.success", ModPartEnum.COMMAND,
             "§bAdded leash successfully. §a%s §7→ §e%s",
             "§b添加拴绳成功. §a%s §7→ §e%s",
             "§b添加拴繩成功. §a%s §7→ §e%s",
             "§b繫繩既添. §a%s §7→ §e%s"
     ),
     MESSAGE_LEASHDATA_REMOVE_SUCCESS(
-            "command.leashdata.remove.success", ModPartEnum.COMMAND,
+            "command.leashdata.removeApplyEntity.success", ModPartEnum.COMMAND,
             "§bRemoved leash successfully. §a%s §7- §e%s",
             "§b移除拴绳成功. §a%s §7- §e%s",
             "§b移除拴繩成功. §a%s §7- §e%s",
@@ -331,7 +331,7 @@ public enum SLPLangKeyValue {
             "§b繫繩既移. §a%s §7→ §e%s §7→ §6%s"
     ),
     MESSAGE_LEASHDATA_SET_SUCCESS(
-            "command.leashdata.set.success", ModPartEnum.COMMAND,
+            "command.leashdata.setApplyEntity.success", ModPartEnum.COMMAND,
             "§bSet leash property successfully. §a%s §7: §e%s §7= §6%.1f",
             "§b设置拴绳属性成功. §a%s §7: §e%s §7= §6%.1f",
             "§b設置拴繩屬性成功. §a%s §7: §e%s §7= §6%.1f",

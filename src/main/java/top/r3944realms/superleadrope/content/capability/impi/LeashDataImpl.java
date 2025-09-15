@@ -202,7 +202,7 @@ public class LeashDataImpl implements ILeashData {
         } else {
             leashHolders.put(holder.getUUID(), info);
         }
-        LeashStateAPI.Operations.attach(entity, holder);
+        LeashStateAPI.Offset.setHolderFor(entity, holder);
         markForSync();
         return true;
     }
@@ -579,40 +579,6 @@ public class LeashDataImpl implements ILeashData {
     }
 
     /**
-     * 增强的移动能力检查
-     */
-    private boolean canMobMoveEnhanced(Mob mob) {
-        // 基础移动检查
-        if (!canMobMove(mob)) {
-            return false;
-        }
-
-        // 检查导航系统是否可用
-        if (mob.getNavigation().isDone() || mob.getNavigation().isStuck()) {
-            return false;
-        }
-
-        // 检查生物是否被拴绳过度拉扯（防止无限尝试移动）
-        Vec3 motion = mob.getDeltaMovement();
-        if (motion.lengthSqr() > 4.0 && mob.tickCount % 20 == 0) {
-            // 如果移动速度过快，偶尔跳过移动尝试
-            return false;
-        }
-
-        // 检查生物是否在尝试移动但实际没有移动（卡住检测）
-        if (mob.getNavigation().getPath() != null &&
-                !mob.getNavigation().getPath().isDone()) {
-
-            // 获取上一tick的位置进行比较
-            double distanceMoved = mob.position().distanceTo(new Vec3(mob.xOld, mob.yOld, mob.zOld));
-
-            // 生物卡住了（有路径但几乎没有移动）
-            return !(distanceMoved < 0.1);
-        }
-
-        return true;
-    }
-    /**
      * 根据生物类型和力的大小计算移动速度
      */
     private double calculateMobSpeed(Mob mob, double forceMagnitude) {
@@ -636,7 +602,7 @@ public class LeashDataImpl implements ILeashData {
             return calculateLeashForce(uuidHolder, entry);
         } else {
             if (!delayedHolders.contains(uuid)) {
-                SuperLeadRope.logger.error("Could not apply leash forces for {}, because it is not found(it will be removed from list).", uuid);
+                SuperLeadRope.logger.warn("Could not apply leash forces for {}, because it is not found(it will be removed from list).", uuid);
                 leashHolders.remove(uuid);
             }
             return null;
@@ -760,21 +726,21 @@ public class LeashDataImpl implements ILeashData {
     public void removeAllLeashes() {
         leashHolders.clear();
         leashKnots.clear();
-        LeashStateAPI.Offset.removeAll(entity);
+        LeashStateAPI.Offset.removeHolderAll(entity);
         markForSync();
     }
 
     @Override
     public void removeAllHolderLeashes() {
         leashHolders.clear();
-        LeashStateAPI.Offset.removeAllUUIDs(entity);
+        LeashStateAPI.Offset.removeAllHolderUUIDs(entity);
         markForSync();
     }
 
     @Override
     public void removeAllKnotLeashes() {
         leashKnots.clear();
-        LeashStateAPI.Offset.removeAllBlockPoses(entity);
+        LeashStateAPI.Offset.removeAllHolderBlockPoses(entity);
         markForSync();
     }
 

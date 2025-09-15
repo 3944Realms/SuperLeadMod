@@ -94,7 +94,13 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
 
     @Override
     public boolean survives() {
-        return SuperLeashKnotEntity.isSupportBlock(this.level().getBlockState(this.pos));
+        boolean supportBlock = SuperLeashKnotEntity.isSupportBlock(this.level().getBlockState(this.pos));
+        if (!supportBlock) {
+            for (Entity entity : LeashDataImpl.leashableInArea(this)) {
+                LeashDataAPI.LeashOperations.detach(entity, this);
+            }
+        }
+        return supportBlock;
     }
 
     public static @NotNull SuperLeashKnotEntity getOrCreateKnot(@NotNull Level pLevel, @NotNull BlockPos pPos) {

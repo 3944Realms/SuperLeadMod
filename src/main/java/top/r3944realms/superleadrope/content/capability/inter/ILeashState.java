@@ -20,6 +20,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +35,7 @@ public interface ILeashState extends INBTSerializable<CompoundTag> {
     /* ----------------------
      * Query leash states
      * ---------------------- */
+    boolean hasLeashState();
     Map<UUID, LeashState> getHolderLeashStates();
     Map<BlockPos, LeashState> getKnotLeashStates();
 
@@ -40,29 +44,42 @@ public interface ILeashState extends INBTSerializable<CompoundTag> {
     Optional<LeashState> getLeashState(BlockPos pos);
 
     /* ----------------------
-     * Reset holder offsets
+     * Get offsets
      * ---------------------- */
+    Optional<Vec3> getHolderLocationOffset(Entity entity);
+    Optional<Vec3> getHolderLocationOffset(UUID uuid);
+    Optional<Vec3> getHolderLocationOffset(BlockPos pos);
+    Optional<Vec3> getLeashApplyEntityLocationOffset();
+    Vec3 getDefaultLeashApplyEntityLocationOffset();
+
+
+    /* ----------------------
+     * Reset offsets (setApplyEntity null)
+     * ---------------------- */
+    void resetAllLeashApplyEntityLocationsOffset();
     void resetAllLeashHolderLocationsOffset();
     void resetLeashHolderLocationOffset(Entity holder);
     void resetLeashHolderLocationOffset(UUID holderUUID);
     void resetLeashHolderLocationOffset(BlockPos knotPos);
 
     /* ----------------------
-     * Set holder offsets
+     * Set offsets (can setApplyEntity null)
      * ---------------------- */
-    void setLeashHolderLocationOffset(Entity holder, Vec3 offset);
-    void setLeashHolderLocationOffset(UUID holderUUID, Vec3 offset);
-    void setLeashHolderLocationOffset(BlockPos knotPos, Vec3 offset);
+    void setLeashHolderLocationOffset(Entity holder,@Nullable Vec3 offset);
+    void setLeashHolderLocationOffset(UUID holderUUID,@Nullable Vec3 offset);
+    void setLeashHolderLocationOffset(BlockPos knotPos,@Nullable Vec3 offset);
+    void setLeashApplyEntityLocationOffset(Vec3 offset);
 
     /* ----------------------
-     * Add holder offsets
+     * Add offsets
      * ---------------------- */
     void addLeashHolderLocationOffset(Entity holder, Vec3 offset);
     void addLeashHolderLocationOffset(UUID holderUUID, Vec3 offset);
     void addLeashHolderLocationOffset(BlockPos knotPos, Vec3 offset);
+    void addLeashApplyEntityLocationOffset(Vec3 offset);
 
     /* ----------------------
-     * Remove holder offsets
+     * Remove offsets (delete)
      * ---------------------- */
     void removeLeashHolderLocationOffset(Entity holder);
     void removeLeashHolderLocationOffset(UUID holderUUID);
@@ -70,17 +87,7 @@ public interface ILeashState extends INBTSerializable<CompoundTag> {
     void removeAllLeashHolderLocationOffset();
     void removeAllLeashHolderUUIDLocationOffset();
     void removeAllLeashHolderBlockPosLocationOffset();
-
-    /* ----------------------
-     * Apply-entity offset
-     * ---------------------- */
-    Optional<Vec3> getLeashApplyEntityLocationOffset();
-    Vec3 getDefaultLeashApplyEntityLocationOffset();
-
-    void resetAllLeashApplyEntityLocationsOffset();
     void removeLeashApplyEntityLocationOffset();
-    void setLeashApplyEntityLocationOffset(Vec3 offset);
-    void addLeashApplyEntityLocationOffset(Vec3 offset);
 
     /* ----------------------
      * Utility & sync
@@ -95,19 +102,27 @@ public interface ILeashState extends INBTSerializable<CompoundTag> {
      * Data record
      * ---------------------- */
     record LeashState(
-            Vec3 holderLocationOffset,
+            @Nullable Vec3 holderLocationOffset,
             Vec3 applyEntityLocationOffset,
             Vec3 defaultHolderLocationOffset
     ) {
-        public LeashState resetHolderLocationOffset() {
-            return new LeashState(defaultHolderLocationOffset, applyEntityLocationOffset, defaultHolderLocationOffset);
+        @Contract(" -> new")
+        public @NotNull LeashState resetHolderLocationOffset() {
+            return new LeashState(null, applyEntityLocationOffset, defaultHolderLocationOffset);
         }
 
-        public LeashState setHolderLocationOffset(Vec3 holderLocationOffset) {
+        @Contract("_ -> new")
+        public @NotNull LeashState setHolderLocationOffset(@Nullable Vec3 holderLocationOffset) {
             return new LeashState(holderLocationOffset, applyEntityLocationOffset, defaultHolderLocationOffset);
         }
 
-        public LeashState setApplyEntityLocationOffset(Vec3 applyEntityLocationOffset) {
+        @Contract("_ -> new")
+        public @NotNull LeashState setApplyEntityLocationOffset(@NotNull Vec3 applyEntityLocationOffset) {
+            return new LeashState(holderLocationOffset, applyEntityLocationOffset, defaultHolderLocationOffset);
+        }
+
+        @Contract("_ -> new")
+        public @NotNull LeashState setDefaultHolderLocationOffset(@NotNull Vec3 defaultHolderLocationOffset) {
             return new LeashState(holderLocationOffset, applyEntityLocationOffset, defaultHolderLocationOffset);
         }
     }

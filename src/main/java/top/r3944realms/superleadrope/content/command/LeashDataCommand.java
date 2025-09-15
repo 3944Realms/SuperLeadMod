@@ -112,7 +112,7 @@ public class LeashDataCommand {
                                 )
                         )
                 );
-        LiteralArgumentBuilder<CommandSourceStack> $$$add = Commands.literal("add")
+        LiteralArgumentBuilder<CommandSourceStack> $$$add = Commands.literal("addApplyEntity")
                 .then(Commands.argument("target", EntityArgument.entities())
                         // 实体拴绳
                         .then($$$add$holder)
@@ -120,7 +120,7 @@ public class LeashDataCommand {
                         // 方块拴绳
                         .then($$$add$pos)
                 );
-        LiteralArgumentBuilder<CommandSourceStack> $$$remove = Commands.literal("remove")
+        LiteralArgumentBuilder<CommandSourceStack> $$$remove = Commands.literal("removeApplyEntity")
                 .then(Commands.argument("target", EntityArgument.entities())
                         // 移除特定实体拴绳
                         .then(Commands.argument("holder", EntityArgument.entity())
@@ -237,7 +237,7 @@ public class LeashDataCommand {
                                 )
                         )
                 );
-        LiteralArgumentBuilder<CommandSourceStack> $$$set = Commands.literal("set")
+        LiteralArgumentBuilder<CommandSourceStack> $$$set = Commands.literal("setApplyEntity")
                 .then(Commands.argument("target", EntityArgument.entities())
                         // 实体拴绳设置
                         .then($$$set$holder)
@@ -282,7 +282,7 @@ public class LeashDataCommand {
             }
         }
     }
-    public static final String SET_MAX_DISTANCE = SLP_LEASH_MESSAGE_ + "set.max_distance";
+    public static final String SET_MAX_DISTANCE = SLP_LEASH_MESSAGE_ + "setApplyEntity.max_distance";
     private static int setMaxDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setMaxDistance(context, CommonEventHandler.leashConfigManager.getMaxLeashLength(), "");
     }
@@ -297,11 +297,11 @@ public class LeashDataCommand {
         }
         return -1;
     }
-    public static final String REMOVE_ALL_BLOCK_LEASHES = SLP_LEASH_MESSAGE_ + "remove.all_block_leashes";
+    public static final String REMOVE_ALL_BLOCK_LEASHES = SLP_LEASH_MESSAGE_ + "removeApplyEntity.all_block_leashes";
     private static int removeAllBlockLeashes(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return -1;
     }
-    public static final String REMOVE_ALL_HOLDER_LEASHES = SLP_LEASH_MESSAGE_ + "remove.all_holder_leashes";
+    public static final String REMOVE_ALL_HOLDER_LEASHES = SLP_LEASH_MESSAGE_ + "removeApplyEntity.all_holder_leashes";
     private static int removeAllHolderLeashes(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return -1;
     }
@@ -312,7 +312,7 @@ public class LeashDataCommand {
     private static int transferFromBlock(CommandContext<CommandSourceStack> context, String reserved) throws CommandSyntaxException {
         return -1;
     }
-    public static final String SET_ELASTIC_DISTANCE = SLP_LEASH_MESSAGE_ + "set.elastic_distance";
+    public static final String SET_ELASTIC_DISTANCE = SLP_LEASH_MESSAGE_ + "setApplyEntity.elastic_distance";
     private static int setElasticDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setElasticDistance(context, 0 ,"");
     }
@@ -322,7 +322,7 @@ public class LeashDataCommand {
     private static int setElasticDistance(CommandContext<CommandSourceStack> context, int keepTicks, String reserved) throws CommandSyntaxException {
         return -1;
     }
-    public static final String SET_BLOCK_MAX_DISTANCE = SLP_LEASH_MESSAGE_ + "set.block_max_distance";
+    public static final String SET_BLOCK_MAX_DISTANCE = SLP_LEASH_MESSAGE_ + "setApplyEntity.block_max_distance";
     private static int setBlockMaxDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setBlockMaxDistance(context, 0 ,"");
     }
@@ -332,7 +332,7 @@ public class LeashDataCommand {
     private static int setBlockMaxDistance(CommandContext<CommandSourceStack> context, int keepTicks, String reserved) throws CommandSyntaxException {
         return -1;
     }
-    public static final String SET_BLOCK_ELASTIC_DISTANCE = SLP_LEASH_MESSAGE_ + "set.block_elastic_distance";
+    public static final String SET_BLOCK_ELASTIC_DISTANCE = SLP_LEASH_MESSAGE_ + "setApplyEntity.block_elastic_distance";
     private static int setBlockElasticDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setBlockElasticDistance(context, 0 ,"");
     }

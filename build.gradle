@@ -311,14 +311,7 @@ tasks.register("runWithRenderDoc", Exec) {
         println "Environment MOD_CLASSES: ${environment['MOD_CLASSES']}"
     }
 }
-tasks.register("copyCoreMods", Copy) {
-    from("src/main/resources/coremods")  // 源目录
-    into("$buildDir/classes/java/main/coremods")  // 目标目录
-}
 
-tasks.named("classes") {
-    dependsOn("copyCoreMods")
-}
 
 // IDEA 支持
 idea {

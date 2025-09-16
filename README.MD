@@ -1,5 +1,68 @@
-# Super Lead Rope / 超级拴绳
+# 🪢 Super Lead Rope / 超级拴绳
 
+## ⚠️ 注意 / Warning
+**提示：目前属于早期测试版，已确认未有问题，如在服务器上使用不保证后续版本兼容，请慎重考虑。**  
+**Notice:** This is an **early test release** and has been confirmed to have no known issues. However, **compatibility with future versions on servers is not guaranteed — use with caution.**  
+建议在正式服务器部署前先在备份或测试服中验证。  
+We recommend testing on backups or a development server before deploying to production.
+
+---
+**Super Lead Rope** 是一个对原版拴绳进行增强的模组，让玩家能够更灵活地管理和牵引生物。  
+相比原版，它不仅更强大，还具备跨维度与跨服的拓展特性。
+
+**Super Lead Rope** is a mod that enhances the vanilla lead, allowing players to manage and leash entities more flexibly.  
+Compared to the original, it is not only more powerful but also supports cross-dimension and even cross-server features.
+
+---
+
+## ✨ 功能特色 / Features
+
+### 🔗 多实体拴绳 / Multi-Entity Leash
+- 一根绳子可以同时拴多个实体。
+- 一个实体也可以被多根绳子拴住，支持复杂连接。
+
+- A single rope can leash multiple entities at the same time.
+- One entity can also be leashed by multiple ropes, supporting complex connections.
+
+![The bee is leashed by 3 knots](https://cdn.modrinth.com/data/cached_images/04ab8197835a07376197207539b370eb5fff5921_0.webp)
+![More](https://cdn.modrinth.com/data/cached_images/8bef5a7d7129d98acd119e0b11f5f740f86b2907.png)
+---
+
+### 📏 远距离牵引 / Long-Distance Tethering
+- 原版拴绳在一定距离会断裂。
+- 超级拴绳支持更远距离（待做）。
+- 像橡皮筋一样拉回目标。在Y轴会有一定的弹性阻尼，保证在生物在Y轴下被牵引不会异常的频繁上下蹦极。
+
+- Vanilla leads break after a certain distance.
+- Super Lead Rope supports extended leash distance (WIP).
+- Pulls entities back like a rubber band. There is a certain amount of damping on the Y axis to ensure that leashed entities do not bounce up and down excessively when being pulled vertically.
+
+---
+
+### 💾 持久拴绑 / Persistent Leash
+- 支持保存拴绳状态，退出/重进游戏不会断开。
+- 即使 **holder**（拴绳端点）暂时消失，回来时也能恢复连接。
+
+- Leash states are persistent and won’t break after rejoining the game.
+- Even if the **holder** (anchor point) disappears temporarily, connections will be restored when it comes back.
+
+---
+
+### 🌌 跨维度 / 传送 / Cross-Dimension & Teleport
+- 目前支持 **传送跟随**：当拴绳实体或玩家通过传送（如下界传送门、指令）时，拴绳目标会一同跟随。
+
+- Currently, supports **teleport-follow**: when a leashed entity or player teleports (e.g. Nether portal, commands), the tethered entities follow along.
+
+---
+
+### 🎨 可视化与材质 / Visuals & Materials
+- 比原版拴绳更粗壮，或具有特殊颜色。
+- 未来可能支持多种材质（铁链、魔法绳、能量链等）。
+
+- Thicker or colored ropes compared to vanilla leads.
+- Future plans include multiple leash materials (iron chains, magical ropes, energy cords, etc.).
+
+---
 
 # 📜 License / 许可证
 

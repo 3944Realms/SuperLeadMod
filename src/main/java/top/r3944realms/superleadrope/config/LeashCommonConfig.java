@@ -113,7 +113,8 @@ public class LeashCommonConfig {
                     .defineListAllowEmpty(
                             List.of("defaultApplyEntityLocationOffset"),
                             List.of(
-                                    "vec3(0,-0.5,0) : [*]", "vec3(0,-0.42,0) : [minecraft:player]"
+                                    "vec3(0,-0.2,0) : [*]",
+                                    "vec3(0,-0.22,-0.2) : [minecraft:player]"
                             ),
                             o -> o instanceof String s && isValidOffsetRefFormat(s)
                     );
@@ -130,13 +131,14 @@ public class LeashCommonConfig {
                             " - #modid                : all entities from a mod (e.g. #minecraft)",
                             " - *                     : all entities",
                             "Multiple entries can be separated by commas",
-                            "Example: vec3(0,1.5,0) : [minecraft:player]",
+                            "Example: vec3(0,-0.5,0) : [minecraft:player]",
                             "Priority order: specific entity > tag > mod > *"
                     )
                     .defineListAllowEmpty(
                             List.of("defaultHolderLocationOffset"),
                             List.of(
-                                    "vec3(0,-0.5,0) : [*]"
+                                    "vec3(0,-0.2,0) : [*]",
+                                    "vec3(0,-0.6,0) : [minecraft:player]"
                             ),
                             o -> o instanceof String s && isValidOffsetRefFormat(s)
                     );

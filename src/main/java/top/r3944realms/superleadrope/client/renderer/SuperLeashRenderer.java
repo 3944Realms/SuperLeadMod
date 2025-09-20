@@ -47,9 +47,9 @@ public class SuperLeashRenderer {
         Matrix4f matrix = poseStack.last().pose();
 
         int blockLightStart = getBlockLight(BlockPos.containing(startWorld));
-        int blockLightEnd   = getBlockLight(BlockPos.containing(endWorld));
-        int skyLightStart   = getSkyLight(BlockPos.containing(startWorld));
-        int skyLightEnd     = getSkyLight(BlockPos.containing(endWorld));
+        int blockLightEnd   = getBlockLight(state.isFirstPerson() ? state.belowBlockPos() : (BlockPos.containing(endWorld)));
+        int skyLightStart   = 15; //getSkyLight(BlockPos.containing(startWorld));
+        int skyLightEnd     = 15; //getSkyLight(BlockPos.containing(endWorld));
 
         // 差向量 + 偏移
         Offsets offsets = computeOffsets(startWorld, endWorld);

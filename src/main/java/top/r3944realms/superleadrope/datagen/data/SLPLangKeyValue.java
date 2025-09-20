@@ -206,9 +206,9 @@ public enum SLPLangKeyValue {
     ),
     TELEPORT_WITH_LEASHED_ENTITIES_NAME(
             TeleportWithLeashedEntities.NAME_KEY, ModPartEnum.GAME_RULE,
-            "Teleport leashed player with player holder",
-            "被拴实体随玩家持有者传送",
-            "被拴实体随玩家持有者傳送",
+            "Teleport leashed player with holder",
+            "被拴实体随持有者传送",
+            "被拴实体随持有者傳送",
             "繫畜隨持者傳送"
     ),
     CREATE_SUPER_LEASH_KNOT_ENTITY_IF_ABSENT_NAME(

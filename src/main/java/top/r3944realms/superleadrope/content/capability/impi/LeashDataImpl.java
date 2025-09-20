@@ -38,6 +38,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.compat.CurtainCompat;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
@@ -489,7 +490,7 @@ public class LeashDataImpl implements ILeashData {
 
         if (hasForce) {
             // 处理玩家和其他实体
-            if (finalApplyEntity instanceof ServerPlayer player) {
+            if (finalApplyEntity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player)) {
                 RindingLeash.applyForceToPlayer(player, combinedForce);
             } else {
                 finalApplyEntity.setDeltaMovement(finalApplyEntity.getDeltaMovement().add(combinedForce));

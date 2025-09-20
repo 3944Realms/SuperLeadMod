@@ -21,11 +21,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import top.r3944realms.superleadrope.SuperLeadRope;
+import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.client.renderer.state.SuperLeashRenderState;
-import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
@@ -64,19 +62,19 @@ public class SuperLeashStateResolver {
         ILeashState.LeashState leashState = leashStateOpt.get();
 
         // 计算实体端偏移
-        Vec3 currentEntityOffset = getEntityLeashOffset(leashedEntity, leashState, partialTicks);
+        Vec3 currentEntityOffset = getEntityLeashOffset(leashedEntity, leashState);
 
         // 计算持有者端偏移
         Vec3 holderOffset = getHolderOffset(holder, leashState);
-
+        boolean isFirstPerson = Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
         // 获取插值后的位置
         Vec3 currentHolderPos;
         if (holder instanceof Player player) {
-             // 玩家手部偏移 + 旋转矩阵（第一人称/第三人称都适用）
-            if (Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON) {
+             // 玩家手部偏移 + 旋转矩阵（第一人称适用）
+            if (isFirstPerson && player == Minecraft.getInstance().player) {
                 currentHolderPos = getFirstPersonLeashPos(player, partialTicks);
             } else {
-                currentHolderPos = getEntityLeashHolderPos(player, holderOffset, partialTicks);
+                currentHolderPos = getEntityLeashHolderPos(player, (Minecraft.getInstance().player == holder) ? holderOffset : holderOffset.add(0,0,0.4), partialTicks);
             }
 
         } else if (holder instanceof SuperLeashKnotEntity) {
@@ -85,8 +83,7 @@ public class SuperLeashStateResolver {
             // 普通实体，偏移 + 插值 + 旋转
             currentHolderPos = getEntityLeashHolderPos(holder, holderOffset, partialTicks);
         }
-        Vec3 currentEntityPos = getInterpolatedPosition(leashedEntity, partialTicks)
-                .add(currentEntityOffset);
+        Vec3 currentEntityPos = applyOffsetWithRotation(leashedEntity, currentEntityOffset, partialTicks);
 
         // 上一帧缓存
         FrameCache cache = frameCacheMap.get(leashedEntity.getUUID());
@@ -123,42 +120,21 @@ public class SuperLeashStateResolver {
                 selectColor(tension, isCritical),
                 THICKNESS_BASE + tension * THICKNESS_TENSION,
                 swing.angle(), swing.speed(),
-                (float) leashInfo.maxDistance()
+                (float) leashInfo.maxDistance(),
+                isFirstPerson, holder.blockPosition()
+
+
         ));
     }
 
     /* ------------------------ 实体偏移计算 ------------------------ */
-    private static Vec3 getEntityLeashOffset(Entity entity, ILeashState.LeashState leashState, float partialTicks) {
-        // 获取实体自身的 LeashState 偏移
+    private static @NotNull Vec3 getEntityLeashOffset(Entity entity, ILeashState.@NotNull LeashState leashState) {
         Optional<ILeashState> entityStateOpt = LeashStateAPI.getLeashState(entity);
         Vec3 baseOffset = entityStateOpt
                 .map(eState -> eState.getLeashApplyEntityLocationOffset()
                         .orElse(eState.getDefaultLeashApplyEntityLocationOffset()))
                 .orElse(Vec3.ZERO);
-
-        // 加上单条绳子的额外偏移
-        baseOffset = baseOffset.add(leashState.applyEntityLocationOffset());
-
-        // 获取旋转角度
-        float pitch = Mth.lerp(partialTicks, entity.getXRot(), entity.xRotO) * ((float)Math.PI / 180F);
-        float yaw   = Mth.lerp(partialTicks, entity.getYRot(), entity.yRotO) * ((float)Math.PI / 180F);
-        float roll  = 0f;
-
-        // 玩家特殊处理：飞行/旋转攻击可能需要 roll
-        if (entity instanceof Player player && (player.isFallFlying() || player.isAutoSpinAttack())) {
-            Vec3 view = player.getViewVector(partialTicks);
-            Vec3 motion = player.getDeltaMovement();
-            double motionLenSq = motion.horizontalDistanceSqr();
-            double viewLenSq = view.horizontalDistanceSqr();
-            if (motionLenSq > 0 && viewLenSq > 0) {
-                double dot = (motion.x * view.x + motion.z * view.z) / Math.sqrt(motionLenSq * viewLenSq);
-                double cross = motion.x * view.z - motion.z * view.x;
-                roll = (float)(Math.signum(cross) * Math.acos(dot));
-            }
-        }
-
-        // 将偏移从局部坐标转换到世界坐标
-        return baseOffset.xRot(-pitch).yRot(-yaw).zRot(-roll);
+        return baseOffset.add(leashState.applyEntityLocationOffset());
     }
     private static Vec3 getHolderOffset(Entity holder, ILeashState.LeashState leashState) {
         if (LeashStateAPI.Query.hasLeashState(holder)) {
@@ -172,92 +148,89 @@ public class SuperLeashStateResolver {
         return Optional.ofNullable(leashState.holderLocationOffset())
                 .orElse(leashState.defaultHolderLocationOffset());
     }
-    private static boolean holderHasLeashState(Entity holder) {
-        if (LeashStateAPI.Query.hasLeashState(holder)) {
-            Optional<ILeashState> holderStateOpt = LeashStateAPI.getLeashState(holder);
-            return holderStateOpt.isPresent();
+    /**
+     * 将局部偏移向量应用到实体旋转，返回世界坐标位置
+     * @param entity 实体
+     * @param localOffset 局部偏移（相对于实体局部坐标系）
+     * @param partialTicks 插值参数
+     * @return 偏移旋转后的世界坐标位置
+     */
+    public static @NotNull Vec3 applyOffsetWithRotation(Entity entity, Vec3 localOffset, float partialTicks) {
+        // 实体中心位置
+        Vec3 centerPos = getInterpolatedPosition(entity, partialTicks);
+
+        // 旋转角度
+//        float pitch = Mth.lerp(partialTicks, entity.getXRot(), entity.xRotO) * ((float)Math.PI / 180F);
+        float yaw   = Mth.lerp(partialTicks, entity.getYRot(), entity.yRotO) * ((float)Math.PI / 180F);
+        float roll  = 0f;
+
+        if (entity instanceof Player player && (player.isFallFlying() || player.isAutoSpinAttack())) {
+            roll = getRoll(player, partialTicks, roll);
         }
-        return false;
+
+        // 应用旋转到局部偏移
+        Vec3 rotatedOffset = localOffset.yRot(-yaw).zRot(-roll);
+
+        // 返回世界坐标
+        return centerPos.add(rotatedOffset);
     }
     /**
      * 获取玩家挂点位置，支持旋转偏移
      */
-    private static Vec3 getFirstPersonLeashPos(Player player, float partialTicks) {
+    private static @NotNull Vec3 getFirstPersonLeashPos(@NotNull Player player, float partialTicks) {
         // 插值旋转角度
         float yaw = Mth.lerp(partialTicks, player.yRotO, player.getYRot()) * ((float)Math.PI / 180F);
-        float pitch = Mth.lerp(partialTicks, player.xRotO, player.getXRot()) * ((float)Math.PI / 180F);
+//        float pitch = Mth.lerp(partialTicks, player.xRotO, player.getXRot()) * ((float)Math.PI / 180F);
         float roll = 0f;
 
         // 计算 roll（飞行或旋转攻击时）
         if (player.isFallFlying() || player.isAutoSpinAttack()) {
-            Vec3 view = player.getViewVector(partialTicks);
-            Vec3 motion = player.getDeltaMovement();
-            double motionLenSq = motion.horizontalDistanceSqr();
-            double viewLenSq = view.horizontalDistanceSqr();
-            if (motionLenSq > 0 && viewLenSq > 0) {
-                double dot = (motion.x*view.x + motion.z*view.z) / Math.sqrt(motionLenSq*viewLenSq);
-                double cross = motion.x*view.z - motion.z*view.x;
-                roll = (float)(Math.signum(cross) * Math.acos(dot));
-            }
+            roll = getRoll(player, partialTicks, roll);
         }
 
         // 手部偏移
         double side = player.getMainArm() == HumanoidArm.RIGHT ? -1.0D : 1.0D;
-        Vec3 localPos = new Vec3(0.39D * side, -0.6D, 0.3D);
+        Vec3 localPos = new Vec3(0.39D * side, -0.6D, -0.5D);
 
         // 局部坐标旋转到世界坐标
-        Vec3 rotatedPos = localPos.xRot(-pitch).yRot(-yaw).zRot(-roll);
+        Vec3 rotatedPos = localPos.yRot(-yaw).zRot(-roll);
 
         // 返回世界坐标（玩家眼睛位置 + 手部旋转偏移）
         return player.getEyePosition(partialTicks).add(rotatedPos);
     }
+
+    private static float getRoll(@NotNull Player player, float partialTicks, float roll) {
+        Vec3 view = player.getViewVector(partialTicks);
+        Vec3 motion = player.getDeltaMovement();
+        double motionLenSq = motion.horizontalDistanceSqr();
+        double viewLenSq = view.horizontalDistanceSqr();
+        if (motionLenSq > 0 && viewLenSq > 0) {
+            double dot = (motion.x*view.x + motion.z*view.z) / Math.sqrt(motionLenSq*viewLenSq);
+            double cross = motion.x*view.z - motion.z*view.x;
+            roll = (float)(Math.signum(cross) * Math.acos(dot));
+        }
+        return roll;
+    }
+
     /**
      * 获取实体挂点位置，支持旋转偏移
      */
     public static Vec3 getEntityLeashHolderPos(Entity entity, Vec3 baseOffset, float partialTicks) {
+        // 从眼睛位置（头部）开始
+        Vec3 pos = entity.getEyePosition(partialTicks);
 
-        Vec3 pos = entity.getPosition(partialTicks);
         double xOffset = baseOffset.x();
         double yOffset = baseOffset.y();
         double zOffset = baseOffset.z();
 
-        float pitch = Mth.lerp(partialTicks, entity.getXRot(), entity.xRotO) * ((float)Math.PI / 180F);
         float yaw = Mth.lerp(partialTicks, entity.getYRot(), entity.yRotO) * ((float)Math.PI / 180F);
-
         if (entity instanceof Player player) {
-            xOffset *= player.getMainArm() == HumanoidArm.RIGHT ? -1.0D : 1.0D;
-
-            if (!player.isFallFlying() && !player.isAutoSpinAttack()) {
-                if (player.isVisuallySwimming()) {
-                    pos = pos.add(new Vec3(xOffset, 0.2D, -0.15D).xRot(-pitch).yRot(-yaw));
-                } else {
-                    double yBase = player.getBoundingBox().getYsize() - 1.0D;
-                    double yAdjust = player.isCrouching() ? -0.2D : 0.07D;
-                    pos = pos.add(new Vec3(xOffset, yBase, yAdjust).yRot(-yaw));
-                }
-            } else {
-                Vec3 view = player.getViewVector(partialTicks);
-                Vec3 motion = player.getDeltaMovement();
-                float roll = computeRoll(view, motion);
-                pos = pos.add(new Vec3(xOffset, -0.11D, 0.85D).zRot(-roll).xRot(-pitch).yRot(-yaw));
-            }
-        } else {
-            double yBase = entity.getBbHeight() * 0.5 + yOffset;
-            pos = pos.add(new Vec3(xOffset, yBase, zOffset).yRot(-yaw).xRot(-pitch));
+           xOffset += 0.19D * (player.getMainArm() == HumanoidArm.RIGHT ? -1.0D : 1.0D);
         }
+        // 直接在头部位置应用偏移（不管手、飞行、游泳）
+        pos = pos.add(new Vec3(xOffset, yOffset, zOffset).yRot(-yaw));
 
         return pos;
-    }
-
-    private static float computeRoll(Vec3 view, Vec3 motion) {
-        double d1 = motion.horizontalDistanceSqr();
-        double d2 = view.horizontalDistanceSqr();
-        if (d1 > 0.0 && d2 > 0.0) {
-            double dot = (motion.x * view.x + motion.z * view.z) / Math.sqrt(d1 * d2);
-            double cross = motion.x * view.z - motion.z * view.x;
-            return (float)(Math.signum(cross) * Math.acos(dot));
-        }
-        return 0.0F;
     }
 
     private static Vec3 getInterpolatedPosition(Entity entity, float partialTicks) {
@@ -276,13 +249,13 @@ public class SuperLeashStateResolver {
 
         Vec3 cross = lastDir.cross(currentDir);
         float angleChange = (float) Math.acos(Math.min(1.0, lastDir.dot(currentDir)));
-        angleChange *= Math.signum(cross.y);
+        angleChange *= (float) Math.signum(cross.y);
 
         float newSpeed = lastSpeed * 0.9f + angleChange * 0.5f * tension;
         float newAngle = lastAngle + newSpeed;
 
         if (tension > 0.3f) {
-            newSpeed += (Math.random() - 0.5) * 0.05 * tension;
+            newSpeed += (float) ((Math.random() - 0.5) * 0.05 * tension);
         }
 
         return new SwingDynamics(newAngle, newSpeed);
@@ -301,27 +274,4 @@ public class SuperLeashStateResolver {
         return tension > 0.7f ? SuperLeashRenderState.COLOR_TENSION : SuperLeashRenderState.COLOR_NORMAL;
     }
 
-    /* ------------------------ 批量解析 ------------------------ */
-
-    public static List<SuperLeashRenderState> resolveAll(Entity leashedEntity,
-                                                         LeashDataImpl leashData, float partialTicks) {
-
-        List<SuperLeashRenderState> states = new ArrayList<>();
-        Level level = leashedEntity.level();
-
-        for (ILeashData.LeashInfo leashInfo : leashData.getAllLeashes()) {
-            Entity holder = null;
-            if (leashInfo.blockPosOpt().isEmpty() && leashInfo.holderIdOpt().isPresent()){
-                holder = level.getEntity(leashInfo.holderIdOpt().get());
-            } else if (leashInfo.blockPosOpt().isPresent()) {
-                holder = SuperLeashKnotEntity.getOrCreateKnot(level, leashInfo.blockPosOpt().get());
-            }
-            if (holder != null) {
-                resolve(holder, leashedEntity, leashInfo, partialTicks)
-                        .ifPresent(states::add);
-            } else SuperLeadRope.logger.error("Holder not found for leash of " + leashedEntity);
-        }
-
-        return states;
-    }
 }

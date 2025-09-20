@@ -337,7 +337,7 @@ public class LeashStateImpl implements ILeashState {
     @Override
     public void copy(ILeashState other, Entity newEntity) {
         this.entity = newEntity;
-        this.defaultApplyEntityLocationOffset = other.getDefaultLeashApplyEntityLocationOffset();
+        this.defaultApplyEntityLocationOffset = CommonEventHandler.leashConfigManager.getDefaultEntityOffset(newEntity);
         this.staticApplyEntityLocationOffset = other.getLeashApplyEntityLocationOffset().orElse(null);
     }
 

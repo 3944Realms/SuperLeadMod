@@ -24,7 +24,7 @@ public class SLPGamerules {
     public static final SLPGameruleRegistry GAMERULE_REGISTRY = SLPGameruleRegistry.INSTANCE;
     public static final HashMap<String, Boolean> gamerulesBooleanValuesClient = new HashMap<>();
     public static final HashMap<String, Integer> gameruleIntegerValuesClient = new HashMap<>();
-    public static final String RULE_KEY_PERFiX_ = "gamerule." + GAMERULE_PREFIX.toLowerCase();
+    public static final String RULE_KEY_PERFiX_ = "gamerule." + GAMERULE_PREFIX;
     public static String getDescriptionKey(Class<?> gameRuleClass) {
         return RULE_KEY_PERFiX_ + gameRuleClass.getSimpleName() + ".description";
     }

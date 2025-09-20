@@ -19,6 +19,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import top.r3944realms.superleadrope.content.gamerule.SLPGamerules;
+import top.r3944realms.superleadrope.content.gamerule.server.CreateSuperLeashKnotEntityIfAbsent;
 import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
 
 import java.util.HashMap;
@@ -63,7 +64,7 @@ public enum SLPGameruleRegistry {
         gameruleDataTypes.put(gameruleName, RuleDataType.BOOLEAN);
     }
     public void registerGamerule(String gameruleName, GameRules.Category category, int pDefault) {
-        registerGamerule(gameruleName, category, pDefault, (BiConsumer<MinecraftServer, GameRules.IntegerValue>) (s, i)->{});//最后一个仅占位无用
+        registerGamerule(gameruleName, category, pDefault, (s, i)->{});//最后一个仅占位无用
     }
     public void registerGamerule(String gameruleName, GameRules.Category category, int pDefault, BiConsumer<MinecraftServer, GameRules.IntegerValue> pChangeListener) {
         gamerules.put(gameruleName, GameRules.register(gameruleName, category, GameRules.IntegerValue.create(pDefault, pChangeListener)));
@@ -71,6 +72,7 @@ public enum SLPGameruleRegistry {
     }
     public static void register() {
         TeleportWithLeashedEntities.register();
+        CreateSuperLeashKnotEntityIfAbsent.register();
     }
 
 }

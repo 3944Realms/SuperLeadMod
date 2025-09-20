@@ -15,6 +15,7 @@
 
 package top.r3944realms.superleadrope.client.renderer.state;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
 public record SuperLeashRenderState(
@@ -30,7 +31,9 @@ public record SuperLeashRenderState(
         float thickness,      // 线宽(根据张力变化)
         float swingAngle,     // 当前摆动角度(弧度)
         float swingSpeed,      // 摆动速度(弧度/tick)
-        float maxDistance      // 最大距离
+        float maxDistance,      // 最大距离
+        boolean isFirstPerson,        // 是否是第一人称
+        BlockPos belowBlockPos     // 持有者位置
 ) {
     // 预定义颜色常量
     public static final int COLOR_NORMAL = 0xFF6B4E2E; // 深棕色（木绳色，温暖自然）

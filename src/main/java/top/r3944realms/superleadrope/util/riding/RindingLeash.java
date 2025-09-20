@@ -17,6 +17,7 @@ package top.r3944realms.superleadrope.util.riding;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.phys.Vec3;
@@ -90,13 +91,31 @@ public class RindingLeash {
     /**
      * 给玩家应用拴绳力前的发包处理
      */
-    public static void applyForceToPlayer(ServerPlayer player, Vec3 force) {
+    public static void applyForceToPlayer(ServerPlayer player, Vec3 leashVec, double k, double dampingFactor, double maxForce) {
+        Vec3 velocity = player.getDeltaMovement();
+
+        // 弹簧力
+        Vec3 springForce = leashVec.scale(k);
+
+        // 阻尼力
+        Vec3 dampingForce = velocity.scale(-dampingFactor);
+
+        // 合力
+        Vec3 finalForce = springForce.add(dampingForce);
+
+        // 限幅
+        if (finalForce.length() > maxForce) {
+            finalForce = finalForce.normalize().scale(maxForce);
+        }
+
+        // 发包应用给玩家
         NetworkHandler.sendToPlayer(
                 new UpdatePlayerMovementPacket(
                         UpdatePlayerMovementPacket.Operation.ADD,
-                        force
+                        finalForce
                 ), player
         );
     }
+
 
 }

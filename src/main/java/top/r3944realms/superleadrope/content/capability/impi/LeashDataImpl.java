@@ -27,8 +27,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
@@ -466,7 +466,7 @@ public class LeashDataImpl implements ILeashData {
         Vec3 combinedDirection = Vec3.ZERO;
         int validLeashes = 0;
 
-        // 计算所有拴绳的合力和平均方向
+        // 1. 计算所有拴绳的合力和平均方向
         for (Map.Entry<UUID, LeashInfo> entry : leashHolders.entrySet()) {
             Vec3 force = calculateLeashForceForUUID(entry);
             if (force != null) {
@@ -486,31 +486,40 @@ public class LeashDataImpl implements ILeashData {
         }
 
         boolean hasForce = !combinedForce.equals(Vec3.ZERO);
-        Entity finalApplyEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
+        Entity targetEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
 
-        if (hasForce) {
-            // 处理玩家和其他实体
-            if (finalApplyEntity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player)) {
-                RindingLeash.applyForceToPlayer(player, combinedForce);
+        if (targetEntity != null && hasForce) {
+            // 玩家与普通实体统一力应用
+            if (targetEntity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player)) {
+                RindingLeash.applyForceToPlayer(
+                        player,
+                        combinedForce,
+                        CommonEventHandler.leashConfigManager.getPlayerSpringFactor(),
+                        0.0, // 阻力取消
+                        CommonEventHandler.leashConfigManager.getMaxForce()
+                );
             } else {
-                finalApplyEntity.setDeltaMovement(finalApplyEntity.getDeltaMovement().add(combinedForce));
-                finalApplyEntity.hurtMarked = true;
-
-                // 对生物使用合力方向进行移动（只有在能够移动时才执行）
-                if (finalApplyEntity instanceof Mob mob && validLeashes > 0 && canMobMove(mob)) {
-                    moveMobTowardsCombinedDirection(mob, combinedDirection, validLeashes, combinedForce.length());
-                } else if (finalApplyEntity instanceof Mob mob) {
-                    // 无法移动时停止导航
-                    mob.getNavigation().stop();
-                }
+                applyForceToNonPlayerEntity(targetEntity, combinedForce, validLeashes, combinedDirection);
             }
+        }
 
-            RindingLeash.protectAnimalMovement(finalApplyEntity, true);
-        } else {
-            RindingLeash.protectAnimalMovement(finalApplyEntity, false);
+        // 保护动物移动
+        RindingLeash.protectAnimalMovement(targetEntity, hasForce);
+    }
+    /**
+     * 给非玩家实体施加拴绳力（取消阻力）
+     */
+    private void applyForceToNonPlayerEntity(Entity entity, Vec3 combinedForce,
+                                             int validLeashes, Vec3 combinedDirection) {
+        // 直接施加合力，不再加阻力
+        entity.setDeltaMovement(entity.getDeltaMovement().add(combinedForce));
+        entity.hurtMarked = true;
 
-            // 没有力时也停止导航
-            if (finalApplyEntity instanceof Mob mob) {
+        // 如果是生物，处理导航
+        if (entity instanceof Mob mob) {
+            if (validLeashes > 0 && canMobMove(mob)) {
+                moveMobTowardsCombinedDirection(mob, combinedDirection, validLeashes, combinedForce.length());
+            } else {
                 mob.getNavigation().stop();
             }
         }
@@ -534,10 +543,7 @@ public class LeashDataImpl implements ILeashData {
      * 让生物朝着合力方向移动
      */
     private void moveMobTowardsCombinedDirection(Mob mob, Vec3 combinedDirection, int leashCount, double forceMagnitude) {
-        if (combinedDirection.equals(Vec3.ZERO)) return;
-
-        // 再次检查是否能够移动
-        if (!canMobMove(mob)) {
+        if (combinedDirection.equals(Vec3.ZERO) || !canMobMove(mob)) {
             mob.getNavigation().stop();
             return;
         }
@@ -569,11 +575,7 @@ public class LeashDataImpl implements ILeashData {
      */
     private boolean isPositionReachable(Mob mob, Vec3 targetPos) {
         // 简单的距离检查
-        double distance = mob.position().distanceTo(targetPos);
-        if (distance > 20.0) { // 距离太远
-            return false;
-        }
-
+        if (mob.position().distanceTo(targetPos) > 20.0) return false;// 距离太远
         // 检查是否有导航路径
         Path path = mob.getNavigation().createPath(targetPos.x, targetPos.y, targetPos.z, 0);
         return path != null && !path.isDone();
@@ -626,7 +628,7 @@ public class LeashDataImpl implements ILeashData {
         LeashInfo info = entry.getValue();
         Vec3 entityPos = entity.position();
         double distance = holderPos.distanceTo(entityPos);
-        double extremeSnapDist = info.maxDistance() * CommonEventHandler.leashConfigManager.getExtremeSnapFactor();
+        double extremeSnapDist = CommonEventHandler.leashConfigManager.getBreakDistance();
 
         // 1. 检查是否超出断裂距离
         if (distance > extremeSnapDist) {
@@ -841,7 +843,7 @@ public class LeashDataImpl implements ILeashData {
     //只能系在这些实体上，在这里，其它情况一律忽略
     //TODO: 标签支持控制
     public static boolean isLeashable(Entity entity) {
-        return entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart;
+        return entity instanceof LivingEntity || entity instanceof Boat || entity instanceof AbstractMinecart;
     }
 
 

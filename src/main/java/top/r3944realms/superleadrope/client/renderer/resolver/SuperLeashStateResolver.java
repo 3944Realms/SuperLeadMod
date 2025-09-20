@@ -167,9 +167,13 @@ public class SuperLeashStateResolver {
         if (entity instanceof Player player && (player.isFallFlying() || player.isAutoSpinAttack())) {
             roll = getRoll(player, partialTicks, roll);
         }
-
+        boolean isFirstPerson = Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
         // 应用旋转到局部偏移
-        Vec3 rotatedOffset = localOffset.yRot(-yaw).zRot(-roll);
+        Vec3 rotatedOffset = localOffset;
+        if (!isFirstPerson && entity instanceof Player)  {
+            rotatedOffset = rotatedOffset.add(0,0,0.2);
+        }
+        rotatedOffset = rotatedOffset.yRot(-yaw).zRot(-roll);
 
         // 返回世界坐标
         return centerPos.add(rotatedOffset);

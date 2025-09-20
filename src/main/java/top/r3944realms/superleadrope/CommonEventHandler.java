@@ -96,7 +96,7 @@ public class CommonEventHandler {
         public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) return;
-            if (entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart) {
+            if (LeashDataImpl.isLeashable(entity)) {
                 LeashDataAPI.getLeashData(entity).ifPresent(LeashSyncManager.Data::track);
                 LeashStateAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::track);
                 if (entity instanceof ServerPlayer serverPlayer) {
@@ -113,7 +113,7 @@ public class CommonEventHandler {
         public static void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) return;
-            if (entity instanceof LivingEntity || entity instanceof Boat || entity instanceof Minecart) {
+            if (LeashDataImpl.isLeashable(entity)) {
                 if (entity instanceof ServerPlayer serverPlayer) {
                     LeashSyncManager.Data.forEach(i -> {
                         if(i.isLeashedBy(serverPlayer)) {

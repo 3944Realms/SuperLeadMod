@@ -21,7 +21,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.function.Supplier;
 
@@ -42,7 +42,7 @@ public record LeashDataSyncPacket(int entityId, CompoundTag leashData) {
             if (level != null) {
                 Entity entity = level.getEntity(msg.entityId);
                 if (entity != null) {
-                    LeashDataAPI.getLeashData(entity).ifPresent(cap -> {
+                    LeashDataInnerAPI.getLeashData(entity).ifPresent(cap -> {
                         // 只在数据确实变化时更新
                         CompoundTag current = cap.serializeNBT();
                         if (!current.equals(msg.leashData)) {

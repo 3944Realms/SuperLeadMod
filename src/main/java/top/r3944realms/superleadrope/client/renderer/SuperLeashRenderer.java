@@ -108,7 +108,7 @@ public class SuperLeashRenderer {
     // 颜色渐变
     private static float[] computeColor(SuperLeashRenderState state, int index, boolean reversePass) {
         float distance = (float) state.startPos().distanceTo(state.endPos());
-        float ratio = Mth.clamp(distance / (state.maxDistance() * 2f), 0f, 1f);
+        float ratio = (float) Mth.clamp(distance / (state.maxDistance() * 2f), 0f, 1f);
 
         // 定义颜色
         float rStart = 0.42f; // 深棕 R
@@ -154,11 +154,11 @@ public class SuperLeashRenderer {
         return mc.level.getBrightness(LightLayer.BLOCK, pos);
     }
 
-    private static int getSkyLight(BlockPos pos) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return 15; // 默认亮度，防止空指针
-        return mc.level.getBrightness(LightLayer.SKY, pos);
-    }
+//    private static int getSkyLight(BlockPos pos) {
+//        Minecraft mc = Minecraft.getInstance();
+//        if (mc.level == null) return 15; // 默认亮度，防止空指针
+//        return mc.level.getBrightness(LightLayer.SKY, pos);
+//    }
 
     /** 横纵偏移数据 */
     private static class Offsets {

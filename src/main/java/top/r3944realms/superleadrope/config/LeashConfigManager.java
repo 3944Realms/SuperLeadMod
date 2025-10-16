@@ -51,7 +51,7 @@ public class LeashConfigManager {
     private volatile double mobSpringFactor = 0.5;
 
     private volatile double maxLeashLength = 12.0;
-    private volatile double elasticDistance = 6.0;
+    private volatile double elasticDistanceScale = 1.0;
     private volatile double extremeSnapFactor = 2.0;
     private volatile double springDampening = 0.7;
     private volatile List<Double> axisElasticity = List.of(0.8, 0.2, 0.8);
@@ -186,9 +186,8 @@ public class LeashConfigManager {
     public double getMobSpringFactor() { return mobSpringFactor; }
 
     public double getMaxLeashLength() { return maxLeashLength; }
-    public double getElasticDistance() { return elasticDistance; }
+    public double getElasticDistanceScale() { return elasticDistanceScale; }
     public double getExtremeSnapFactor() { return extremeSnapFactor; }
-    public double getBreakDistance() { return maxLeashLength * extremeSnapFactor; }
     public double getSpringDampening() { return springDampening; }
     public List<Double> getAxisElasticity() { return Collections.unmodifiableList(axisElasticity); }
     public double getXElasticity() { return !axisElasticity.isEmpty() ? axisElasticity.get(0) : 0.8; }
@@ -209,7 +208,7 @@ public class LeashConfigManager {
         commandPrefixEnabledCache = LeashCommonConfig.COMMON.enableSLPModCommandPrefix.get();
 
         maxLeashLength = LeashCommonConfig.COMMON.maxLeashLength.get();
-        elasticDistance = LeashCommonConfig.COMMON.elasticDistance.get();
+        elasticDistanceScale = LeashCommonConfig.COMMON.elasticDistanceScale.get();
         extremeSnapFactor = LeashCommonConfig.COMMON.extremeSnapFactor.get();
         springDampening = LeashCommonConfig.COMMON.springDampening.get();
         axisElasticity = new ArrayList<>(LeashCommonConfig.COMMON.axisSpecificElasticity.get());

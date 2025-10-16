@@ -26,9 +26,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
+import top.r3944realms.superleadrope.api.SLPCapability;
 import top.r3944realms.superleadrope.content.capability.impi.LeashStateImpl;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 
 public class LeashStateProvider implements ICapabilitySerializable<CompoundTag> {
     public static final ResourceLocation LEASH_STATE_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_state");
@@ -40,7 +40,7 @@ public class LeashStateProvider implements ICapabilitySerializable<CompoundTag> 
     }
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        return CapabilityHandler.LEASH_STATE_CAP.orEmpty(cap, optional);
+        return SLPCapability.LEASH_STATE_CAP.orEmpty(cap, optional);
     }
 
     @Override

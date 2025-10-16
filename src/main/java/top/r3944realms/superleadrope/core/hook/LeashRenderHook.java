@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,7 +28,7 @@ public class LeashRenderHook {
     public static boolean shouldRenderExtra(Mob mob, Frustum camera) {
         SuperLeadRope.logger.debug("[SuperLeash] Checking entity: {} at position: {}, {}, {}", mob.getName().getString(), mob.getX(), mob.getY(), mob.getZ());
         AtomicBoolean flag = new AtomicBoolean(false);
-        LeashDataAPI.getLeashData(mob).ifPresent(i -> {
+        LeashDataInnerAPI.getLeashData(mob).ifPresent(i -> {
             i.getAllLeashes().forEach(j -> {
                 Optional<Integer> i1 = j.holderIdOpt();
                 if (i1.isPresent()) {

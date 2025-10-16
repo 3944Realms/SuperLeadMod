@@ -18,7 +18,7 @@ package top.r3944realms.superleadrope.content.capability;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import top.r3944realms.superleadrope.util.capability.LeashStateAPI;
+import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 
 public class CapabilityRemainder {
     public static void onPlayerClone(PlayerEvent.Clone event) {
@@ -26,9 +26,9 @@ public class CapabilityRemainder {
         if(newEntity instanceof ServerPlayer newPlayer) {
             Player original = event.getOriginal();
             original.reviveCaps();
-            LeashStateAPI.getLeashState(original)
+            LeashStateInnerAPI.getLeashState(original)
                     .ifPresent(oldCap ->
-                            LeashStateAPI.getLeashState(newPlayer)
+                            LeashStateInnerAPI.getLeashState(newPlayer)
                                     .ifPresent(newData ->
                                             newData.copy(oldCap, newEntity)
                                     )

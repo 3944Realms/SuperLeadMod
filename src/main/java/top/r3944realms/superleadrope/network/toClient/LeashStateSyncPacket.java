@@ -21,7 +21,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
+import top.r3944realms.superleadrope.api.SLPCapability;
 
 import java.util.function.Supplier;
 
@@ -41,7 +41,7 @@ public record LeashStateSyncPacket(int entityId, CompoundTag leashState) {
             if (level != null) {
                 Entity entity = level.getEntity(msg.entityId);
                 if (entity != null) {
-                    entity.getCapability(CapabilityHandler.LEASH_STATE_CAP).ifPresent(cap -> {
+                    entity.getCapability(SLPCapability.LEASH_STATE_CAP).ifPresent(cap -> {
                         // 只在数据确实变化时更新
                         CompoundTag current = cap.serializeNBT();
                         if (!current.equals(msg.leashState)) {

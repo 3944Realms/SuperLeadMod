@@ -16,14 +16,16 @@
 package top.r3944realms.superleadrope.content.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.*;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.*;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
@@ -33,11 +35,11 @@ import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.content.gamerule.server.CreateSuperLeashKnotEntityIfAbsent;
 import top.r3944realms.superleadrope.core.register.SLPGameruleRegistry;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +47,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static top.r3944realms.superleadrope.content.command.Command.*;
-import static top.r3944realms.superleadrope.content.command.Command.SHOULD_USE_PREFIX;
 public class LeashDataCommand {
     public static final String SLP_LEASH_MESSAGE_ = SuperLeadRope.MOD_ID + ".command.leash.message.";
     public static final String LEASH_DATA_GET_ = SLP_LEASH_MESSAGE_ + ".get.",
@@ -67,19 +68,19 @@ public class LeashDataCommand {
                 .then(Commands.argument("maxDistance", DoubleArgumentType.doubleArg(1.0, 256.0))
                         .executes(context -> addLeash(context,
                                 DoubleArgumentType.getDouble(context, "maxDistance")))
-                        .then(Commands.argument("elasticDistance", DoubleArgumentType.doubleArg(1.0, 128.0))
+                        .then(Commands.argument("elasticDistanceScale", DoubleArgumentType.doubleArg(1.0, 128.0))
                                 .executes(context -> addLeash(context,
                                         DoubleArgumentType.getDouble(context, "maxDistance"),
-                                        DoubleArgumentType.getDouble(context, "elasticDistance")))
+                                        DoubleArgumentType.getDouble(context, "elasticDistanceScale")))
                                 .then(Commands.argument("keepTicks", IntegerArgumentType.integer(0))
                                         .executes(context -> addLeash(context,
                                                 DoubleArgumentType.getDouble(context, "maxDistance"),
-                                                DoubleArgumentType.getDouble(context, "elasticDistance"),
+                                                DoubleArgumentType.getDouble(context, "elasticDistanceScale"),
                                                 IntegerArgumentType.getInteger(context, "keepTicks")))
                                         .then(Commands.argument("reserved", StringArgumentType.string())
                                                 .executes(context -> addLeash(context,
                                                         DoubleArgumentType.getDouble(context, "maxDistance"),
-                                                        DoubleArgumentType.getDouble(context, "elasticDistance"),
+                                                        DoubleArgumentType.getDouble(context, "elasticDistanceScale"),
                                                         IntegerArgumentType.getInteger(context, "keepTicks"),
                                                         StringArgumentType.getString(context, "reserved")))
                                         )
@@ -92,19 +93,19 @@ public class LeashDataCommand {
                         .then(Commands.argument("maxDistance", DoubleArgumentType.doubleArg(1.0, 256.0))
                                 .executes(context -> addBlockLeash(context,
                                         DoubleArgumentType.getDouble(context, "maxDistance")))
-                                .then(Commands.argument("elasticDistance", DoubleArgumentType.doubleArg(1.0, 128.0))
+                                .then(Commands.argument("elasticDistanceScale", DoubleArgumentType.doubleArg(1.0, 128.0))
                                         .executes(context -> addBlockLeash(context,
                                                 DoubleArgumentType.getDouble(context, "maxDistance"),
-                                                DoubleArgumentType.getDouble(context, "elasticDistance"), 0, ""))
+                                                DoubleArgumentType.getDouble(context, "elasticDistanceScale"), 0, ""))
                                         .then(Commands.argument("keepTicks", IntegerArgumentType.integer(0))
                                                 .executes(context -> addBlockLeash(context,
                                                         DoubleArgumentType.getDouble(context, "maxDistance"),
-                                                        DoubleArgumentType.getDouble(context, "elasticDistance"),
+                                                        DoubleArgumentType.getDouble(context, "elasticDistanceScale"),
                                                         IntegerArgumentType.getInteger(context, "keepTicks")))
                                                 .then(Commands.argument("reserved", StringArgumentType.string())
                                                         .executes(context -> addBlockLeash(context,
                                                                 DoubleArgumentType.getDouble(context, "maxDistance"),
-                                                                DoubleArgumentType.getDouble(context, "elasticDistance"),
+                                                                DoubleArgumentType.getDouble(context, "elasticDistanceScale"),
                                                                 IntegerArgumentType.getInteger(context, "keepTicks"),
                                                                 StringArgumentType.getString(context, "reserved")))
                                                 )
@@ -189,7 +190,7 @@ public class LeashDataCommand {
                 )
 
                 // 设置弹性距离
-                .then(Commands.literal("elasticDistance")
+                .then(Commands.literal("elasticDistanceScale")
                         .then(Commands.argument("distance", DoubleArgumentType.doubleArg(1.0, 128.0))
                                 .executes(context -> setElasticDistance(context, 0, ""))
                                 .then(Commands.argument("keepTicks", IntegerArgumentType.integer(0))
@@ -222,7 +223,7 @@ public class LeashDataCommand {
                         )
 
                         // 设置弹性距离
-                        .then(Commands.literal("elasticDistance")
+                        .then(Commands.literal("elasticDistanceScale")
                                 .then(Commands.argument("distance", DoubleArgumentType.doubleArg(1.0, 128.0))
                                         .executes(LeashDataCommand::setBlockElasticDistance)
                                         .then(Commands.argument("keepTicks", IntegerArgumentType.integer(0))
@@ -350,18 +351,18 @@ public class LeashDataCommand {
         CommandSourceStack source = context.getSource();
 
         for (Entity target : targets) {
-            Collection<ILeashData.LeashInfo> leashes = LeashDataAPI.QueryOperations.getAllLeashes(target);
+            Collection<LeashInfo> leashes = LeashDataInnerAPI.QueryOperations.getAllLeashes(target);
             // +++
 
             source.sendSuccess(() -> Component.literal("=== Leash Data for " + target.getName().getString() + " ==="), false);
             source.sendSuccess(() -> Component.literal("Total leashes: " + leashes.size()), false);
             // TODO:翻译支持 HoverTip实现部分信息简化显示
-            for (ILeashData.LeashInfo leash : leashes) {
+            for (LeashInfo leash : leashes) {
                 StringBuilder info = new StringBuilder();
                 leash.blockPosOpt().ifPresent(pos -> info.append("Block: ").append(pos.toShortString()).append(" "));
                 leash.holderUUIDOpt().ifPresent(uuid -> info.append("UUID: ").append(uuid).append(" "));
                 info.append("Max: ").append(leash.maxDistance()).append(" ");
-                info.append("Elastic: ").append(leash.elasticDistance()).append(" ");
+                info.append("Elastic: ").append(leash.elasticDistanceScale()).append(" ");
                 info.append("Keep: ").append(leash.keepLeashTicks()).append("/").append(leash.maxKeepLeashTicks());
                 if (!leash.reserved().isEmpty()) {
                     info.append(" Reserved: ").append(leash.reserved());
@@ -374,12 +375,12 @@ public class LeashDataCommand {
         return targets.size();
     }
     private static int addLeash(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return addLeash(context,  CommonEventHandler.leashConfigManager.getMaxLeashLength(), CommonEventHandler.leashConfigManager.getElasticDistance(), 0, "");
+        return addLeash(context,  CommonEventHandler.leashConfigManager.getMaxLeashLength(), CommonEventHandler.leashConfigManager.getElasticDistanceScale(), 0, "");
     }
 
     private static int addLeash(CommandContext<CommandSourceStack> context,
                                      double maxDistance) throws CommandSyntaxException {
-        return addLeash(context, maxDistance, CommonEventHandler.leashConfigManager.getElasticDistance(), 0, "");
+        return addLeash(context, maxDistance, CommonEventHandler.leashConfigManager.getElasticDistanceScale(), 0, "");
     }
 
     private static int addLeash(CommandContext<CommandSourceStack> context,
@@ -398,7 +399,7 @@ public class LeashDataCommand {
         CommandSourceStack source = context.getSource();
         List<Entity> successful = new ArrayList<>(), failed = new ArrayList<>();
         for (Entity target : targets) {
-            if(LeashDataAPI.LeashOperations.attach(target, holder, maxDistance, elasticDistance, keepTicks, reserved)) {
+            if(LeashDataInnerAPI.LeashOperations.attach(target, holder, maxDistance, elasticDistance, keepTicks, reserved)) {
                 successful.add(target);
             } else failed.add(target);
         }
@@ -406,11 +407,11 @@ public class LeashDataCommand {
         return successful.size();
     }
     private static int addBlockLeash(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return addBlockLeash(context, CommonEventHandler.leashConfigManager.getMaxLeashLength(), CommonEventHandler.leashConfigManager.getElasticDistance(), 0, "");
+        return addBlockLeash(context, CommonEventHandler.leashConfigManager.getMaxLeashLength(), CommonEventHandler.leashConfigManager.getElasticDistanceScale(), 0, "");
     }
     private static int addBlockLeash(CommandContext<CommandSourceStack> context,
                                      double maxDistance) throws CommandSyntaxException {
-        return addBlockLeash(context, maxDistance, CommonEventHandler.leashConfigManager.getElasticDistance(), 0, "");
+        return addBlockLeash(context, maxDistance, CommonEventHandler.leashConfigManager.getElasticDistanceScale(), 0, "");
     }
     private static int addBlockLeash(CommandContext<CommandSourceStack> context,
                                      double maxDistance, double elasticDistance, int keepTicks) throws CommandSyntaxException {
@@ -435,7 +436,7 @@ public class LeashDataCommand {
         }
         List<Entity> successful = new ArrayList<>(), failed = new ArrayList<>();
         for (Entity target : targets) {
-            if(LeashDataAPI.LeashOperations.attach(target, knotEntity, maxDistance, elasticDistance, keepTicks, reserved)) {
+            if(LeashDataInnerAPI.LeashOperations.attach(target, knotEntity, maxDistance, elasticDistance, keepTicks, reserved)) {
                 successful.add(target);
             } else failed.add(target);
         }
@@ -450,7 +451,7 @@ public class LeashDataCommand {
         int successCount = 0;
 
         for (Entity target : targets) {
-            boolean success = LeashDataAPI.LeashOperations.detach(target, holder);
+            boolean success = LeashDataInnerAPI.LeashOperations.detach(target, holder);
 
             if (success) {
                 successCount++;
@@ -472,7 +473,7 @@ public class LeashDataCommand {
         int successCount = 0;
 
         for (Entity target : targets) {
-            boolean success = LeashDataAPI.LeashOperations.detach(target, pos);
+            boolean success = LeashDataInnerAPI.LeashOperations.detach(target, pos);
 
             if (success) {
                 successCount++;
@@ -492,7 +493,7 @@ public class LeashDataCommand {
         CommandSourceStack source = context.getSource();
 
         for (Entity target : targets) {
-            LeashDataAPI.LeashOperations.detachAll(target);
+            LeashDataInnerAPI.LeashOperations.detachAll(target);
             source.sendSuccess(() -> Component.literal("Removed all leashes from " + target.getName().getString()), false);
         }
 
@@ -512,8 +513,8 @@ public class LeashDataCommand {
 
         for (Entity target : targets) {
             boolean success = reserved.isEmpty() ?
-                    LeashDataAPI.TransferOperations.transfer(target, from, to) :
-                    LeashDataAPI.TransferOperations.transfer(target, from, to, reserved);
+                    LeashDataInnerAPI.TransferOperations.transfer(target, from, to) :
+                    LeashDataInnerAPI.TransferOperations.transfer(target, from, to, reserved);
 
             if (success) {
                 successCount++;
@@ -532,7 +533,7 @@ public class LeashDataCommand {
         CommandSourceStack source = context.getSource();
 
         for (Entity target : targets) {
-            LeashDataAPI.PhysicsOperations.applyForces(target);
+            LeashDataInnerAPI.PhysicsOperations.applyForces(target);
             source.sendSuccess(() -> Component.literal("Applied leash forces to " + target.getName().getString()), false);
         }
 

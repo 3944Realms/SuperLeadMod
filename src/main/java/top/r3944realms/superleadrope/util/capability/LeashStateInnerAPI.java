@@ -18,9 +18,10 @@ package top.r3944realms.superleadrope.util.capability;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.api.SLPCapability;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 
 import java.util.Map;
 import java.util.Objects;
@@ -28,14 +29,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
-public final class LeashStateAPI {
+@ApiStatus.Internal
+public final class LeashStateInnerAPI {
 
-    private LeashStateAPI() {
+    private LeashStateInnerAPI() {
     } // 防止实例化
 
-    public static Optional<ILeashState> getLeashState(@NotNull Entity entity) {
+    public static @NotNull Optional<ILeashState> getLeashState(@NotNull Entity entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-        return entity.getCapability(CapabilityHandler.LEASH_STATE_CAP).resolve();
+        return entity.getCapability(SLPCapability.LEASH_STATE_CAP).resolve();
     }
 
     // ==================== 查询操作 ====================

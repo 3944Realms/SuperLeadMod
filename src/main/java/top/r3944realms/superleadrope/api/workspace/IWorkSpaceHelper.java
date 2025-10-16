@@ -13,20 +13,22 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.util.nbt;
+package top.r3944realms.superleadrope.api.workspace;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.api.type.util.ILeashHelper;
 
-public class NBTWriter {
-    private NBTWriter() {}
-    public static CompoundTag writeVec3(Vec3 vec) {
-        CompoundTag nbt = new CompoundTag();
-        if (vec == null) throw new IllegalArgumentException("Vec3 cannot be null");
+import java.util.List;
+import java.util.function.Predicate;
 
-        nbt.putDouble("X", vec.x);
-        nbt.putDouble("Y", vec.y);
-        nbt.putDouble("Z", vec.z);
-        return nbt;
-    }
+public interface IWorkSpaceHelper {
+    @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Vec3 pPos, Predicate<Entity> filter, double fetchDistance);
+    ILeashHelper getLeashHelper();
+    boolean isSuperLeadKnot(Entity pEntity);
+    BlockPos getSuperLeadPos(Entity pEntity) throws IllegalArgumentException;
+    boolean isLeashable(@NotNull Entity pEntity);
 }

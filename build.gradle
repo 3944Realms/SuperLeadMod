@@ -71,6 +71,22 @@ repositories {
             includeModule 'me.lucko', 'spark-api'
         }
     }
+    maven {
+        name "KosmX's maven"
+        url 'https://maven.kosmx.dev/'
+    }
+    maven {
+        name = "Curios"
+        url = uri("https://maven.theillusivec4.top/")
+    }
+    maven {
+        name = 'GeckoLib'
+        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content {
+            includeGroupByRegex("software\\.bernie.*")
+            includeGroup("com.eliotlash.mclib")
+        }
+    }
     mavenCentral()
     flatDir {
         dir "libs"
@@ -98,7 +114,7 @@ legacyForge {
             systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
 //            // 设置 RenderDoc library 路径
 //            // 系统属性，使用项目相对路径
-//            systemProperty 'neoforge.rendernurse.renderdoc.library', file('RenderDoc_1.40_64/renderdoc.dll').absolutePath
+//            systemProperty 'neoforged.rendernurse.renderdoc.library', file('RenderDoc_1.40_64/renderdoc.dll').absolutePath
 //
 //            // JVM 参数
 //            jvmArgument "-javaagent:${file('libs/RenderNurse-0.0.9.jar').absolutePath}"
@@ -150,10 +166,19 @@ dependencies {
     modRuntimeOnly("curse.maven:debug-utils-forge-783008:5337491")
     modCompileOnly("blank:curtain-1.20.1:1.3.2")
     modRuntimeOnly("blank:curtain-1.20.1:1.3.2")
+    modImplementation("dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}")
+    modImplementation("curse.maven:bendy-lib-623373:4550371")
+    modImplementation("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
+    implementation("com.eliotlash.mclib:mclib:20")
+    modCompileOnly("top.theillusivec4.curios:curios-forge:${curios_version}:api")
+    modCompileOnly("top.theillusivec4.curios:curios-forge:${curios_version}")
+    modRuntimeOnly("top.theillusivec4.curios:curios-forge:${curios_version}")
     modCompileOnly("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
     modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     modRuntimeOnly("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
     modRuntimeOnly("curse.maven:spark-361579:4738952")
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    modImplementation("io.github.llamalad7:mixinextras-forge:0.4.1")
     compileOnly ('me.lucko:spark-api:0.1-SNAPSHOT')
     implementation 'org.ow2.asm:asm:9.6'
     implementation 'org.ow2.asm:asm-tree:9.6'
@@ -170,6 +195,45 @@ dokkaJavadoc {
     outputDirectory = file("$buildDir/javadoc")
 }
 
+// ========== API Jar 配置 ==========
+tasks.register('apiJar', Jar) {
+    archiveClassifier.set('api')
+    from sourceSets.main.output
+    include "top/r3944realms/superleadrope/api/**/*"
+    include "top/r3944realms/superleadrope/SuperLeadRopeAPI.class"
+
+    manifest {
+        attributes([
+                'Specification-Title'     : "${mod_id}-api",
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : "${project.name}-api",
+                'Implementation-Version'  : archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'FMLModType'              : 'GAMELIBRARY'
+        ])
+    }
+
+    // 确保包含 API 相关的源文件
+    dependsOn classes
+}
+
+// 创建包含源码的 API Jar
+tasks.register('sourcesApiJar', Jar) {
+    archiveClassifier.set('api-sources')
+    from sourceSets.main.allSource
+    include "top/r3944realms/superleadrope/api/**/*"
+    include "top/r3944realms/superleadrope/SuperLeadRopeAPI.java"
+}
+
+// 创建 API Javadoc Jar
+tasks.register('javadocApiJar', Jar) {
+    archiveClassifier.set('api-javadoc')
+    from dokkaJavadoc
+    dependsOn dokkaJavadoc
+}
+
 // ========== 打包配置 ==========
 jar {
     manifest {
@@ -184,6 +248,10 @@ jar {
         ])
     }
     archiveFileName = "${mod_id}-${mod_version}-origin.jar"
+
+    // 可选：排除 API 类（如果你不想在主 jar 中包含 API）
+    // exclude "top/r3944realms/superleadrope/api/**/*"
+
     finalizedBy 'proguard'
 }
 
@@ -215,19 +283,6 @@ shadowJar {
     outputs.upToDateWhen { false }
 }
 
-// 本地 Maven 发布
-publishing {
-    publications {
-        create('mavenJava', MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
-    }
-}
 // 新建一个可解析配置专门给 ProGuard
 configurations {
     proguardLibs {
@@ -279,12 +334,62 @@ afterEvaluate {
     }
 }
 
+// ========== 发布配置 ==========
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            // 添加 API 相关构件
+            artifact apiJar
+            artifact sourcesApiJar
+            artifact javadocApiJar
+
+            // POM 配置，便于其他模组依赖
+            pom {
+                name = "${mod_name} API"
+                description = "The API for ${mod_name}"
+                url = "https://github.com/3944Realms/SuperLeadMod"
+
+                licenses {
+                    license {
+                        name = mod_license
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "r3944realms"
+                        name = mod_authors
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+// ========== 构建任务依赖 ==========
+// 确保构建任务包含 API Jar
+tasks.named('build') {
+    dependsOn apiJar, sourcesApiJar, javadocApiJar
+}
+
+// 清理任务
+tasks.named('clean') {
+    delete fileTree(dir: "${project.projectDir}/mcmodsrepo")
+}
+
 tasks.register("runWithRenderDoc", Exec) {
     group = "minecraft"
     description = "Run Minecraft with RenderDoc using runClientAuth configuration"
     dependsOn("classes") // 确保源码编译完成
     def jdwpArgs = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-    
+
     def renderDocCmd = file("RenderDoc_1.40_64/renderdoccmd.exe").absolutePath
     def captureDir = file("$buildDir/renderdoc/capture").absolutePath
 
@@ -313,7 +418,6 @@ tasks.register("runWithRenderDoc", Exec) {
         println "Environment MOD_CLASSES: ${environment['MOD_CLASSES']}"
     }
 }
-
 
 // IDEA 支持
 idea {

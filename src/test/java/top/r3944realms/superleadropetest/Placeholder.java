@@ -15,8 +15,6 @@
 
 package top.r3944realms.superleadropetest;
 
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
-
 public class Placeholder {
 
 }

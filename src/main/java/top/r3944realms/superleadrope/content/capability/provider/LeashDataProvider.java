@@ -25,9 +25,9 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
+import top.r3944realms.superleadrope.api.SLPCapability;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 
 public class LeashDataProvider implements ICapabilitySerializable<CompoundTag> {
     public static final ResourceLocation LEASH_DATA_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_data");
@@ -39,7 +39,7 @@ public class LeashDataProvider implements ICapabilitySerializable<CompoundTag> {
     }
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        return CapabilityHandler.LEASH_DATA_CAP.orEmpty(cap, optional);
+        return SLPCapability.LEASH_DATA_CAP.orEmpty(cap, optional);
     }
 
     @Override

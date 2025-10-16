@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 
 public class NBTReader {
+    private NBTReader() {}
     public static Vec3 readVec3(CompoundTag nbt) {
         if (nbt.contains("X") && nbt.contains("Y") && nbt.contains("Z")) {
             return new Vec3(

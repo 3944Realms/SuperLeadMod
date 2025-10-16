@@ -34,9 +34,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
-import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
+import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.Arrays;
 import java.util.List;
@@ -81,9 +81,9 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
                 this.kill();
                 this.markHurt();
                 this.playSound(SoundEvents.LEASH_KNOT_BREAK);
-                List<Entity> entities = LeashDataImpl.leashableInArea(this.level(), pos.getCenter(), entity -> LeashDataImpl.isLeashHolder(entity, this));
+                List<Entity> entities = SuperLeadRopeApi.leashableInArea(this.level(), pos.getCenter(), entity -> SuperLeadRopeApi.isLeashHolder(entity, this));
                 entities.forEach(entity ->
-                        LeashDataAPI.getLeashData(entity)
+                        LeashDataInnerAPI.getLeashData(entity)
                                 .map(iLeashDataCapability -> iLeashDataCapability.removeLeash(this))
                 );
             }
@@ -96,8 +96,8 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
     public boolean survives() {
         boolean supportBlock = SuperLeashKnotEntity.isSupportBlock(this.level().getBlockState(this.pos));
         if (!supportBlock) {
-            for (Entity entity : LeashDataImpl.leashableInArea(this)) {
-                LeashDataAPI.LeashOperations.detach(entity, this);
+            for (Entity entity : SuperLeadRopeApi.leashableInArea(this)) {
+                LeashDataInnerAPI.LeashOperations.detach(entity, this);
             }
         }
         return supportBlock;
@@ -193,10 +193,10 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
             return InteractionResult.SUCCESS;
         }
         AtomicBoolean isTransferLeash = new AtomicBoolean(false);
-        List<Entity> entities = LeashDataImpl.leashableInArea(player);
+        List<Entity> entities = SuperLeadRopeApi.leashableInArea(player);
         for(Entity entity : entities) {
-            if (LeashDataImpl.isLeashHolder(entity, player.getUUID()))
-                LeashDataAPI.getLeashData(entity)
+            if (SuperLeadRopeApi.isLeashHolder(entity, player.getUUID()))
+                LeashDataInnerAPI.getLeashData(entity)
                     .ifPresent(i -> {
                         i.transferLeash(player.getUUID(), this);
                         isTransferLeash.set(true);
@@ -207,9 +207,9 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
             if (((ServerPlayer) player).gameMode.getGameModeForPlayer() != GameType.ADVENTURE) {
                 this.playSound(SoundEvents.LEASH_KNOT_BREAK);
                 this.discard();
-                List<Entity> entities1 = LeashDataImpl.leashableInArea(this);
+                List<Entity> entities1 = SuperLeadRopeApi.leashableInArea(this);
                 entities1.forEach(entity ->
-                                LeashDataAPI.getLeashData(entity)
+                                LeashDataInnerAPI.getLeashData(entity)
                                     .ifPresent(iLeashDataCapability -> {
                                         iLeashDataCapability.removeLeash(this);
                                         isRemoveLeashKnot.set(true);

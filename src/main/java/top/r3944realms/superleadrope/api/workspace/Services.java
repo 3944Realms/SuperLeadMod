@@ -13,20 +13,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.util.nbt;
+package top.r3944realms.superleadrope.api.workspace;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.phys.Vec3;
+import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 
-public class NBTWriter {
-    private NBTWriter() {}
-    public static CompoundTag writeVec3(Vec3 vec) {
-        CompoundTag nbt = new CompoundTag();
-        if (vec == null) throw new IllegalArgumentException("Vec3 cannot be null");
+import java.util.ServiceLoader;
 
-        nbt.putDouble("X", vec.x);
-        nbt.putDouble("Y", vec.y);
-        nbt.putDouble("Z", vec.z);
-        return nbt;
+public class Services {
+    public static final IWorkSpaceHelper WORK_SPACE = load(IWorkSpaceHelper.class);
+    public static <T> T load(Class<T> clazz) {
+        final T loadedService = ServiceLoader.load(clazz)
+                .findFirst()
+                .orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));
+        SuperLeadRopeApi.LOGGER.debug("Loaded {} for service {}", loadedService, clazz);
+        return loadedService;
     }
 }

@@ -16,7 +16,6 @@
 package top.r3944realms.superleadrope.core.leash;
 
 
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -28,12 +27,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.Optional;
 
@@ -61,7 +61,7 @@ public class LeashInteractHandler {
         if (!LeashDataImpl.isLeashable(target)) {
             return;
         }
-        Optional<ILeashData> LeashCap = LeashDataAPI.getLeashData(target);
+        Optional<ILeashData> LeashCap = LeashDataInnerAPI.getLeashData(target);
         if (LeashCap.isEmpty()) {
             return;
         }
@@ -82,7 +82,7 @@ public class LeashInteractHandler {
                 event.setCancellationResult(InteractionResult.SUCCESS);
             }
         } else {
-            if (LeashDataImpl.isLeashHolder(target, player)) {
+            if (SuperLeadRopeApi.isLeashHolder(target, player)) {
                 LeashCap.ifPresent(
                         iLeashDataCapability -> iLeashDataCapability.removeLeash(player.getUUID())
                 );
@@ -127,7 +127,7 @@ public class LeashInteractHandler {
             }
         } else {
             if (flag) {
-                LeashDataAPI.getLeashData(target).ifPresent(leashDataCapability -> {
+                LeashDataInnerAPI.getLeashData(target).ifPresent(leashDataCapability -> {
                     if (leashDataCapability.hasLeash()){
                         int size = leashDataCapability.getAllLeashes().size();
                         if (player.isSecondaryUseActive())

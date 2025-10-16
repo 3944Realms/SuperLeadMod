@@ -23,12 +23,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -53,14 +50,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
+import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.config.LeashCommonConfig;
 import top.r3944realms.superleadrope.config.LeashConfigManager;
 import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.CapabilityRemainder;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
@@ -74,8 +73,8 @@ import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.util.PotatoMode;
 import top.r3944realms.superleadrope.core.util.PotatoModeHelper;
 import top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
-import top.r3944realms.superleadrope.util.capability.LeashStateAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
+import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 import top.r3944realms.superleadrope.util.model.RidingRelationship;
 import top.r3944realms.superleadrope.util.riding.RidingApplier;
 import top.r3944realms.superleadrope.util.riding.RidingDismounts;
@@ -97,8 +96,8 @@ public class CommonEventHandler {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) return;
             if (LeashDataImpl.isLeashable(entity)) {
-                LeashDataAPI.getLeashData(entity).ifPresent(LeashSyncManager.Data::track);
-                LeashStateAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::track);
+                LeashDataInnerAPI.getLeashData(entity).ifPresent(LeashSyncManager.Data::track);
+                LeashStateInnerAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::track);
                 if (entity instanceof ServerPlayer serverPlayer) {
                     LeashSyncManager.Data.forEach(i -> {
                         if (i.isLeashedBy(serverPlayer) && i.isInDelayedLeash(serverPlayer.getUUID())) {
@@ -121,8 +120,8 @@ public class CommonEventHandler {
                         }
                     });
                 }
-                LeashDataAPI.getLeashData(entity).ifPresent(LeashSyncManager.Data::untrack);
-                LeashStateAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::untrack);
+                LeashDataInnerAPI.getLeashData(entity).ifPresent(LeashSyncManager.Data::untrack);
+                LeashStateInnerAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::untrack);
             }
         }
         @SubscribeEvent
@@ -157,6 +156,12 @@ public class CommonEventHandler {
                 }
             }
         }
+
+        public static ServerLevel getServerLevel() {
+            return sl;
+        }
+
+        private static ServerLevel sl;
         @SubscribeEvent
         public static void onServerStarting(ServerStartingEvent event) {
             PotatoMode mode = PotatoModeHelper.getCurrentMode();
@@ -169,6 +174,7 @@ public class CommonEventHandler {
                 if (serverLevel.dimension() == Level.OVERWORLD) {
                     EternalPotatoFacade.initSavedData(serverLevel);
                     RidingSaver.setEntityProvider(serverLevel::getEntity);
+                    sl = serverLevel;
                 }
             }
         }
@@ -179,6 +185,7 @@ public class CommonEventHandler {
                 // 只在主世界卸载时清空
                 if (serverLevel.dimension() == Level.OVERWORLD) {
                     EternalPotatoFacade.clear();
+                    sl = null;
                 }
             }
         }
@@ -256,10 +263,10 @@ public class CommonEventHandler {
             if (!(level instanceof ServerLevel serverLevel)) return;
 
             // 获取范围内可被拴住实体
-            List<Entity> entities = LeashDataImpl.leashableInArea(telEntity);
+            List<Entity> entities = SuperLeadRopeApi.leashableInArea(telEntity);
             //规则关闭则禁止
             if(!SLPGameruleRegistry.getGameruleBoolValue(event.getEntity().level(), TeleportWithLeashedEntities.ID)) {
-                entities.forEach(entity -> LeashDataAPI.LeashOperations.detach(entity, telEntity));
+                entities.forEach(entity -> LeashDataInnerAPI.LeashOperations.detach(entity, telEntity));
                 return;
             }
             for (Entity beLeashedEntity : entities) {
@@ -270,8 +277,8 @@ public class CommonEventHandler {
                 float originalPitch = beLeashedEntity.getXRot();
                 Vec3 originalDeltaMovement = beLeashedEntity.getDeltaMovement();
 
-                AtomicReference<ILeashData.LeashInfo> originalLeashInfo = new AtomicReference<>();
-                LeashDataAPI.getLeashData(beLeashedEntity).ifPresent(data -> {
+                AtomicReference<LeashInfo> originalLeashInfo = new AtomicReference<>();
+                LeashDataInnerAPI.getLeashData(beLeashedEntity).ifPresent(data -> {
                     originalLeashInfo.set(data.getLeashInfo(telEntity).orElse(null));
                     data.removeLeash(telEntity);
                 });
@@ -306,10 +313,10 @@ public class CommonEventHandler {
                 }
 
                 // --- 将holder替换 ---
-                ILeashData.LeashInfo leashInfo = Optional.ofNullable(originalLeashInfo.get())
-                        .orElse(ILeashData.LeashInfo.EMPTY);
+                LeashInfo leashInfo = Optional.ofNullable(originalLeashInfo.get())
+                        .orElse(LeashInfo.EMPTY);
 
-                LeashDataAPI.LeashOperations.attachWithInfo(beLeashedEntity, telEntity, leashInfo);
+                LeashDataInnerAPI.LeashOperations.attachWithInfo(beLeashedEntity, telEntity, leashInfo);
 
                 // --- 重新应用骑乘关系，仅保留白名单根载具 ---
                 RidingRelationship filteredRelationship = RidingSaver.filterByWhitelistRoot(originalRidingRelationship);

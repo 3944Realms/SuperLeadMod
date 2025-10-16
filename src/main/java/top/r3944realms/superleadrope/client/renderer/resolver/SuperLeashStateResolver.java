@@ -23,13 +23,16 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.client.renderer.state.SuperLeashRenderState;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
-import top.r3944realms.superleadrope.util.capability.LeashStateAPI;
+import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 //TODO: 未来实现更高级的渲染
 public class SuperLeashStateResolver {
@@ -48,11 +51,11 @@ public class SuperLeashStateResolver {
     /* ------------------------ 主解析方法 ------------------------ */
 
     public static Optional<SuperLeashRenderState> resolve(Entity holder, Entity leashedEntity,
-                                                          ILeashData.LeashInfo leashInfo, float partialTicks) {
+                                                          LeashInfo leashInfo, float partialTicks) {
 
         if (holder == null || leashedEntity == null) return Optional.empty();
 
-        Optional<ILeashState> leashedEntityStateOpt = LeashStateAPI.getLeashState(leashedEntity);
+        Optional<ILeashState> leashedEntityStateOpt = LeashStateInnerAPI.getLeashState(leashedEntity);
         if (leashedEntityStateOpt.isEmpty()) return Optional.empty();
 
         ILeashState leashedEntityState = leashedEntityStateOpt.get();
@@ -95,7 +98,7 @@ public class SuperLeashStateResolver {
         // 物理参数
         double distance = currentHolderPos.distanceTo(currentEntityPos);
         double maxDistance = leashInfo.maxDistance();
-        double elasticDistance = leashInfo.elasticDistance();
+        double elasticDistance = leashInfo.elasticDistanceScale();
         float tension = calculateTension(distance, maxDistance, elasticDistance);
         float stretchRatio = (float) (distance / maxDistance);
         boolean isCritical = distance > maxDistance * 1.5;
@@ -120,7 +123,7 @@ public class SuperLeashStateResolver {
                 selectColor(tension, isCritical),
                 THICKNESS_BASE + tension * THICKNESS_TENSION,
                 swing.angle(), swing.speed(),
-                (float) leashInfo.maxDistance(),
+                leashInfo.maxDistance(),
                 isFirstPerson, holder.blockPosition()
 
 
@@ -129,7 +132,7 @@ public class SuperLeashStateResolver {
 
     /* ------------------------ 实体偏移计算 ------------------------ */
     private static @NotNull Vec3 getEntityLeashOffset(Entity entity, ILeashState.@NotNull LeashState leashState) {
-        Optional<ILeashState> entityStateOpt = LeashStateAPI.getLeashState(entity);
+        Optional<ILeashState> entityStateOpt = LeashStateInnerAPI.getLeashState(entity);
         Vec3 baseOffset = entityStateOpt
                 .map(eState -> eState.getLeashApplyEntityLocationOffset()
                         .orElse(eState.getDefaultLeashApplyEntityLocationOffset()))
@@ -137,8 +140,8 @@ public class SuperLeashStateResolver {
         return baseOffset.add(leashState.applyEntityLocationOffset());
     }
     private static Vec3 getHolderOffset(Entity holder, ILeashState.LeashState leashState) {
-        if (LeashStateAPI.Query.hasLeashState(holder)) {
-            Optional<ILeashState> holderStateOpt = LeashStateAPI.getLeashState(holder);
+        if (LeashStateInnerAPI.Query.hasLeashState(holder)) {
+            Optional<ILeashState> holderStateOpt = LeashStateInnerAPI.getLeashState(holder);
             if (holderStateOpt.isPresent()) {
                 ILeashState holderState = holderStateOpt.get();
                 return holderState.getLeashApplyEntityLocationOffset()

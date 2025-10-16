@@ -23,10 +23,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.client.renderer.resolver.SuperLeashStateResolver;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -46,17 +46,17 @@ public class LeashRenderHandler {
 
         // 遍历摄像机附近所有实体
         for (Entity entity : level.getEntitiesOfClass(Entity.class,
-                cameraEntity.getBoundingBox().inflate(100))) {
+                cameraEntity.getBoundingBox().inflate(32*16))) {
 
-            LeashDataAPI.getLeashData(entity).ifPresent(leashData -> {
-                for (ILeashData.LeashInfo leashInfo : leashData.getAllLeashes()) {
+            LeashDataInnerAPI.getLeashData(entity).ifPresent(leashData -> {
+                for (LeashInfo leashInfo : leashData.getAllLeashes()) {
                     renderLeashFromInfo(entity, leashInfo, poseStack, bufferSource, partialTick);
                 }
             });
         }
     }
 
-    private static void renderLeashFromInfo(Entity entity, ILeashData.LeashInfo leashInfo,
+    private static void renderLeashFromInfo(Entity entity, LeashInfo leashInfo,
                                             PoseStack poseStack, MultiBufferSource bufferSource,
                                             float partialTick) {
         try {
@@ -76,10 +76,10 @@ public class LeashRenderHandler {
         }
     }
 
-    private static Optional<Entity> getHolderFromLeashInfo(Level level, ILeashData.LeashInfo leashInfo) {
+    private static Optional<Entity> getHolderFromLeashInfo(Level level, LeashInfo leashInfo) {
         if (leashInfo.blockPosOpt().isPresent()) {
             BlockPos pos = leashInfo.blockPosOpt().get();
-            return Optional.of(SuperLeashKnotEntity.getOrCreateKnot(level, pos));
+            return SuperLeashKnotEntity.get(level,pos).map(Entity.class::cast);
         } else if (leashInfo.holderUUIDOpt().isPresent()) {
             UUID holderUUID = leashInfo.holderUUIDOpt().get();
             for (Entity e : ((ClientLevel)level).entitiesForRendering()) {

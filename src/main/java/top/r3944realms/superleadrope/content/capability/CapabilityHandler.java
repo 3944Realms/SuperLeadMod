@@ -22,26 +22,25 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.content.capability.provider.EternalPotatoProvider;
 import top.r3944realms.superleadrope.content.capability.provider.LeashDataProvider;
 import top.r3944realms.superleadrope.content.capability.provider.LeashStateProvider;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 
 public class CapabilityHandler {
-    public static final Capability<ILeashData> LEASH_DATA_CAP = CapabilityManager.get(new CapabilityToken<>(){});
-    public static Capability<ILeashState> LEASH_STATE_CAP = CapabilityManager.get(new CapabilityToken<>() {});
-    public static Capability<IEternalPotato> ETERNAL_POTATO_CAP = CapabilityManager.get(new CapabilityToken<>() {});
-    public static void registerCapability(RegisterCapabilitiesEvent event) {
+    public static final Capability<IEternalPotato> ETERNAL_POTATO_CAP = CapabilityManager.get(new CapabilityToken<>() {});
+    public static void registerCapability(@NotNull RegisterCapabilitiesEvent event) {
         event.register(ILeashData.class);
         event.register(IEternalPotato.class);
         event.register(ILeashState.class);
     }
 
-    public static void attachCapability(AttachCapabilitiesEvent<?> event) {
+    public static void attachCapability(@NotNull AttachCapabilitiesEvent<?> event) {
         Object object = event.getObject();
         if(object instanceof Entity entity &&
                 (LeashDataImpl.isLeashable(entity))//只对活体 船 矿车添加CAP

@@ -18,9 +18,11 @@ package top.r3944realms.superleadrope.util.capability;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.api.SLPCapability;
+import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 
 import java.util.*;
 
@@ -28,11 +30,12 @@ import java.util.*;
  * 拴绳数据API - 提供统一的API接口操作拴绳数据能力
  */
 @SuppressWarnings("unused")
-public final class LeashDataAPI {
+@ApiStatus.Internal
+public final class LeashDataInnerAPI {
     // ==================== 基础能力获取 ====================
-    public static Optional<ILeashData> getLeashData(@NotNull Entity entity) {
+    public static @NotNull Optional<ILeashData> getLeashData(@NotNull Entity entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-        return entity.getCapability(CapabilityHandler.LEASH_DATA_CAP).resolve();
+        return entity.getCapability(SLPCapability.LEASH_DATA_CAP).resolve();
     }
     // ==================== 拴绳数据管理 API ====================
 
@@ -64,7 +67,7 @@ public final class LeashDataAPI {
             return getLeashData(entity).map(data -> data.addLeash(holder, maxDistance, elasticDistance, maxKeepTicks, reserved)).orElse(false);
         }
 
-        public static void attachWithInfo(Entity entity, Entity holder, ILeashData.LeashInfo info) {
+        public static void attachWithInfo(Entity entity, Entity holder, LeashInfo info) {
             getLeashData(entity).ifPresent(data -> data.addLeash(holder, info));
         }
 
@@ -147,39 +150,39 @@ public final class LeashDataAPI {
 
         // ---------------------- 设置弹性距离 ----------------------
         public static boolean setElasticDistance(Entity entity, Entity holder, double distance) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(holder, distance)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, distance)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, Entity holder, double distance, int maxKeepTicks) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(holder, distance, maxKeepTicks)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, distance, maxKeepTicks)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, Entity holder, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(holder, distance, maxKeepTicks, reserved)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, distance, maxKeepTicks, reserved)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, UUID holderUUID, double distance) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(holderUUID, distance)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, distance)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, UUID holderUUID, double distance, int maxKeepTicks) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(holderUUID, distance, maxKeepTicks)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, distance, maxKeepTicks)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, UUID holderUUID, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(holderUUID, distance, maxKeepTicks, reserved)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, distance, maxKeepTicks, reserved)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, BlockPos knotPos, double distance) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(knotPos, distance)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, distance)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, BlockPos knotPos, double distance, int maxKeepTicks) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(knotPos, distance, maxKeepTicks)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, distance, maxKeepTicks)).orElse(false);
         }
 
         public static boolean setElasticDistance(Entity entity, BlockPos knotPos, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setElasticDistance(knotPos, distance, maxKeepTicks, reserved)).orElse(false);
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, distance, maxKeepTicks, reserved)).orElse(false);
         }
     }
 
@@ -240,7 +243,7 @@ public final class LeashDataAPI {
             return getLeashData(entity).map(ILeashData::hasHolderLeash).orElse(false);
         }
 
-        public static Collection<ILeashData.LeashInfo> getAllLeashes(Entity entity) {
+        public static Collection<LeashInfo> getAllLeashes(Entity entity) {
             return getLeashData(entity).map(ILeashData::getAllLeashes).orElse(Collections.emptyList());
         }
 
@@ -260,15 +263,15 @@ public final class LeashDataAPI {
             return getLeashData(entity).map(data -> data.isInDelayedLeash(holderUUID)).orElse(false);
         }
 
-        public static Optional<ILeashData.LeashInfo> getLeashInfo(Entity entity, Entity holder) {
+        public static Optional<LeashInfo> getLeashInfo(Entity entity, Entity holder) {
             return getLeashData(entity).flatMap(data -> data.getLeashInfo(holder));
         }
 
-        public static Optional<ILeashData.LeashInfo> getLeashInfo(Entity entity, UUID holderUUID) {
+        public static Optional<LeashInfo> getLeashInfo(Entity entity, UUID holderUUID) {
             return getLeashData(entity).flatMap(data -> data.getLeashInfo(holderUUID));
         }
 
-        public static Optional<ILeashData.LeashInfo> getLeashInfo(Entity entity, BlockPos knotPos) {
+        public static Optional<LeashInfo> getLeashInfo(Entity entity, BlockPos knotPos) {
             return getLeashData(entity).flatMap(data -> data.getLeashInfo(knotPos));
         }
 

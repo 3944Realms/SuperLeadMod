@@ -31,6 +31,7 @@ import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.util.file.ConfigUtil;
 
 @Mod(value = SuperLeadRope.MOD_ID)
+//TODO: API规范化
 public class SuperLeadRope {
     public static final Logger logger = LoggerFactory.getLogger(SuperLeadRope.class);
 

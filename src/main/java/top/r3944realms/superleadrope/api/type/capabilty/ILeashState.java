@@ -13,7 +13,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.content.capability.inter;
+package top.r3944realms.superleadrope.api.type.capabilty;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

@@ -15,8 +15,8 @@
 
 package top.r3944realms.superleadrope.core.leash;
 
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashState;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 
 import java.util.Collections;
 import java.util.Set;

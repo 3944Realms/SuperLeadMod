@@ -27,7 +27,7 @@ public class LeashCommonConfig {
 
         // Leash settings
         public final ForgeConfigSpec.DoubleValue maxLeashLength;
-        public final ForgeConfigSpec.DoubleValue elasticDistance;
+        public final ForgeConfigSpec.DoubleValue elasticDistanceScale;
         public final ForgeConfigSpec.DoubleValue extremeSnapFactor;
         public final ForgeConfigSpec.DoubleValue springDampening;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> axisSpecificElasticity;
@@ -84,9 +84,9 @@ public class LeashCommonConfig {
                     .comment("Maximum leash distance (in blocks) for any entity")
                     .defineInRange("maxLeashLength", 12.0, 6.0, 256.0);
 
-            elasticDistance = builder
+            elasticDistanceScale = builder
                     .comment("Default elastic distance for the Super Lead rope")
-                    .defineInRange("elasticDistance", 6.0, 6.0, 128.0);
+                    .defineInRange("elasticDistanceScale", 1.0, 0.2, 4.0);
 
             extremeSnapFactor = builder
                     .comment("Leash break factor = maxDistance * factor")

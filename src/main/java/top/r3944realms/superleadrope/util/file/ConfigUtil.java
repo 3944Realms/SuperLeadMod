@@ -19,6 +19,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.SuperLeadRope;
 
 import java.io.File;
@@ -48,7 +49,7 @@ public class ConfigUtil {
     }
 
     public static void registerConfig (
-            ModLoadingContext context,
+            @NotNull ModLoadingContext context,
             ModConfig.Type type,
             ForgeConfigSpec configSpec,
             String folderName,

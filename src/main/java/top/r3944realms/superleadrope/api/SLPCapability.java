@@ -13,20 +13,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.util.nbt;
+package top.r3944realms.superleadrope.api;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 
-public class NBTWriter {
-    private NBTWriter() {}
-    public static CompoundTag writeVec3(Vec3 vec) {
-        CompoundTag nbt = new CompoundTag();
-        if (vec == null) throw new IllegalArgumentException("Vec3 cannot be null");
-
-        nbt.putDouble("X", vec.x);
-        nbt.putDouble("Y", vec.y);
-        nbt.putDouble("Z", vec.z);
-        return nbt;
-    }
+public class SLPCapability {
+    public static final Capability<ILeashData> LEASH_DATA_CAP = CapabilityManager.get(new CapabilityToken<>(){});
+    public static final Capability<ILeashState> LEASH_STATE_CAP = CapabilityManager.get(new CapabilityToken<>() {});
 }

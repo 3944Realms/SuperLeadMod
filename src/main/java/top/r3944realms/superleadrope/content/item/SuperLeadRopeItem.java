@@ -30,12 +30,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.common.extensions.IForgeItem;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 import top.r3944realms.superleadrope.content.SLPToolTier;
-import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
-import top.r3944realms.superleadrope.content.capability.inter.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
-import top.r3944realms.superleadrope.util.capability.LeashDataAPI;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.List;
 import java.util.Optional;
@@ -121,13 +121,13 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         boolean isSuccess = false;
 
         // 查找当前玩家持有的可拴生物
-        List<Entity> list = LeashDataImpl.leashableInArea(
+        List<Entity> list = SuperLeadRopeApi.leashableInArea(
                 level, pos.getCenter(),
-                entity -> LeashDataImpl.isLeashHolder(entity, player.getUUID())
+                entity -> SuperLeadRopeApi.isLeashHolder(entity, player.getUUID())
         );
 
         for (Entity e : list) {
-            Optional<ILeashData> leashDataOpt = LeashDataAPI.getLeashData(e);
+            Optional<ILeashData> leashDataOpt = LeashDataInnerAPI.getLeashData(e);
 
             if (leashDataOpt.map(i -> i.canBeAttachedTo(newHolder)).orElse(false)) {
                 leashDataOpt.ifPresent(i -> i.transferLeash(player.getUUID(), newHolder));
@@ -170,8 +170,8 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         AtomicBoolean isSuccess = new AtomicBoolean(false);
         UUID uuid = player.getUUID();
 
-        List<Entity> list = LeashDataImpl.leashableInArea(level, pos.getCenter(),
-                entity -> LeashDataImpl.isLeashHolder(entity, uuid));
+        List<Entity> list = SuperLeadRopeApi.leashableInArea(level, pos.getCenter(),
+                entity -> SuperLeadRopeApi.isLeashHolder(entity, uuid));
 
         // 情况一：拴自己到新 knot
         if (shouldBindSelf && list.isEmpty()) {
@@ -182,7 +182,7 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
                 knot.playPlacementSound();
 
                 SuperLeashKnotEntity finalKnot = knot;
-                LeashDataAPI.getLeashData(player).ifPresent(i -> {
+                LeashDataInnerAPI.getLeashData(player).ifPresent(i -> {
                     if (i.canBeAttachedTo(finalKnot)) {
                         if (!level.isClientSide) i.addLeash(finalKnot);
                         isSuccess.set(true);
@@ -198,7 +198,7 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
                 }
                 SuperLeashKnotEntity finalKnot = knot;
 
-                LeashDataAPI.getLeashData(e).ifPresent(i -> {
+                LeashDataInnerAPI.getLeashData(e).ifPresent(i -> {
                     if (i.canBeAttachedTo(finalKnot)) {
                         if (!level.isClientSide) i.transferLeash(uuid, finalKnot);
                         isSuccess.set(true);

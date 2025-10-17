@@ -25,12 +25,15 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
 import static top.r3944realms.superleadrope.config.LeashCommonConfig.Common.OFFSET_PATTERN;
 
 public class LeashConfigManager {
-
+    // ========== 最值检测 ==========
+    public static final Predicate<Double> MAX_DISTANCE_CHECK = distance -> distance == null || (distance >= 6.0 && distance <= 256.0);
+    public static final Predicate<Double> ELASTIC_DISTANCE_CHECK = distance -> distance == null || (distance >= 0.2 && distance <= 4.0);
     // ========== 偏移映射 ==========
     private final Map<String, double[]> entityHolderMap = new ConcurrentHashMap<>();
     private final Map<String, double[]> tagHolderMap = new ConcurrentHashMap<>();

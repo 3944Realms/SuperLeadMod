@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -51,6 +52,7 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
+import top.r3944realms.superleadrope.api.event.SuperLeadRopeEvent;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.config.LeashCommonConfig;
 import top.r3944realms.superleadrope.config.LeashConfigManager;
@@ -269,8 +271,10 @@ public class CommonEventHandler {
                 entities.forEach(entity -> LeashDataInnerAPI.LeashOperations.detach(entity, telEntity));
                 return;
             }
+
             for (Entity beLeashedEntity : entities) {
                 // --- 保存状态快照 ---
+                if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.teleportWithHolder(beLeashedEntity, telEntity, beLeashedEntity.level(), level, beLeashedEntity.position(), targetPos))) continue;
                 Pose originalPose = beLeashedEntity.getPose();
                 boolean originalIsSprinting = beLeashedEntity.isSprinting();
                 float originalYaw = beLeashedEntity.getYRot();
@@ -290,7 +294,6 @@ public class CommonEventHandler {
                 // --- 解除骑乘 ---
                 List<Entity> allPassengers = RidingFinder.getEntityFromRidingShip(originalRidingRelationship, serverLevel::getEntity);
                 RidingDismounts.dismountEntities(allPassengers);
-
                 // --- 传送实体及乘客 ---
                 for (Entity entity : allPassengers) {
                     if (entity.level() != serverLevel) {

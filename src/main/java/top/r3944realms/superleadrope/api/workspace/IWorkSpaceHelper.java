@@ -20,9 +20,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.api.type.util.ILeashHelper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public interface IWorkSpaceHelper {
@@ -31,4 +34,6 @@ public interface IWorkSpaceHelper {
     boolean isSuperLeadKnot(Entity pEntity);
     BlockPos getSuperLeadPos(Entity pEntity) throws IllegalArgumentException;
     boolean isLeashable(@NotNull Entity pEntity);
+    Optional<ILeashData> getLeashData(@NotNull Entity pEntity);
+    Optional<ILeashState> getLeashState(@NotNull Entity pEntity);
 }

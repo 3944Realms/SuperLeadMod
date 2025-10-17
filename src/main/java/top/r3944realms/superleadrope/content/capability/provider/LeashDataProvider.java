@@ -26,8 +26,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.api.SLPCapability;
-import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 
 public class LeashDataProvider implements ICapabilitySerializable<CompoundTag> {
     public static final ResourceLocation LEASH_DATA_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_data");

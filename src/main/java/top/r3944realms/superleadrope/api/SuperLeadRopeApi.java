@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.r3944realms.superleadrope.api.type.util.ILeashHelper;
 import top.r3944realms.superleadrope.api.workspace.Services;
-import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
-import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.List;
 import java.util.UUID;
@@ -64,19 +62,19 @@ public class SuperLeadRopeApi {
     }
 
     public static boolean isLeashHolder(@NotNull Entity pEntity, Entity pTestHolder) {
-        return pTestHolder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
-                isLeashHolder(pEntity, superLeashKnotEntity.getPos()) :
+        return Services.WORK_SPACE.isSuperLeadKnot(pTestHolder) ?
+                isLeashHolder(pEntity, Services.WORK_SPACE.getSuperLeadPos(pTestHolder)) :
                 isLeashHolder(pEntity, pTestHolder.getUUID());
     }
 
     public static boolean isLeashHolder(@NotNull Entity pEntity, UUID pHolderUUID) {
-        return LeashDataInnerAPI.getLeashData(pEntity)
+        return Services.WORK_SPACE.getLeashData(pEntity)
                 .map(leashData -> leashData.isLeashedBy(pHolderUUID))
                 .orElse(false);
     }
 
     public static boolean isLeashHolder(@NotNull Entity pEntity, BlockPos pKnotPos) {
-        return LeashDataInnerAPI.getLeashData(pEntity)
+        return Services.WORK_SPACE.getLeashData(pEntity)
                 .map(leashData -> leashData.isLeashedBy(pKnotPos))
                 .orElse(false);
     }

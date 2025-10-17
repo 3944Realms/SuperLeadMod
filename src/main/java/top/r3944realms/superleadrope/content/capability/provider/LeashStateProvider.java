@@ -27,8 +27,8 @@ import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.api.SLPCapability;
-import top.r3944realms.superleadrope.content.capability.impi.LeashStateImpl;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
+import top.r3944realms.superleadrope.content.capability.impi.LeashStateImpl;
 
 public class LeashStateProvider implements ICapabilitySerializable<CompoundTag> {
     public static final ResourceLocation LEASH_STATE_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_state");

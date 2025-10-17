@@ -21,12 +21,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.api.type.util.ILeashHelper;
 import top.r3944realms.superleadrope.api.workspace.IWorkSpaceHelper;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
+import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class WorkSpaceHelper implements IWorkSpaceHelper {
@@ -57,6 +62,16 @@ public class WorkSpaceHelper implements IWorkSpaceHelper {
     @Override
     public boolean isLeashable(@NotNull Entity pEntity) {
         return LeashDataImpl.isLeashable(pEntity);
+    }
+
+    @Override
+    public Optional<ILeashData> getLeashData(@NotNull Entity pEntity) {
+        return LeashDataInnerAPI.getLeashData(pEntity);
+    }
+
+    @Override
+    public Optional<ILeashState> getLeashState(@NotNull Entity pEntity) {
+        return LeashStateInnerAPI.getLeashState(pEntity);
     }
 
 }

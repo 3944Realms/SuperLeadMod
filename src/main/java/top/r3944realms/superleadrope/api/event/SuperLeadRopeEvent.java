@@ -25,7 +25,6 @@ import net.minecraftforge.fml.event.IModBusEvent;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashHolder;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
-import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.HashMap;
 import java.util.Map;

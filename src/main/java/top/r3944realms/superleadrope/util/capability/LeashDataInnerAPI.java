@@ -21,8 +21,8 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.api.SLPCapability;
-import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
+import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 
 import java.util.*;
 

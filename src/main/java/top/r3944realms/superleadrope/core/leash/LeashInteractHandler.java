@@ -102,7 +102,7 @@ public class LeashInteractHandler {
             }
             if (!itemStack.isEmpty()) {
                 if (itemStack.getItem() == SLPItems.SUPER_LEAD_ROPE.get()) {
-                    LeashCap.ifPresent(iLeashDataCapability -> {
+                     LeashCap.ifPresent(iLeashDataCapability -> {
                         if (iLeashDataCapability.canBeAttachedTo(player)) {
                             boolean success = iLeashDataCapability.addLeash(player);
                             if (success) {

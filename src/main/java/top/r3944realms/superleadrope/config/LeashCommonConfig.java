@@ -82,7 +82,7 @@ public class LeashCommonConfig {
             builder.push("LeashSettings");
             maxLeashLength = builder
                     .comment("Maximum leash distance (in blocks) for any entity")
-                    .defineInRange("maxLeashLength", 12.0, 6.0, 256.0);
+                    .defineInRange("maxLeashLength", 6.0, 6.0, 256.0);
 
             elasticDistanceScale = builder
                     .comment("Default elastic distance for the Super Lead rope")

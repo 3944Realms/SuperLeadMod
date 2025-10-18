@@ -80,8 +80,8 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         return InteractionResultHolder.success(lead);
     }
 
-    public static boolean canUse(ItemStack itemStack) {
-        return itemStack.getDamageValue() < 1200;
+    public static boolean canUse(@NotNull ItemStack itemStack) {
+        return itemStack.getDamageValue() < 1000;
     }
 
     @Override

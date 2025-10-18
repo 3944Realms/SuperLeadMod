@@ -34,7 +34,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -96,10 +95,10 @@ public class LeashDataImpl implements ILeashData {
     private long lastSyncTime;
     @Nullable
     private Double staticMaxDistance;
-    private double defaultMaxDistance;
+    private double defaultMaxDistance = 6.0;
     @Nullable
     private Double staticElasticDistanceScale;
-    private double defaultElasticDistanceScale;
+    private double defaultElasticDistanceScale = 1.0;
     private final Set<UUID> delayedHolders = new CopyOnWriteArraySet<>();
     private final Map<UUID, LeashInfo> leashHolders = new ConcurrentHashMap<>();
     // 引入解决 绳结不保存导致第二进入持有者不存在的问题
@@ -168,7 +167,7 @@ public class LeashDataImpl implements ILeashData {
 
     @Override
     public double getDefaultMaxDistance() {
-        boolean isNotClient = !FMLEnvironment.dist.isClient();
+        boolean isNotClient = !this.entity.level().isClientSide();
         if (isNotClient) {
             defaultMaxDistance = CommonEventHandler.leashConfigManager.getMaxLeashLength();
         }
@@ -209,7 +208,7 @@ public class LeashDataImpl implements ILeashData {
 
     @Override
     public double getDefaultElasticDistanceScale() {
-        boolean isNotClient = !FMLEnvironment.dist.isClient();
+        boolean isNotClient = !this.entity.level().isClientSide();
         if (isNotClient) {
             defaultElasticDistanceScale = CommonEventHandler.leashConfigManager.getElasticDistanceScale();
         }
@@ -875,12 +874,12 @@ public class LeashDataImpl implements ILeashData {
         double elasticLimitDistance = maxDistance * elasticDistanceScale;
         // 1. 检查是否超出断裂距离
         if (distance > extremeSnapDist) {
-            if (info.keepLeashTicks() > 0) {
+            if (info.keepLeashTicks() >= 0) {
                 // 计算临界拉力
                 Vec3 pullForce = calculateCriticalPullForce(holderPos, entityPos, distance, maxDistance, elasticLimitDistance);
                 entry.setValue(info.decrementKeepTicks());
                 MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.keepNotBreakTick(this.entity, entry.getValue().keepLeashTicks(), holder, entry));
-                return pullForce;
+                if (entry.getValue().keepLeashTicks() > 0) return pullForce;
             }
             // 断裂
             removeLeash(holder);
@@ -907,47 +906,74 @@ public class LeashDataImpl implements ILeashData {
     // 计算正常拉力
     @Contract("_, _, _, _, _ -> new")
     private @NotNull Vec3 calculatePullForce(@NotNull Vec3 holderPos, Vec3 entityPos, double distance, double maxDistance, double elasticLimitDistance) {
-        Vec3 pullDirection = holderPos.subtract(entityPos).normalize();
-        double pullStrength = 0.2;
+        double extremeSnapDistance = maxDistance * CommonEventHandler.leashConfigManager.getExtremeSnapFactor();
 
-        // 计算超过弹性限度的距离
-        double excessDistance = distance - elasticLimitDistance;
-
-        if (distance > maxDistance) {
-            double excessRatio = (distance - maxDistance) / (maxDistance - elasticLimitDistance);
-            pullStrength += excessRatio * 0.8;
+        if (distance <= elasticLimitDistance) {
+            // 场景1：距离 ≤ elasticLimitDistance - 正常弹性拉力
+            return calculateNormalPullForce(holderPos, entityPos, distance, elasticLimitDistance);
+        } else if (distance <= extremeSnapDistance) {
+            // 场景2：elasticLimitDistance < distance ≤ extremeSnapDistance - 增强拉力
+            return calculateEnhancedPullForce(holderPos, entityPos, distance, elasticLimitDistance, extremeSnapDistance);
+        } else {
+            // 场景3：distance > extremeSnapDistance - 临界拉力
+            return calculateCriticalPullForce(holderPos, entityPos, distance, elasticLimitDistance, extremeSnapDistance);
         }
+    }
 
-        // 拉力与超过弹性限度的距离成正比
+    private @NotNull Vec3 calculateNormalPullForce(@NotNull Vec3 holderPos, Vec3 entityPos, double distance, double elasticLimitDistance) {
+        Vec3 pullDirection = holderPos.subtract(entityPos).normalize();
+        double basePullStrength = 0.2;
+
+        // 轻微拉力，保持弹性
+        double excessDistance = Math.max(0, distance - (elasticLimitDistance * 0.8)); // 在接近极限时开始轻微拉动
+        Vec3 pullForce = pullDirection.scale(
+                excessDistance * basePullStrength * CommonEventHandler.leashConfigManager.getSpringDampening()
+        );
+
+        return applyElasticityFactors(pullForce);
+    }
+    private @NotNull Vec3 calculateEnhancedPullForce(@NotNull Vec3 holderPos, Vec3 entityPos, double distance,
+                                                     double elasticLimitDistance, double extremeSnapDistance) {
+        Vec3 pullDirection = holderPos.subtract(entityPos).normalize();
+
+        // 计算超出弹性限度的比例
+        double excessRatio = (distance - elasticLimitDistance) / (extremeSnapDistance - elasticLimitDistance);
+
+        // 拉力强度随超出比例增加而增强
+        double pullStrength = 0.5 + excessRatio * 1.5; // 从0.5线性增加到2.0
+
+        double excessDistance = distance - elasticLimitDistance;
         Vec3 pullForce = pullDirection.scale(
                 excessDistance * pullStrength * CommonEventHandler.leashConfigManager.getSpringDampening()
         );
 
-        return new Vec3(
-                pullForce.x * CommonEventHandler.leashConfigManager.getXElasticity(),
-                pullForce.y * CommonEventHandler.leashConfigManager.getYElasticity(), // 修正：应该是 YElasticity
-                pullForce.z * CommonEventHandler.leashConfigManager.getZElasticity()
-        );
+        return applyElasticityFactors(pullForce);
     }
 
     // 计算临界拉力（修正版）
-    private @NotNull Vec3 calculateCriticalPullForce(@NotNull Vec3 holderPos, Vec3 entityPos, double distance, double maxDistance, double elasticLimitDistance) {
+    private @NotNull Vec3 calculateCriticalPullForce(@NotNull Vec3 holderPos, Vec3 entityPos, double distance,
+                                                     double elasticLimitDistance, double extremeSnapDistance) {
         Vec3 pullDirection = holderPos.subtract(entityPos).normalize();
 
-        double excessRatio = (distance - maxDistance) / maxDistance;
-        double pullStrength = 1.0 + excessRatio * 2.0;
+        // 计算超出临界距离的比例
+        double criticalExcessRatio = (distance - extremeSnapDistance) / extremeSnapDistance;
 
-        // 计算超过弹性限度的距离
+        // 在临界状态下使用更强的拉力
+        double pullStrength = 2.0 + criticalExcessRatio * 3.0; // 从2.0开始，随超出比例增加
+
         double excessDistance = distance - elasticLimitDistance;
-
         Vec3 pullForce = pullDirection.scale(
                 excessDistance * pullStrength * CommonEventHandler.leashConfigManager.getSpringDampening()
         );
 
+        return applyElasticityFactors(pullForce);
+    }
+
+    private @NotNull Vec3 applyElasticityFactors(@NotNull Vec3 force) {
         return new Vec3(
-                pullForce.x * CommonEventHandler.leashConfigManager.getXElasticity(),
-                pullForce.y * CommonEventHandler.leashConfigManager.getYElasticity(),
-                pullForce.z * CommonEventHandler.leashConfigManager.getZElasticity()
+                force.x * CommonEventHandler.leashConfigManager.getXElasticity(),
+                force.y * CommonEventHandler.leashConfigManager.getYElasticity(),
+                force.z * CommonEventHandler.leashConfigManager.getZElasticity()
         );
     }
 
@@ -1181,9 +1207,9 @@ public class LeashDataImpl implements ILeashData {
         ListTag holdersList = new ListTag();
         ListTag delayedHolderList = new ListTag();
         if (staticMaxDistance != null) tag.putDouble("StaticMaxDistance", staticMaxDistance);
-        tag.putDouble("DefaultMaxDistance", defaultMaxDistance);
+        tag.putDouble("DefaultMaxDistance", getDefaultMaxDistance());
         if (staticElasticDistanceScale != null) tag.putDouble("StaticElasticDistanceScale", staticElasticDistanceScale);
-        tag.putDouble("DefaultElasticDistanceScale", defaultElasticDistanceScale);
+        tag.putDouble("DefaultElasticDistanceScale", getDefaultElasticDistanceScale());
         for (LeashInfo info : leashHolders.values()) {
             CompoundTag infoTag = generateCompoundTagFromUUIDLeashInfo(info);
             holdersList.add(infoTag);
@@ -1228,9 +1254,23 @@ public class LeashDataImpl implements ILeashData {
             throw new IllegalArgumentException("LeashInfo.intId is empty");
         }
         infoTag.putInt("HolderID", info.holderIdOpt().get());
-        infoTag.putString("LeashItem", info.reserved());
-        infoTag.putDouble("MaxDistance", info.maxDistance());
-        infoTag.putDouble("ElasticDistance", info.elasticDistanceScale());
+        CompoundTag marks = new CompoundTag();
+        Set<String> markSet = info.marks();
+        if (!markSet.isEmpty()) {
+            marks.putInt("MarkSize", markSet.size());
+            int i = 0;
+            for (String mark : markSet) {
+                marks.putString("Mark" + i++, mark);
+            }
+            infoTag.put("Marks", marks);
+        }
+        infoTag.putString("Reserved", info.reserved());
+        if (info.maxDistance() != null) {
+            infoTag.putDouble("MaxDistance", info.maxDistance());
+        }
+        if (info.elasticDistanceScale() != null) {
+            infoTag.putDouble("ElasticDistanceScale", info.elasticDistanceScale());
+        }
         infoTag.putInt("KeepLeashTicks", info.keepLeashTicks());
         infoTag.putInt("MaxKeepLeashTicks", info.maxKeepLeashTicks());
         return infoTag;
@@ -1248,12 +1288,12 @@ public class LeashDataImpl implements ILeashData {
             } else staticMaxDistance = null;
 
         } else defaultMaxDistance = CommonEventHandler.leashConfigManager.getMaxLeashLength();
-        if(nbt.contains("DefaultElasticDistanceScale")) {
-            staticElasticDistanceScale = nbt.getDouble("DefaultElasticDistanceScale");
+        if (nbt.contains("DefaultElasticDistanceScale")) {
+            defaultElasticDistanceScale = nbt.getDouble("DefaultElasticDistanceScale");
             if (nbt.contains("StaticElasticDistanceScale")) {
                 staticElasticDistanceScale = nbt.getDouble("StaticElasticDistanceScale");
             } else staticElasticDistanceScale = null;
-        } else staticElasticDistanceScale = CommonEventHandler.leashConfigManager.getElasticDistanceScale();
+        } else defaultElasticDistanceScale = CommonEventHandler.leashConfigManager.getElasticDistanceScale();
         if (nbt.contains("LeashHolders", ListTag.TAG_LIST)) {
             ListTag holdersList = nbt.getList("LeashHolders", ListTag.TAG_COMPOUND);
 
@@ -1285,32 +1325,63 @@ public class LeashDataImpl implements ILeashData {
     @Contract("_ -> new")
     private static @NotNull LeashInfo getUUIDLeashDataFormListTag(@NotNull CompoundTag infoTag) {
         if (infoTag.contains("HolderUUID")){
-            return new LeashInfo(
+            if (infoTag.contains("Marks")) {
+                return new LeashInfo(
+                        infoTag.getUUID("HolderUUID"),
+                        infoTag.getInt("HolderID"),
+                        getMarks(infoTag),
+                        infoTag.getString("Reserved"),
+                        infoTag.contains("MaxDistance") ? infoTag.getDouble("MaxDistance") : null,
+                        infoTag.contains("ElasticDistanceScale") ? infoTag.getDouble("ElasticDistanceScale") : null,
+                        infoTag.getInt("KeepLeashTicks"),
+                        infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
+                );
+            } else return new LeashInfo(
                     infoTag.getUUID("HolderUUID"),
                     infoTag.getInt("HolderID"),
-                    infoTag.getString("LeashItem"),
-                    infoTag.getDouble("MaxDistance"),
-                    infoTag.contains("ElasticDistance") ? infoTag.getDouble("ElasticDistance") : 6.0,
+                    infoTag.getString("Reserved"),
+                    infoTag.contains("MaxDistance") ? infoTag.getDouble("MaxDistance") : null,
+                    infoTag.contains("ElasticDistanceScale") ? infoTag.getDouble("ElasticDistanceScale") : null,
                     infoTag.getInt("KeepLeashTicks"),
                     infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
             );
-        } else
-            throw new IllegalArgumentException("Unknown LeashInfo");
+        } else throw new IllegalArgumentException("Unknown LeashInfo");
+    }
+    private static Set<String> getMarks(CompoundTag infoTag) {
+        if (infoTag.contains("Marks")) {
+            CompoundTag marks = infoTag.getCompound("Marks");
+            int size = marks.getInt("MarkSize");
+            Set<String> markSet = new HashSet<>(size);
+            for (int i = 0; i < size; i++) {
+                markSet.add(marks.getString("Mark" + i));
+            }
+            return markSet;
+        } else return Set.of();
     }
     @Contract("_ -> new")
     private static @NotNull LeashInfo getBlockPosLeashDataFormListTag(@NotNull CompoundTag infoTag) {
         if (infoTag.contains("KnotBlockPos")) {
-            return new LeashInfo(
+            if (infoTag.contains("Marks")){
+                return new LeashInfo(
+                        NbtUtils.readBlockPos(infoTag.getCompound("KnotBlockPos")),
+                        infoTag.getInt("HolderID"),
+                        getMarks(infoTag),
+                        infoTag.getString("Reserved"),
+                        infoTag.contains("MaxDistance") ? infoTag.getDouble("MaxDistance") : null,
+                        infoTag.contains("ElasticDistanceScale") ? infoTag.getDouble("ElasticDistanceScale") : null,
+                        infoTag.getInt("KeepLeashTicks"),
+                        infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
+                );
+            } return new LeashInfo(
                     NbtUtils.readBlockPos(infoTag.getCompound("KnotBlockPos")),
                     infoTag.getInt("HolderID"),
-                    infoTag.getString("LeashItem"),
-                    infoTag.getDouble("MaxDistance"),
-                    infoTag.contains("ElasticDistance") ? infoTag.getDouble("ElasticDistance") : 6.0,
+                    infoTag.getString("Reserved"),
+                    infoTag.contains("MaxDistance") ? infoTag.getDouble("MaxDistance") : null,
+                    infoTag.contains("ElasticDistanceScale") ? infoTag.getDouble("ElasticDistanceScale") : null,
                     infoTag.getInt("KeepLeashTicks"),
-                    infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20
-            );
-        } else
-            throw new IllegalArgumentException("Unknown LeashInfo");
+                    infoTag.contains("MaxKeepLeashTicks") ? infoTag.getInt("MaxKeepLeashTicks") : 20)
+            ;
+        } else throw new IllegalArgumentException("Unknown LeashInfo");
     }
 
     @Override
@@ -1347,7 +1418,7 @@ public class LeashDataImpl implements ILeashData {
             return false;
         } else {
             Optional<LeashInfo> leashInfo = getLeashInfo(pEntity);
-            return leashInfo.isEmpty() && (entity.distanceTo(pEntity) <= CommonEventHandler.leashConfigManager.getElasticDistanceScale() * CommonEventHandler.leashConfigManager.getExtremeSnapFactor()) && canBeLeashed();//距离最大,则不可以被固定或转移
+            return leashInfo.isEmpty() && (entity.distanceTo(pEntity) <= CommonEventHandler.leashConfigManager.getMaxLeashLength() * CommonEventHandler.leashConfigManager.getExtremeSnapFactor()) && canBeLeashed();//距离最大,则不可以被固定或转移
         }
     }
 }

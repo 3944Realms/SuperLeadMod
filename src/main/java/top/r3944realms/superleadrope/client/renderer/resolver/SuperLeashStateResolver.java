@@ -23,10 +23,12 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.client.renderer.state.SuperLeashRenderState;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 
 import java.util.HashMap;
@@ -57,11 +59,10 @@ public class SuperLeashStateResolver {
 
         Optional<ILeashState> leashedEntityStateOpt = LeashStateInnerAPI.getLeashState(leashedEntity);
         if (leashedEntityStateOpt.isEmpty()) return Optional.empty();
-
+        ILeashData leashData = LeashDataInnerAPI.getLeashData(leashedEntity).orElse(null);
         ILeashState leashedEntityState = leashedEntityStateOpt.get();
         Optional<ILeashState.LeashState> leashStateOpt = leashedEntityState.getLeashState(holder);
         if (leashStateOpt.isEmpty()) return Optional.empty();
-
         ILeashState.LeashState leashState = leashStateOpt.get();
 
         // 计算实体端偏移
@@ -97,11 +98,15 @@ public class SuperLeashStateResolver {
 
         // 物理参数
         double distance = currentHolderPos.distanceTo(currentEntityPos);
-        double maxDistance = leashInfo.maxDistance();
-        double elasticDistance = leashInfo.elasticDistanceScale();
-        float tension = calculateTension(distance, maxDistance, elasticDistance);
+        double maxDistance = 6.0d;
+        double elasticDistanceScale = 1.0d;
+        if (leashData != null) {
+            maxDistance = leashInfo.maxDistance() == null ? leashData.getCurrentMaxDistance() : leashInfo.maxDistance();
+            elasticDistanceScale = leashInfo.elasticDistanceScale() == null ? leashData.getCurrentElasticDistanceScale() : leashInfo.elasticDistanceScale();
+        }
+        float tension = calculateTension(distance, maxDistance, elasticDistanceScale);
         float stretchRatio = (float) (distance / maxDistance);
-        boolean isCritical = distance > maxDistance * 1.5;
+        boolean isCritical = distance > maxDistance * elasticDistanceScale * 1.5;
 
         // 摆动动态
         SwingDynamics swing = calculateSwingDynamics(
@@ -123,7 +128,7 @@ public class SuperLeashStateResolver {
                 selectColor(tension, isCritical),
                 THICKNESS_BASE + tension * THICKNESS_TENSION,
                 swing.angle(), swing.speed(),
-                leashInfo.maxDistance(),
+                maxDistance,
                 isFirstPerson, holder.blockPosition()
 
 
@@ -268,9 +273,10 @@ public class SuperLeashStateResolver {
         return new SwingDynamics(newAngle, newSpeed);
     }
 
-    private static float calculateTension(double distance, double maxDistance, double elasticDistance) {
+    private static float calculateTension(double distance, double maxDistance, double elasticDistanceScale) {
+        double elasticDistance = maxDistance * elasticDistanceScale;
         if (distance <= elasticDistance) return 0f;
-        double ratio = (distance - elasticDistance) / (maxDistance - elasticDistance);
+        double ratio = (distance - elasticDistance) / (elasticDistance);
         return easeOutQuad(Math.min((float)ratio, MAX_TENSION));
     }
 

@@ -18,8 +18,18 @@ package top.r3944realms.superleadrope.util.nbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 
+/**
+ * The type Nbt reader.
+ */
 public class NBTReader {
     private NBTReader() {}
+
+    /**
+     * Read vec 3 vec 3.
+     *
+     * @param nbt the nbt
+     * @return the vec 3
+     */
     public static Vec3 readVec3(CompoundTag nbt) {
         if (nbt.contains("X") && nbt.contains("Y") && nbt.contains("Z")) {
             return new Vec3(

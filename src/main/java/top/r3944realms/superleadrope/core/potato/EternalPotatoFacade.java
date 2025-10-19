@@ -36,31 +36,67 @@ public class EternalPotatoFacade {
     private static PotatoSavedData savedData;
     // 全局监听器
     private static final List<IEternalPotatoChangeListener> listeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Add listener.
+     *
+     * @param listener the listener
+     */
     public static void addListener(IEternalPotatoChangeListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Remove listener.
+     *
+     * @param listener the listener
+     */
     public static void removeListener(IEternalPotatoChangeListener listener) {
         listeners.remove(listener);
     }
 
-    // 内部方法，用于通知变化
+    /**
+     * Notify change.
+     *
+     * @param uuid   the uuid
+     * @param potato the potato
+     */
+// 内部方法，用于通知变化
     static void notifyChange(UUID uuid, IEternalPotato potato) {
         listeners.forEach(l -> l.onPotatoChanged(uuid, potato));
     }
 
+    /**
+     * Gets manager.
+     *
+     * @return the manager
+     */
     public static IEternalPotatoManager getManager() {
         return manager;
     }
+
+    /**
+     * Gets saved data.
+     *
+     * @return the saved data
+     */
     public static PotatoSavedData getSavedData() {
         return savedData;
     }
+
+    /**
+     * Init saved data.
+     *
+     * @param serverLevel the server level
+     */
     public static void initSavedData(ServerLevel serverLevel) {
         savedData = PotatoSavedData.create(serverLevel);
     }
+
     /**
      * 初始化（进入世界时调用）
-     * @param mode 当前运行模式
+     *
+     * @param mode     当前运行模式
      * @param isServer 是否在服务端
      */
     public static void init(PotatoMode mode, boolean isServer) {
@@ -73,6 +109,12 @@ public class EternalPotatoFacade {
         }
     }
 
+    /**
+     * Gets or create.
+     *
+     * @param uuid the uuid
+     * @return the or create
+     */
     public static IEternalPotato getOrCreate(UUID uuid) {
         if (manager == null) throw new IllegalStateException("EternalPotatoFacade not initialized!");
         IEternalPotato potato = manager.getOrCreate(uuid);
@@ -86,6 +128,11 @@ public class EternalPotatoFacade {
         return potato;
     }
 
+    /**
+     * Remove.
+     *
+     * @param uuid the uuid
+     */
     public static void remove(UUID uuid) {
         if (manager != null) manager.remove(uuid);
 
@@ -98,10 +145,18 @@ public class EternalPotatoFacade {
         }
     }
 
+    /**
+     * Clear.
+     */
     public static void clear() {
         if (manager != null) manager.clear();
     }
 
+    /**
+     * Is server boolean.
+     *
+     * @return the boolean
+     */
     public static boolean isServer() {
         return (manager instanceof SyncedEternalPotatoManager synced) && synced.isServer();
     }

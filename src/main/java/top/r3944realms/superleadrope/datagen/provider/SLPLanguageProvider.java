@@ -29,10 +29,20 @@ import java.util.Map;
 import static top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue.getLan;
 
 
+/**
+ * The type Slp language provider.
+ */
 public class SLPLanguageProvider extends LanguageProvider {
     private final LanguageEnum Language;
     private final Map<String, String> LanKeyMap;
     private static final List<String> objects = new ArrayList<>();
+
+    /**
+     * Instantiates a new Slp language provider.
+     *
+     * @param output the output
+     * @param Lan    the lan
+     */
     public SLPLanguageProvider(PackOutput output, LanguageEnum Lan) {
         super(output, SuperLeadRope.MOD_ID, Lan.local);
         this.Language = Lan;

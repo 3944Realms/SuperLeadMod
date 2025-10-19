@@ -42,10 +42,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * The type Eternal potato item.
+ */
 public class EternalPotatoItem extends Item {
 
     private static final String ITEM_UUID_TAG = "item_uuid";
 
+    /**
+     * Instantiates a new Eternal potato item.
+     *
+     * @param properties the properties
+     */
     public EternalPotatoItem(Properties properties) {
         super(properties.rarity(Rarity.EPIC).stacksTo(1));
     }
@@ -55,7 +63,11 @@ public class EternalPotatoItem extends Item {
         return new EternalPotatoProvider(stack);
     }
 
-    /** 获取或生成 ItemStack 的唯一 UUID */
+    /**
+     * 获取或生成 ItemStack 的唯一 UUID  @param stack the stack
+     *
+     * @return the or create item uuid
+     */
     public static UUID getOrCreateItemUUID(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTag();
         if (tag.hasUUID(ITEM_UUID_TAG)) {
@@ -178,10 +190,22 @@ public class EternalPotatoItem extends Item {
         return stack.copy();
     }
 
+    /**
+     * Gets desc key.
+     *
+     * @param name the name
+     * @return the desc key
+     */
     public static String getDescKey(String name) {
         return "item.eternal_potato.tooltip." + name;
     }
 
+    /**
+     * Gets msg key.
+     *
+     * @param name the name
+     * @return the msg key
+     */
     public static String getMsgKey(String name) {
         return "item.eternal_potato.msg." + name;
     }
@@ -213,6 +237,12 @@ public class EternalPotatoItem extends Item {
 //        }
     }
 
+    /**
+     * Ensure item in inventory.
+     *
+     * @param player the player
+     * @param stack  the stack
+     */
     public static void ensureItemInInventory(Player player, ItemStack stack) {
         if (player.getInventory().add(stack)) return;
 

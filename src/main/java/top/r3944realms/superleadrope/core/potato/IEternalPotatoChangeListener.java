@@ -19,6 +19,15 @@ import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 
 import java.util.UUID;
 
+/**
+ * The interface Eternal potato change listener.
+ */
 public interface IEternalPotatoChangeListener {
+    /**
+     * On potato changed.
+     *
+     * @param uuid   the uuid
+     * @param potato the potato
+     */
     void onPotatoChanged(UUID uuid, IEternalPotato potato);
 }

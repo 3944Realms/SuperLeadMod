@@ -18,8 +18,18 @@ package top.r3944realms.superleadrope.util.nbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 
+/**
+ * The type Nbt writer.
+ */
 public class NBTWriter {
     private NBTWriter() {}
+
+    /**
+     * Write vec 3 compound tag.
+     *
+     * @param vec the vec
+     * @return the compound tag
+     */
     public static CompoundTag writeVec3(Vec3 vec) {
         CompoundTag nbt = new CompoundTag();
         if (vec == null) throw new IllegalArgumentException("Vec3 cannot be null");

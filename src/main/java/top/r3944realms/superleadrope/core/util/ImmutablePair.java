@@ -17,8 +17,23 @@ package top.r3944realms.superleadrope.core.util;
 
 import java.util.Objects;
 
+/**
+ * The type Immutable pair.
+ *
+ * @param <F> the type parameter
+ * @param <S> the type parameter
+ */
 public record ImmutablePair<F, S>(F first, S second) {
 
+    /**
+     * Of immutable pair.
+     *
+     * @param <F>    the type parameter
+     * @param <S>    the type parameter
+     * @param first  the first
+     * @param second the second
+     * @return the immutable pair
+     */
     public static <F, S> ImmutablePair<F, S> of(F first, S second) {
         return new ImmutablePair<>(first, second);
     }

@@ -33,33 +33,67 @@ import org.jetbrains.annotations.Nullable;
 public record PunishmentDefinition(PunishmentDefinition.Type type, float strength,
                                    boolean affectOthers) {
 
+    /**
+     * The constant DEFAULT.
+     */
     public static final PunishmentDefinition DEFAULT = new PunishmentDefinition(Type.LIGHTNING, 0, false);
 
+    /**
+     * The enum Type.
+     */
     public enum Type {
+        /**
+         * Lightning type.
+         */
         LIGHTNING,   // 雷劈
+        /**
+         * Explosion type.
+         */
         EXPLOSION,   // 爆炸
+        /**
+         * Effect type.
+         */
         EFFECT       // 给予负面效果
     }
-    /** 序列化到网络 */
+
+    /**
+     * 序列化到网络  @param buf the buf
+     */
     public void toNetwork(FriendlyByteBuf buf) {
         buf.writeEnum(this.type);
         buf.writeFloat(this.strength);
         buf.writeBoolean(this.affectOthers);
     }
 
-    /** 从网络反序列化 */
+    /**
+     * 从网络反序列化  @param buf the buf
+     *
+     * @return the punishment definition
+     */
     public static PunishmentDefinition fromNetwork(FriendlyByteBuf buf) {
         Type type = buf.readEnum(Type.class);
         float strength = buf.readFloat();
         boolean affectOthers = buf.readBoolean();
         return new PunishmentDefinition(type, strength, affectOthers);
     }
+
     /**
      * 执行惩罚
+     *
+     * @param target the target
+     * @param cause  the cause
      */
     public void execute(ServerPlayer target, DamageSource cause) {
         execute(target, cause, null);
     }
+
+    /**
+     * Execute.
+     *
+     * @param target        the target
+     * @param cause         the cause
+     * @param actionMessage the action message
+     */
     public void execute(ServerPlayer target, DamageSource cause,@Nullable Component actionMessage) {
         ServerLevel level = (ServerLevel) target.level();
         switch (type) {

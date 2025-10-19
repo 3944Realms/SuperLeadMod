@@ -25,9 +25,15 @@ import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
 
+/**
+ * The type Rinding leash.
+ */
 public class RindingLeash {
     /**
      * 获取乘坐链中第一个在白名单的载具，如果没有则返回null
+     *
+     * @param entity the entity
+     * @return the safe whitelist root
      */
     @Nullable
     public static Entity getSafeWhitelistRoot(Entity entity) {
@@ -50,6 +56,10 @@ public class RindingLeash {
      * 获取最终可作用的载具，用于拴绳合力应用。
      * 当链条中没有白名单载具时解除骑乘并返回自身
      * 仅在拴绳合力不为零时调用
+     *
+     * @param entity   the entity
+     * @param hasForce the has force
+     * @return the final entity for leash if force
      */
     public static Entity getFinalEntityForLeashIfForce(Entity entity, boolean hasForce) {
         if (!hasForce || entity == null) {
@@ -75,6 +85,9 @@ public class RindingLeash {
 
     /**
      * 给动物应用拴绳力前的移动控制保护
+     *
+     * @param entity   the entity
+     * @param hasLeash the has leash
      */
     public static void protectAnimalMovement(Entity entity, boolean hasLeash) {
         if (entity instanceof Animal mob) {
@@ -89,6 +102,12 @@ public class RindingLeash {
 
     /**
      * 给玩家应用拴绳力前的发包处理
+     *
+     * @param player        the player
+     * @param leashVec      the leash vec
+     * @param k             the k
+     * @param dampingFactor the damping factor
+     * @param maxForce      the max force
      */
     public static void applyForceToPlayer(ServerPlayer player, Vec3 leashVec, double k, double dampingFactor, double maxForce) {
         Vec3 velocity = player.getDeltaMovement();

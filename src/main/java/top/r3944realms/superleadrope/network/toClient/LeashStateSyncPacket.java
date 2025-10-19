@@ -25,16 +25,37 @@ import top.r3944realms.superleadrope.api.SLPCapability;
 
 import java.util.function.Supplier;
 
+/**
+ * The type Leash state sync packet.
+ */
 public record LeashStateSyncPacket(int entityId, CompoundTag leashState) {
+    /**
+     * Encode.
+     *
+     * @param msg    the msg
+     * @param buffer the buffer
+     */
     public static void encode(LeashStateSyncPacket msg, FriendlyByteBuf buffer) {
         buffer.writeInt(msg.entityId);
         buffer.writeNbt(msg.leashState);
     }
 
+    /**
+     * Decode leash state sync packet.
+     *
+     * @param buffer the buffer
+     * @return the leash state sync packet
+     */
     public static LeashStateSyncPacket decode(FriendlyByteBuf buffer) {
         return new LeashStateSyncPacket(buffer.readInt(), buffer.readNbt());
     }
 
+    /**
+     * Handle.
+     *
+     * @param msg the msg
+     * @param ctx the ctx
+     */
     public static void handle(LeashStateSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ClientLevel level = Minecraft.getInstance().level;

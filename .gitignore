@@ -1,4 +1,6 @@
 .gradle
+.idea
+.run
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -44,3 +46,5 @@ bin/
 # Ignore Gradle build output directory
 build
 /RenderDoc_1.40_64/
+/.run/
+/.idea/

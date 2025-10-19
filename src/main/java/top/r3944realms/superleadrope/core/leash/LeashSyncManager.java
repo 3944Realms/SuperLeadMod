@@ -23,28 +23,79 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
+/**
+ * The type Leash sync manager.
+ */
 // 全局LeashData同步管理器
 public class LeashSyncManager {
+    /**
+     * The Leash data.
+     */
     static final Set<ILeashData> LEASH_DATA = Collections.newSetFromMap(new WeakHashMap<>());
+    /**
+     * The Leash states.
+     */
     static final Set<ILeashState> LEASH_STATES = Collections.newSetFromMap(new WeakHashMap<>());
+
+    /**
+     * The type Data.
+     */
     public static class Data {
+        /**
+         * Track.
+         *
+         * @param instance the instance
+         */
         public static void track(ILeashData instance) {
             LEASH_DATA.add(instance);
         }
+
+        /**
+         * Untrack.
+         *
+         * @param instance the instance
+         */
         public static void untrack(ILeashData instance) {
             LEASH_DATA.remove(instance);
         }
+
+        /**
+         * For each.
+         *
+         * @param consumer the consumer
+         */
         public static void forEach(Consumer<ILeashData> consumer) {
             LEASH_DATA.forEach(consumer);
         }
     }
+
+    /**
+     * The type State.
+     */
     public static class State {
+        /**
+         * Track.
+         *
+         * @param instance the instance
+         */
         public static void track(ILeashState instance) {
             LEASH_STATES.add(instance);
         }
+
+        /**
+         * Untrack.
+         *
+         * @param instance the instance
+         */
         public static void untrack(ILeashState instance) {
             LEASH_STATES.remove(instance);
         }
+
+        /**
+         * For each.
+         *
+         * @param consumer the consumer
+         */
         public static void forEach(Consumer<ILeashState> consumer) {
             LEASH_STATES.forEach(consumer);
         }

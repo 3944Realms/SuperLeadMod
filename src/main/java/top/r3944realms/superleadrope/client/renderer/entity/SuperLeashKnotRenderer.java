@@ -31,10 +31,19 @@ import top.r3944realms.superleadrope.client.model.SuperLeashKnotModel;
 import top.r3944realms.superleadrope.client.model.geom.SLPModelLayers;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
+/**
+ * The type Super leash knot renderer.
+ */
 @OnlyIn(Dist.CLIENT)
 public class SuperLeashKnotRenderer extends EntityRenderer<SuperLeashKnotEntity> {
     private static final ResourceLocation KNOT_LOCATION = new ResourceLocation(SuperLeadRope.MOD_ID, "textures/entity/super_lead_knot.png");
     private final SuperLeashKnotModel<SuperLeashKnotEntity> model;
+
+    /**
+     * Instantiates a new Super leash knot renderer.
+     *
+     * @param context the context
+     */
     public SuperLeashKnotRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.model = new SuperLeashKnotModel<>(context.bakeLayer(SLPModelLayers.SUPER_LEASH_KNOT));

@@ -26,9 +26,15 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * The type Riding saver.
+ */
 public class RidingSaver {
     /**
      * 保存骑乘关系
+     *
+     * @param entity the entity
+     * @return the riding relationship
      */
     public static RidingRelationship save(@Nullable Entity entity) {
         return save(entity, true);
@@ -36,6 +42,10 @@ public class RidingSaver {
 
     /**
      * 保存骑乘关系
+     *
+     * @param entity   the entity
+     * @param findRoot the find root
+     * @return the riding relationship
      */
     public static RidingRelationship save(@Nullable Entity entity, boolean findRoot) {
         if (entity == null) {
@@ -98,9 +108,13 @@ public class RidingSaver {
 
         return rootRelationship;
     }
+
     /**
      * 过滤骑乘关系，只保留白名单根节点及其合法子树
      * 如果根节点不在白名单，则回退到第一个合法父节点
+     *
+     * @param relationship the relationship
+     * @return the riding relationship
      */
     public static RidingRelationship filterByWhitelistRoot(RidingRelationship relationship) {
         if (relationship == null) return null;
@@ -145,6 +159,11 @@ public class RidingSaver {
     // 传入一个实体提供器 Function<UUID, Entity>，通常在服务器侧就是 level::getEntity
     private static Function<UUID, Entity> entityProvider;
 
+    /**
+     * Sets entity provider.
+     *
+     * @param provider the provider
+     */
     public static void setEntityProvider(Function<UUID, Entity> provider) {
         entityProvider = provider;
     }

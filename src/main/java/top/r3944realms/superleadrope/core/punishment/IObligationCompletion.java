@@ -42,8 +42,11 @@ public interface IObligationCompletion {
      * @param stack  操作的物品
      */
     void onCompleted(ServerPlayer player, ItemStack stack);
+
     /**
      * 获取注册 ID
+     *
+     * @return the id
      */
     default String getId() {
         for (Map.Entry<String, IObligationCompletion> entry : SLPObligationCompletionRegistry.getAll().entrySet()) {
@@ -51,15 +54,28 @@ public interface IObligationCompletion {
         }
         return "none";
     }
-    // --- 网络序列化 ---
+
+    /**
+     * To network.
+     *
+     * @param buf the buf
+     */
+// --- 网络序列化 ---
     default void toNetwork(FriendlyByteBuf buf) {
         buf.writeUtf(this.getId());
     }
 
+    /**
+     * From network obligation completion.
+     *
+     * @param buf the buf
+     * @return the obligation completion
+     */
     static IObligationCompletion fromNetwork(FriendlyByteBuf buf) {
         String id = buf.readUtf();
         return SLPObligationCompletionRegistry.byId(id); // 如果没找到，返回 NONE
     }
+
     /**
      * 一个便捷的静态空实现（默认永不完成）
      */

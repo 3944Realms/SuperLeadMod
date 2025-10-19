@@ -25,46 +25,93 @@ public class RidingRelationship {
     private UUID vehicleId;
     private List<RidingRelationship> passengers;
 
+    /**
+     * Instantiates a new Riding relationship.
+     */
     public RidingRelationship() {
         this.passengers = new ArrayList<>();
     }
 
+    /**
+     * Instantiates a new Riding relationship.
+     *
+     * @param passengers the passengers
+     * @param vehicleId  the vehicle id
+     * @param entityId   the entity id
+     */
     public RidingRelationship(List<RidingRelationship> passengers, UUID vehicleId, UUID entityId) {
         this.passengers = passengers != null ? passengers : new ArrayList<>();
         this.vehicleId = vehicleId;
         this.entityId = entityId;
     }
 
+    /**
+     * Gets entity id.
+     *
+     * @return the entity id
+     */
     public UUID getEntityId() {
         return entityId;
     }
 
+    /**
+     * Sets entity id.
+     *
+     * @param entityId the entity id
+     */
     public void setEntityId(UUID entityId) {
         this.entityId = entityId;
     }
 
+    /**
+     * Gets passengers.
+     *
+     * @return the passengers
+     */
     public List<RidingRelationship> getPassengers() {
         return Collections.unmodifiableList(passengers);
     }
 
+    /**
+     * Sets passengers.
+     *
+     * @param passengers the passengers
+     */
     public void setPassengers(List<RidingRelationship> passengers) {
         this.passengers = passengers != null ? passengers : new ArrayList<>();
     }
 
+    /**
+     * Add passenger.
+     *
+     * @param passenger the passenger
+     */
     public void addPassenger(RidingRelationship passenger) {
         this.passengers.add(passenger);
     }
 
+    /**
+     * Gets vehicle id.
+     *
+     * @return the vehicle id
+     */
     public UUID getVehicleId() {
         return vehicleId;
     }
 
+    /**
+     * Sets vehicle id.
+     *
+     * @param vehicleId the vehicle id
+     */
     public void setVehicleId(UUID vehicleId) {
         this.vehicleId = vehicleId;
     }
 
     /**
      * 获取所有嵌套乘客的数量
+     *
+     * @return the total passenger count
      */
     public int getTotalPassengerCount() {
         int count = passengers.size();
@@ -76,6 +123,9 @@ public class RidingRelationship {
 
     /**
      * 检查是否包含特定实体
+     *
+     * @param entityId the entity id
+     * @return the boolean
      */
     public boolean containsEntity(UUID entityId) {
         if (Objects.equals(this.entityId, entityId)) {

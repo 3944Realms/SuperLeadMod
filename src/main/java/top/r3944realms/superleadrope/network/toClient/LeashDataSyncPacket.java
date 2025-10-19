@@ -25,17 +25,38 @@ import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.function.Supplier;
 
+/**
+ * The type Leash data sync packet.
+ */
 public record LeashDataSyncPacket(int entityId, CompoundTag leashData) {
 
+    /**
+     * Encode.
+     *
+     * @param msg    the msg
+     * @param buffer the buffer
+     */
     public static void encode(LeashDataSyncPacket msg, FriendlyByteBuf buffer) {
         buffer.writeInt(msg.entityId);
         buffer.writeNbt(msg.leashData);
     }
 
+    /**
+     * Decode leash data sync packet.
+     *
+     * @param buffer the buffer
+     * @return the leash data sync packet
+     */
     public static LeashDataSyncPacket decode(FriendlyByteBuf buffer) {
         return new LeashDataSyncPacket(buffer.readInt(), buffer.readNbt());
     }
 
+    /**
+     * Handle.
+     *
+     * @param msg the msg
+     * @param ctx the ctx
+     */
     public static void handle(LeashDataSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ClientLevel level = Minecraft.getInstance().level;

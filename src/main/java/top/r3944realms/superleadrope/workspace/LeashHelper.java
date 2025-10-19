@@ -16,6 +16,7 @@
 package top.r3944realms.superleadrope.workspace;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
 import top.r3944realms.superleadrope.CommonEventHandler;
 import top.r3944realms.superleadrope.api.SLPCapability;
 import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
@@ -26,8 +27,12 @@ import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * The type Leash helper.
+ */
 public class LeashHelper implements ILeashHelper {
     @Override
     public IHolder getHolderHelper(Entity holder) {
@@ -38,8 +43,18 @@ public class LeashHelper implements ILeashHelper {
             }
 
             @Override
-            public Set<ILeashData> getAllLeashData() {
+            public Set<ILeashData> getAllLeash() {
                 return SuperLeadRopeApi.leashableInArea(getHolderEntity())
+                        .stream()
+                        .map(i -> i.getCapability(SLPCapability.LEASH_DATA_CAP).resolve())
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toSet());
+            }
+
+            @Override
+            public Set<ILeashData> getLeash(Class<Entity> clazz, AABB box, Predicate<Entity> filter) {
+                return SuperLeadRopeApi.leashableInArea(getHolderEntity(), clazz, box, filter)
                         .stream()
                         .map(i -> i.getCapability(SLPCapability.LEASH_DATA_CAP).resolve())
                         .filter(Optional::isPresent)

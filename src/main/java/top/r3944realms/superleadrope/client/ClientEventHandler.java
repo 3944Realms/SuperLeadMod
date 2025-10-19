@@ -41,10 +41,21 @@ import java.io.IOException;
 
 import static top.r3944realms.superleadrope.core.util.PotatoModeHelper.getCurrentMode;
 
+/**
+ * The type Client event handler.
+ */
 @OnlyIn(Dist.CLIENT)
 public class ClientEventHandler {
+    /**
+     * The type Game.
+     */
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, value = Dist.CLIENT, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
     public static class Game {
+        /**
+         * On level renderer.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onLevelRenderer (RenderLevelStageEvent event) {
             if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
@@ -52,15 +63,30 @@ public class ClientEventHandler {
             }
             LeashRenderHandler.onRenderLevelStage(event.getPoseStack(), event.getPartialTick());
         }
-        // 未使用-注释
+
+        /**
+         * On player logged out.
+         *
+         * @param event the event
+         */
+// 未使用-注释
         @SubscribeEvent
         public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
             // 清理客户端缓存数据
             EternalPotatoFacade.clear();
         }
     }
+
+    /**
+     * The type Mod.
+     */
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, value = Dist.CLIENT, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.MOD)
     public static class Mod {
+        /**
+         * On client initializer.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onClientInitializer (FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
@@ -76,14 +102,33 @@ public class ClientEventHandler {
                 EternalPotatoFacade.init(mode, false); // 客户端
             });
         }
+
+        /**
+         * On register model layer.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onRegisterModelLayer (EntityRenderersEvent.RegisterLayerDefinitions event) {
             event.registerLayerDefinition(SLPModelLayers.SUPER_LEASH_KNOT, SuperLeashKnotModel::createBodyLayer);
         }
+
+        /**
+         * On register renderer.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onRegisterRenderer (EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(SLPEntityTypes.SUPER_LEAD_KNOT.get(), SuperLeashKnotRenderer::new);
         }
+
+        /**
+         * On register shaders.
+         *
+         * @param event the event
+         * @throws IOException the io exception
+         */
         @SubscribeEvent
         public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
             SLPShaderRegistry.registerShaders(event);

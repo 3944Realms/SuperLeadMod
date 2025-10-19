@@ -23,12 +23,40 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import top.r3944realms.superleadrope.SuperLeadRope;
 
+/**
+ * The type Slp render type.
+ */
 public class SLPRenderType extends RenderType {
+    /**
+     * Instantiates a new Slp render type.
+     *
+     * @param name             the name
+     * @param format           the format
+     * @param mode             the mode
+     * @param bufferSize       the buffer size
+     * @param affectsCrumbling the affects crumbling
+     * @param sortOnUpload     the sort on upload
+     * @param setupState       the setup state
+     * @param clearState       the clear state
+     */
     public SLPRenderType(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
     }
+
+    /**
+     * The Super leash.
+     */
     static RenderType SUPER_LEASH;
+    /**
+     * The constant POSITION_COLOR_LIGHTMAP_NORMAL.
+     */
     public static final VertexFormat POSITION_COLOR_LIGHTMAP_NORMAL;
+
+    /**
+     * Leash type render type.
+     *
+     * @return the render type
+     */
     public static RenderType leashType() {
         return SUPER_LEASH;
     }

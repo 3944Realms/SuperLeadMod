@@ -30,11 +30,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The type Slp item model provider.
+ */
 public class SLPItemModelProvider extends ItemModelProvider {
     private static List<Item> objectList;
+    /**
+     * The constant GENERATED.
+     */
     public static final String GENERATED = "item/generated";
+    /**
+     * The constant HANDHELD.
+     */
     public static final String HANDHELD = "item/handheld";
 
+    /**
+     * Instantiates a new Slp item model provider.
+     *
+     * @param output             the output
+     * @param existingFileHelper the existing file helper
+     */
     public SLPItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, SuperLeadRope.MOD_ID, existingFileHelper);
         objectList = new ArrayList<>();
@@ -59,12 +74,29 @@ public class SLPItemModelProvider extends ItemModelProvider {
         objectList.forEach(this::basicItem);
     }
 
+    /**
+     * Item generate model.
+     *
+     * @param item     the item
+     * @param location the location
+     */
     public void itemGenerateModel(Item item, ResourceLocation location){
         withExistingParent(itemName(item), GENERATED).texture("layer0", location);
     }
+
+    /**
+     * Item hand held model.
+     *
+     * @param item     the item
+     * @param location the location
+     */
     public void itemHandHeldModel(Item item, ResourceLocation location){
         withExistingParent(itemName(item), HANDHELD).texture("layer0", location);
     }
+
+    /**
+     * Super lead rope model.
+     */
     public void superLeadRopeModel() {
         // 生成主模型，支持根据 predicate 切换模型
         ItemModelBuilder builder = getBuilder(SuperLeadRope.MOD_ID + ":super_lead_rope");
@@ -83,10 +115,22 @@ public class SLPItemModelProvider extends ItemModelProvider {
                 .texture("layer0", resourceItem("broken_super_lead_rope"));
     }
 
+    /**
+     * Item name string.
+     *
+     * @param item the item
+     * @return the string
+     */
     public String itemName(Item item){
         return Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item)).getPath();
     }
 
+    /**
+     * Resource item resource location.
+     *
+     * @param path the path
+     * @return the resource location
+     */
     public ResourceLocation resourceItem(String path){
         return modLoc("item/" + path);
     }

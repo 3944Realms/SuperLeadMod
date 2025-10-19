@@ -22,15 +22,36 @@ import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+/**
+ * The type Packet eternal potato remove packet.
+ */
 public record PacketEternalPotatoRemovePacket(UUID itemUUID) {
+    /**
+     * Encode.
+     *
+     * @param msg the msg
+     * @param buf the buf
+     */
     public static void encode(PacketEternalPotatoRemovePacket msg, FriendlyByteBuf buf) {
         buf.writeUUID(msg.itemUUID());
     }
 
+    /**
+     * Decode packet eternal potato remove packet.
+     *
+     * @param buf the buf
+     * @return the packet eternal potato remove packet
+     */
     public static PacketEternalPotatoRemovePacket decode(FriendlyByteBuf buf) {
         return new PacketEternalPotatoRemovePacket(buf.readUUID());
     }
 
+    /**
+     * Handle.
+     *
+     * @param msg the msg
+     * @param ctx the ctx
+     */
     public static void handle(PacketEternalPotatoRemovePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             // 客户端收到移除请求

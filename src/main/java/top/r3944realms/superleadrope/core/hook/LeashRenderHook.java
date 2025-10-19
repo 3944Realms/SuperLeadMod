@@ -24,7 +24,17 @@ import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The type Leash render hook.
+ */
 public class LeashRenderHook {
+    /**
+     * Should render extra boolean.
+     *
+     * @param mob    the mob
+     * @param camera the camera
+     * @return the boolean
+     */
     public static boolean shouldRenderExtra(Mob mob, Frustum camera) {
         SuperLeadRope.logger.debug("[SuperLeash] Checking entity: {} at position: {}, {}, {}", mob.getName().getString(), mob.getX(), mob.getY(), mob.getZ());
         AtomicBoolean flag = new AtomicBoolean(false);

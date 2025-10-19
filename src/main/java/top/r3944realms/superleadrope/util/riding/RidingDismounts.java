@@ -21,9 +21,14 @@ import top.r3944realms.superleadrope.util.model.RidingRelationship;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * The type Riding dismounts.
+ */
 public class RidingDismounts {
     /**
      * 解除单个实体的骑乘关系
+     *
+     * @param entity the entity
      */
     public static void dismountEntity(Entity entity) {
         if (entity == null) {
@@ -41,6 +46,8 @@ public class RidingDismounts {
 
     /**
      * 解除实体及其所有乘客的骑乘关系（非递归）
+     *
+     * @param entity the entity
      */
     public static void dismountAllPassengers(Entity entity) {
         if (entity == null) {
@@ -65,6 +72,8 @@ public class RidingDismounts {
 
     /**
      * 解除根实体的骑乘关系（包括从载具下车）
+     *
+     * @param entity the entity
      */
     public static void dismountRootEntity(Entity entity) {
         if (entity == null) {
@@ -86,6 +95,10 @@ public class RidingDismounts {
 
     /**
      * 安全解除骑乘关系（带超时保护）
+     *
+     * @param entity        the entity
+     * @param maxIterations the max iterations
+     * @return the boolean
      */
     public static boolean safeDismountAll(Entity entity, int maxIterations) {
         if (entity == null) {
@@ -118,6 +131,8 @@ public class RidingDismounts {
 
     /**
      * 批量解除多个实体的骑乘关系
+     *
+     * @param entities the entities
      */
     public static void dismountEntities(Collection<Entity> entities) {
         if (entities == null || entities.isEmpty()) {
@@ -151,6 +166,9 @@ public class RidingDismounts {
 
     /**
      * 根据骑乘关系数据结构解除骑乘
+     *
+     * @param relationship   the relationship
+     * @param entityProvider the entity provider
      */
     public static void dismountByRelationship(RidingRelationship relationship,
                                               Function<UUID, Entity> entityProvider) {
@@ -181,6 +199,8 @@ public class RidingDismounts {
 
     /**
      * 立即解除所有骑乘关系（强制方式）
+     *
+     * @param entity the entity
      */
     public static void forceDismountAll(Entity entity) {
         if (entity == null) {

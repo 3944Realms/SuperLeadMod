@@ -23,21 +23,58 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import top.r3944realms.superleadrope.SuperLeadRope;
 
+/**
+ * The type Slp sound events.
+ */
 public class SLPSoundEvents {
+    /**
+     * The constant SOUND_EVENTS.
+     */
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, SuperLeadRope.MOD_ID);
+    /**
+     * The constant RL_LEAD_UNTIED.
+     */
     public static final ResourceLocation RL_LEAD_UNTIED = new ResourceLocation(SuperLeadRope.MOD_ID,"item/superlead/lead_untied");
+    /**
+     * The constant RL_LEAD_TIED.
+     */
     public static final ResourceLocation RL_LEAD_TIED = new ResourceLocation(SuperLeadRope.MOD_ID,"item/superlead/lead_tied");
+    /**
+     * The constant RL_LEAD_BREAK.
+     */
     public static final ResourceLocation RL_LEAD_BREAK = new ResourceLocation(SuperLeadRope.MOD_ID,"item/superlead/lead_break");
+    /**
+     * The constant LEAD_UNTIED.
+     */
     public static final RegistryObject<SoundEvent> LEAD_UNTIED = registerSound("lead_untied");
+    /**
+     * The constant LEAD_TIED.
+     */
     public static final RegistryObject<SoundEvent> LEAD_TIED = registerSound("lead_tied");
+    /**
+     * The constant LEAD_BREAK.
+     */
     public static final RegistryObject<SoundEvent> LEAD_BREAK = registerSound("lead_break");
     private static RegistryObject<SoundEvent> registerSound(String name) {
         ResourceLocation location = new ResourceLocation(SuperLeadRope.MOD_ID, name);
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(location));
     }
+
+    /**
+     * Register.
+     *
+     * @param bus the bus
+     */
     public static void register(IEventBus bus) {
         SOUND_EVENTS.register(bus);
     }
+
+    /**
+     * Gets sub title translate key.
+     *
+     * @param name the name
+     * @return the sub title translate key
+     */
     public static String getSubTitleTranslateKey(String name) {
         return "sound." + SuperLeadRope.MOD_ID + ".subtitle." + name;
     }

@@ -19,8 +19,21 @@ import dev.dubhe.curtain.features.player.patches.EntityPlayerMPFake;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.fml.ModList;
 
+/**
+ * The type Curtain compat.
+ */
 public class CurtainCompat {
+    /**
+     * The constant isModLoaded.
+     */
     public final static boolean isModLoaded = ModList.get().isLoaded("curtain");
+
+    /**
+     * Is not fake player boolean.
+     *
+     * @param player the player
+     * @return the boolean
+     */
     public static boolean isNotFakePlayer(Player player) {
         if (isModLoaded) {
             return !(player instanceof EntityPlayerMPFake);

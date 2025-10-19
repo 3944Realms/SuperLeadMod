@@ -15,24 +15,81 @@
 
 package top.r3944realms.superleadrope.util.lang;
 
+/**
+ * The enum Mod part enum.
+ */
 public enum ModPartEnum {
+    /**
+     * Default mod part enum.
+     */
     DEFAULT,
+    /**
+     * Item mod part enum.
+     */
     ITEM,
+    /**
+     * Block mod part enum.
+     */
     BLOCK,
+    /**
+     * Enchantment mod part enum.
+     */
     ENCHANTMENT,
+    /**
+     * Advancement mod part enum.
+     */
     ADVANCEMENT,
+    /**
+     * Creative tab mod part enum.
+     */
     CREATIVE_TAB,
+    /**
+     * Config mod part enum.
+     */
     CONFIG,
+    /**
+     * Entity mod part enum.
+     */
     ENTITY,
+    /**
+     * Gui mod part enum.
+     */
     GUI,
+    /**
+     * Author mod part enum.
+     */
     AUTHOR,
+    /**
+     * Title mod part enum.
+     */
     TITLE,
+    /**
+     * Name mod part enum.
+     */
     NAME,
+    /**
+     * Game rule mod part enum.
+     */
     GAME_RULE,
+    /**
+     * Description mod part enum.
+     */
     DESCRIPTION,
+    /**
+     * Info mod part enum.
+     */
     INFO,
+    /**
+     * Message mod part enum.
+     */
     MESSAGE,
+    /**
+     * Command mod part enum.
+     */
     COMMAND,
+    /**
+     * Sound mod part enum.
+     */
     SOUND
 
 }

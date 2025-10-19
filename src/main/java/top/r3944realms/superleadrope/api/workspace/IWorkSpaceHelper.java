@@ -18,6 +18,7 @@ package top.r3944realms.superleadrope.api.workspace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
@@ -28,12 +29,78 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * The interface Work space helper.
+ */
 public interface IWorkSpaceHelper {
+    /**
+     * Leashable in area list.
+     *
+     * @param pLevel        the p level
+     * @param pPos          the p pos
+     * @param filter        the filter
+     * @param fetchDistance the fetch distance
+     * @return the list
+     */
     @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Vec3 pPos, Predicate<Entity> filter, double fetchDistance);
+
+    /**
+     * Leashable in area list.
+     *
+     * @param pLevel the p level
+     * @param clazz  the clazz
+     * @param filter the filter
+     * @param box    the box
+     * @return the list
+     */
+    @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Class<Entity> clazz,Predicate<Entity> filter, AABB box);
+
+
+    /**
+     * Gets leash helper.
+     *
+     * @return the leash helper
+     */
     ILeashHelper getLeashHelper();
+
+    /**
+     * Is super lead knot boolean.
+     *
+     * @param pEntity the p entity
+     * @return the boolean
+     */
     boolean isSuperLeadKnot(Entity pEntity);
+
+    /**
+     * Gets super lead pos.
+     *
+     * @param pEntity the p entity
+     * @return the super lead pos
+     * @throws IllegalArgumentException the illegal argument exception
+     */
     BlockPos getSuperLeadPos(Entity pEntity) throws IllegalArgumentException;
+
+    /**
+     * Is leashable boolean.
+     *
+     * @param pEntity the p entity
+     * @return the boolean
+     */
     boolean isLeashable(@NotNull Entity pEntity);
+
+    /**
+     * Gets leash data.
+     *
+     * @param pEntity the p entity
+     * @return the leash data
+     */
     Optional<ILeashData> getLeashData(@NotNull Entity pEntity);
+
+    /**
+     * Gets leash state.
+     *
+     * @param pEntity the p entity
+     * @return the leash state
+     */
     Optional<ILeashState> getLeashState(@NotNull Entity pEntity);
 }

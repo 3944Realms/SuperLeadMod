@@ -18,6 +18,9 @@ package top.r3944realms.superleadrope.client.renderer.state;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
+/**
+ * The type Super leash render state.
+ */
 public record SuperLeashRenderState(
         Vec3 startPos,          // 当前帧起点位置
         Vec3 endPos,            // 当前帧终点位置
@@ -35,16 +38,26 @@ public record SuperLeashRenderState(
         boolean isFirstPerson,        // 是否是第一人称
         BlockPos belowBlockPos     // 持有者位置
 ) {
-    // 预定义颜色常量
+    /**
+     * The constant COLOR_NORMAL.
+     */
+// 预定义颜色常量
     public static final int COLOR_NORMAL = 0xFF6B4E2E; // 深棕色（木绳色，温暖自然）
+    /**
+     * The constant COLOR_TENSION.
+     */
     public static final int COLOR_TENSION = 0xFFD9A066; // 黄色偏橙（张力稍高时微亮）
+    /**
+     * The constant COLOR_CRITICAL.
+     */
     public static final int COLOR_CRITICAL = 0xFFB03A2E; // 暗红色（即将断裂，警告色）
 
     /**
      * 计算当前帧的摆动偏移量(用于波浪效果)
-     * @param progress 沿绳子的进度(0.0-1.0)
+     *
+     * @param progress     沿绳子的进度(0.0-1.0)
      * @param partialTicks 部分tick时间
-     * @return 垂直于绳子方向的偏移向量
+     * @return 垂直于绳子方向的偏移向量 swing offset
      */
     public Vec3 getSwingOffset(float progress, float partialTicks) {
         // 基于正弦波的摆动效果

@@ -17,10 +17,19 @@ package top.r3944realms.superleadrope.core.exception;
 
 import java.util.UUID;
 
+/**
+ * The type Riding cycle exception.
+ */
 public class RidingCycleException extends IllegalStateException {
     private final UUID entityId;
     private final UUID vehicleId;
 
+    /**
+     * Instantiates a new Riding cycle exception.
+     *
+     * @param entityId  the entity id
+     * @param vehicleId the vehicle id
+     */
     public RidingCycleException(UUID entityId, UUID vehicleId) {
         super(String.format("Cyclic riding reference detected. " +
                         "Entity %s cannot be added as passenger to vehicle %s " +
@@ -30,10 +39,20 @@ public class RidingCycleException extends IllegalStateException {
         this.vehicleId = vehicleId;
     }
 
+    /**
+     * Gets entity id.
+     *
+     * @return the entity id
+     */
     public UUID getEntityId() {
         return entityId;
     }
 
+    /**
+     * Gets vehicle id.
+     *
+     * @return the vehicle id
+     */
     public UUID getVehicleId() {
         return vehicleId;
     }

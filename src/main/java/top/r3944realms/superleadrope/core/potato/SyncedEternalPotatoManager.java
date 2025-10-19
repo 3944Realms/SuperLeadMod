@@ -34,6 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
 class SyncedEternalPotatoManager implements IEternalPotatoManager {
     private final Map<UUID, EternalPotatoImpl> GLOBAL_DATA = new ConcurrentHashMap<>();
     private final boolean isServer;
+
+    /**
+     * Instantiates a new Synced eternal potato manager.
+     *
+     * @param isServer the is server
+     */
     public SyncedEternalPotatoManager(boolean isServer) {
         this.isServer = isServer;
     }
@@ -83,6 +89,11 @@ class SyncedEternalPotatoManager implements IEternalPotatoManager {
         }
     }
 
+    /**
+     * Is server boolean.
+     *
+     * @return the boolean
+     */
     public boolean isServer() {
         return isServer;
     }

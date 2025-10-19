@@ -27,7 +27,17 @@ import top.r3944realms.superleadrope.content.SLPTags;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The type Slp item tag provider.
+ */
 public class SLPItemTagProvider extends ItemTagsProvider {
+    /**
+     * Instantiates a new Slp item tag provider.
+     *
+     * @param packOutput         the pack output
+     * @param holderProvider     the holder provider
+     * @param existingFileHelper the existing file helper
+     */
     public SLPItemTagProvider(
             PackOutput packOutput,
             CompletableFuture<HolderLookup.Provider> holderProvider,

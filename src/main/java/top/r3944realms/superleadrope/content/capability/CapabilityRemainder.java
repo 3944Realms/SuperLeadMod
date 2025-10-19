@@ -20,7 +20,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 
+/**
+ * The type Capability remainder.
+ */
 public class CapabilityRemainder {
+    /**
+     * On player clone.
+     *
+     * @param event the event
+     */
     public static void onPlayerClone(PlayerEvent.Clone event) {
         Player newEntity = event.getEntity();
         if(newEntity instanceof ServerPlayer newPlayer) {

@@ -43,6 +43,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The type Super leash knot entity.
+ */
 public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
     // 默认尺寸
     private static final float DEFAULT_WIDTH = 0.5f;
@@ -58,11 +61,23 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
             BlockTags.WALLS
     );
 
+    /**
+     * Instantiates a new Super leash knot entity.
+     *
+     * @param pEntityType the p entity type
+     * @param pLevel      the p level
+     */
     public SuperLeashKnotEntity(EntityType<? extends SuperLeashKnotEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
 
+    /**
+     * Instantiates a new Super leash knot entity.
+     *
+     * @param pLevel the p level
+     * @param pPos   the p pos
+     */
     public SuperLeashKnotEntity(Level pLevel, BlockPos pPos) {
         this(SLPEntityTypes.SUPER_LEAD_KNOT.get(), pLevel);
         this.setPos(pPos.getX(), pPos.getY(), pPos.getZ());
@@ -103,6 +118,13 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         return supportBlock;
     }
 
+    /**
+     * Gets or create knot.
+     *
+     * @param pLevel the p level
+     * @param pPos   the p pos
+     * @return the or create knot
+     */
     public static @NotNull SuperLeashKnotEntity getOrCreateKnot(@NotNull Level pLevel, @NotNull BlockPos pPos) {
         int i = pPos.getX();
         int j = pPos.getY();
@@ -126,6 +148,14 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         pLevel.addFreshEntity(superLeashKnotEntity1);
         return superLeashKnotEntity1;
     }
+
+    /**
+     * Get optional.
+     *
+     * @param level the level
+     * @param pos   the pos
+     * @return the optional
+     */
     public static @NotNull Optional<SuperLeashKnotEntity> get(@NotNull Level level, @NotNull BlockPos pos) {
         AABB searchArea = new AABB(pos).inflate(1.0D);
 
@@ -137,7 +167,11 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
 
     /**
      * 创建拴绳结，请不用直接调用这个，除非你知道自己在干上面
-     * @return 拴绳结
+     *
+     * @param pLevel  the p level
+     * @param pPos    the p pos
+     * @param isEmpty the is empty
+     * @return 拴绳结 super leash knot entity
      */
     public static @NotNull SuperLeashKnotEntity createKnot(@NotNull Level pLevel, @NotNull BlockPos pPos, boolean isEmpty) {
         if(isEmpty) {
@@ -179,6 +213,12 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
         //TODO: 未来扩展可配置化大小
     }
 
+    /**
+     * Is support block boolean.
+     *
+     * @param state the state
+     * @return the boolean
+     */
     public static boolean isSupportBlock(BlockState state) {
         for(TagKey<Block> tagKey : SUPPORTED_BLOCK) {
             if(state.is(tagKey)) {

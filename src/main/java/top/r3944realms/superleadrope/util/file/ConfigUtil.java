@@ -25,7 +25,15 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 import java.io.File;
 import java.util.Optional;
 
+/**
+ * The type Config util.
+ */
 public class ConfigUtil {
+    /**
+     * Create file.
+     *
+     * @param children the children
+     */
     public static void createFile(String[] children) {//初始化配置文件目录
         File configFile = new File(FMLPaths.CONFIGDIR.get().toFile(), SuperLeadRope.MOD_ID);
         if (!configFile.exists()) {
@@ -48,6 +56,15 @@ public class ConfigUtil {
         }
     }
 
+    /**
+     * Register config.
+     *
+     * @param context    the context
+     * @param type       the type
+     * @param configSpec the config spec
+     * @param folderName the folder name
+     * @param fileName   the file name
+     */
     public static void registerConfig (
             @NotNull ModLoadingContext context,
             ModConfig.Type type,

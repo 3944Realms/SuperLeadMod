@@ -15,6 +15,9 @@
 
 package top.r3944realms.superleadrope.core.util;
 
+/**
+ * The enum Potato mode.
+ */
 public enum PotatoMode {
     /**
      * 单人 or 局域网主机
@@ -28,6 +31,12 @@ public enum PotatoMode {
      * 远程连接的客户端
      */
     REMOTE_CLIENT;
+
+    /**
+     * Is synced boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSynced() {
         // Synced 模式：DEDICATED 服务端 + REMOTE_CLIENT 客户端
         return this == DEDICATED || this == REMOTE_CLIENT;

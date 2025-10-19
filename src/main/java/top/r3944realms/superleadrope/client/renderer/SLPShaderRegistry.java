@@ -23,9 +23,22 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 
 import java.io.IOException;
 
+/**
+ * The type Slp shader registry.
+ */
 public class SLPShaderRegistry {
     private static final ResourceLocation RL_SUPER_ROPE = new ResourceLocation(SuperLeadRope.MOD_ID, "super_leash");
+    /**
+     * The constant ROPE_SHADER.
+     */
     public static ShaderInstance ROPE_SHADER;
+
+    /**
+     * Register shaders.
+     *
+     * @param event the event
+     * @throws IOException the io exception
+     */
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
         event.registerShader(
                 new ShaderInstance(

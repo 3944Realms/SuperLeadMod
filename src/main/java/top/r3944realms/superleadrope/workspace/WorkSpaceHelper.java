@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.api.type.util.ILeashHelper;
@@ -31,14 +32,23 @@ import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * The type Work space helper.
+ */
 public class WorkSpaceHelper implements IWorkSpaceHelper {
     @Override
-    public @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Vec3 pPos, Predicate<Entity> filter, double fetchDistance) {
+    public @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Vec3 pPos, @Nullable Predicate<Entity> filter, double fetchDistance) {
         AABB box = AABB.ofSize(pPos, fetchDistance, fetchDistance, fetchDistance);
-        return pLevel.getEntitiesOfClass(Entity.class, box, e -> LeashDataImpl.isLeashable(e) && filter.test(e));
+        return pLevel.getEntitiesOfClass(Entity.class, box, e -> LeashDataImpl.isLeashable(e) && Objects.requireNonNullElse(filter, entity -> true).test(e));
+    }
+
+    @Override
+    public @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Class<Entity> clazz, @Nullable Predicate<Entity> filter, AABB box) {
+        return pLevel.getEntitiesOfClass(clazz, box, e -> LeashDataImpl.isLeashable(e) && Objects.requireNonNullElse(filter, entity -> true).test(e));
     }
 
     @Override

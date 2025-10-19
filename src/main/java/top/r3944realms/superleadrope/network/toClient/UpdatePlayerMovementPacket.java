@@ -23,17 +23,39 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
+/**
+ * The type Update player movement packet.
+ */
 public record UpdatePlayerMovementPacket(Operation operation, double x, double y, double z) {
+    /**
+     * Encode.
+     *
+     * @param packet the packet
+     * @param buffer the buffer
+     */
     public static void encode(UpdatePlayerMovementPacket packet, FriendlyByteBuf buffer) {
         buffer.writeEnum(packet.operation());
         buffer.writeDouble(packet.x());
         buffer.writeDouble(packet.y());
         buffer.writeDouble(packet.z());
     }
+
+    /**
+     * Instantiates a new Update player movement packet.
+     *
+     * @param operation the operation
+     * @param vec       the vec
+     */
     public UpdatePlayerMovementPacket(Operation operation, Vec3 vec) {
         this(operation, vec.x, vec.y, vec.z);
     }
 
+    /**
+     * Decode update player movement packet.
+     *
+     * @param buffer the buffer
+     * @return the update player movement packet
+     */
     public static UpdatePlayerMovementPacket decode(FriendlyByteBuf buffer) {
         return new UpdatePlayerMovementPacket(
                 buffer.readEnum(Operation.class),
@@ -43,6 +65,12 @@ public record UpdatePlayerMovementPacket(Operation operation, double x, double y
         );
     }
 
+    /**
+     * Handle.
+     *
+     * @param packet the packet
+     * @param ctx    the ctx
+     */
     public static void handle(UpdatePlayerMovementPacket packet, Supplier<NetworkEvent.Context> ctx) {
         NetworkEvent.Context context = ctx.get();
         context.enqueueWork(() -> {
@@ -57,9 +85,22 @@ public record UpdatePlayerMovementPacket(Operation operation, double x, double y
         );
         context.setPacketHandled(true);
     }
+
+    /**
+     * The enum Operation.
+     */
     public enum Operation {
+        /**
+         * Set operation.
+         */
         SET,
+        /**
+         * Add operation.
+         */
         ADD,
+        /**
+         * Multiply operation.
+         */
         MULTIPLY
     }
 }

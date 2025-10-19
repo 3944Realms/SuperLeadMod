@@ -19,8 +19,22 @@ import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 
 import java.util.ServiceLoader;
 
+/**
+ * The type Services.
+ */
 public class Services {
+    /**
+     * The constant WORK_SPACE.
+     */
     public static final IWorkSpaceHelper WORK_SPACE = load(IWorkSpaceHelper.class);
+
+    /**
+     * Load t.
+     *
+     * @param <T>   the type parameter
+     * @param clazz the clazz
+     * @return the t
+     */
     public static <T> T load(Class<T> clazz) {
         final T loadedService = ServiceLoader.load(clazz)
                 .findFirst()

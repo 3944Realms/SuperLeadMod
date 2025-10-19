@@ -21,7 +21,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
+/**
+ * The enum Slp tool tier.
+ */
 public enum SLPToolTier implements Tier {
+    /**
+     * String slp tool tier.
+     */
     STRING(24, 1.0F, 0.0F, 15, () -> Ingredient.of(SLPTags.Items.LEAD))
     ;
     private final int uses;

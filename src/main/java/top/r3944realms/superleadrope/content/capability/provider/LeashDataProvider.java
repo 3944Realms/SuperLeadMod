@@ -29,10 +29,22 @@ import top.r3944realms.superleadrope.api.SLPCapability;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 
+/**
+ * The type Leash data provider.
+ */
 public class LeashDataProvider implements ICapabilitySerializable<CompoundTag> {
+    /**
+     * The constant LEASH_DATA_REL.
+     */
     public static final ResourceLocation LEASH_DATA_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_data");
     private final ILeashData instance;
     private final LazyOptional<ILeashData> optional;
+
+    /**
+     * Instantiates a new Leash data provider.
+     *
+     * @param entity the entity
+     */
     public LeashDataProvider(Entity entity) {
         this.instance = new LeashDataImpl(entity);
         this.optional = LazyOptional.of(() -> instance);

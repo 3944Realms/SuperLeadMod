@@ -22,10 +22,27 @@ import net.minecraftforge.common.data.SoundDefinitionsProvider;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 
+/**
+ * The type Slp sound definitions provider.
+ */
 public class SLPSoundDefinitionsProvider extends SoundDefinitionsProvider {
+    /**
+     * Instantiates a new Slp sound definitions provider.
+     *
+     * @param output the output
+     * @param helper the helper
+     */
     public SLPSoundDefinitionsProvider(PackOutput output, ExistingFileHelper helper) {
         super(output, SuperLeadRope.MOD_ID, helper);
     }
+
+    /**
+     * Gets sound definition.
+     *
+     * @param subTitle the sub title
+     * @param sounds   the sounds
+     * @return the sound definition
+     */
     public SoundDefinition getSoundDefinition(String subTitle, SoundDefinition.Sound... sounds) {
         return SoundDefinition.definition().subtitle(subTitle).with(sounds);
     }

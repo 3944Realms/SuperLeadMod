@@ -23,9 +23,27 @@ import top.r3944realms.superleadrope.CommonEventHandler;
 
 import java.util.List;
 
+/**
+ * The type Command.
+ */
 public class Command {
+    /**
+     * The constant PREFIX.
+     */
     public static final String PREFIX = CommonEventHandler.leashConfigManager.getCommandPrefix();
+    /**
+     * The constant SHOULD_USE_PREFIX.
+     */
     public static boolean SHOULD_USE_PREFIX = CommonEventHandler.leashConfigManager.isCommandPrefixEnabled();
+
+    /**
+     * Gets liter argument builder of css.
+     *
+     * @param name            the name
+     * @param shouldAddToList the should add to list
+     * @param list            the list
+     * @return the liter argument builder of css
+     */
     static LiteralArgumentBuilder<CommandSourceStack> getLiterArgumentBuilderOfCSS(String name, boolean shouldAddToList, @Nullable List<LiteralArgumentBuilder<CommandSourceStack>> list) {
         LiteralArgumentBuilder<CommandSourceStack> literal = Commands.literal(name);
         if (shouldAddToList) {

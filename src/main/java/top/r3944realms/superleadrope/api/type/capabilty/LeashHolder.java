@@ -20,10 +20,24 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+/**
+ * The type Leash holder.
+ */
 public record LeashHolder(@Nullable UUID holderUUID, @Nullable BlockPos knotPos, boolean isKnot) {
+    /**
+     * Instantiates a new Leash holder.
+     *
+     * @param holderUUID the holder uuid
+     */
     public LeashHolder(UUID holderUUID) {
         this (holderUUID, null, false);
     }
+
+    /**
+     * Instantiates a new Leash holder.
+     *
+     * @param knotPos the knot pos
+     */
     public LeashHolder(BlockPos knotPos) {
         this(null, knotPos, true);
     }

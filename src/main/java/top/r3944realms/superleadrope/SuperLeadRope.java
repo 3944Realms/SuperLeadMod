@@ -30,12 +30,25 @@ import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.util.file.ConfigUtil;
 
+/**
+ * The type Super lead rope.
+ */
 @Mod(value = SuperLeadRope.MOD_ID)
 //TODO: API规范化
 public class SuperLeadRope {
+    /**
+     * The constant logger.
+     */
     public static final Logger logger = LoggerFactory.getLogger(SuperLeadRope.class);
 
+    /**
+     * The constant MOD_ID.
+     */
     public static final String MOD_ID = "superleadrope";
+
+    /**
+     * Instantiates a new Super lead rope.
+     */
     public SuperLeadRope() {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         SLPItems.register(eventBus);
@@ -45,6 +58,10 @@ public class SuperLeadRope {
         initialize();
 
     }
+
+    /**
+     * Initialize.
+     */
     public static void initialize() {
         logger.info("Initializing SuperLeadRope");
         String c = "common";
@@ -53,7 +70,13 @@ public class SuperLeadRope {
         ConfigUtil.registerConfig(modLoadingContext, ModConfig.Type.COMMON, LeashCommonConfig.SPEC, c, "leash");
     }
 
+    /**
+     * The type Mod info.
+     */
     public static class ModInfo {
+        /**
+         * The constant VERSION.
+         */
         public static final String VERSION;
         static {
             // 从 ModList 获取当前 ModContainer 的元数据

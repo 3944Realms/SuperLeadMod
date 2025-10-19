@@ -20,9 +20,16 @@ import net.minecraft.world.entity.Entity;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * The type Riding validator.
+ */
 public class RidingValidator {
     /**
      * 检查骑乘是否会产生循环引用
+     *
+     * @param entity  the entity
+     * @param vehicle the vehicle
+     * @return the boolean
      */
     public static boolean wouldCreateCycle(Entity entity, Entity vehicle) {
         // 如果实体就是载具本身，直接产生循环
@@ -36,6 +43,10 @@ public class RidingValidator {
 
     /**
      * 检查target是否是entity的间接乘客
+     *
+     * @param target the target
+     * @param entity the entity
+     * @return the boolean
      */
     public static boolean isIndirectPassenger(Entity target, Entity entity) {
         Queue<Entity> queue = new LinkedList<>();

@@ -28,11 +28,21 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import top.r3944realms.superleadrope.client.renderer.state.SuperLeashRenderState;
 
+/**
+ * The type Super leash renderer.
+ */
 @SuppressWarnings("UnnecessaryLocalVariable")
 public class SuperLeashRenderer {
 
     private static final int LEASH_STEPS = 24;
 
+    /**
+     * Render leash.
+     *
+     * @param state     the state
+     * @param poseStack the pose stack
+     * @param buffer    the buffer
+     */
     public static void renderLeash(SuperLeashRenderState state, PoseStack poseStack, MultiBufferSource buffer) {
         poseStack.pushPose();
 
@@ -162,11 +172,51 @@ public class SuperLeashRenderer {
 
     /** 横纵偏移数据 */
     private static class Offsets {
-        public final float dx, dy, dz;     // 绳子差向量
-        public final float xOffset, zOffset; // 横向偏移
-        public final float yOffsetPass1, dyOffsetPass1; // pass1 纵向偏移
-        public final float yOffsetPass2, dyOffsetPass2; // pass2 纵向偏移
+        /**
+         * The Dx.
+         */
+        public final float dx, /**
+         * The Dy.
+         */
+        dy, /**
+         * The Dz.
+         */
+        dz;     // 绳子差向量
+        /**
+         * The X offset.
+         */
+        public final float xOffset, /**
+         * The Z offset.
+         */
+        zOffset; // 横向偏移
+        /**
+         * The Y offset pass 1.
+         */
+        public final float yOffsetPass1, /**
+         * The Dy offset pass 1.
+         */
+        dyOffsetPass1; // pass1 纵向偏移
+        /**
+         * The Y offset pass 2.
+         */
+        public final float yOffsetPass2, /**
+         * The Dy offset pass 2.
+         */
+        dyOffsetPass2; // pass2 纵向偏移
 
+        /**
+         * Instantiates a new Offsets.
+         *
+         * @param dx            the dx
+         * @param dy            the dy
+         * @param dz            the dz
+         * @param xOffset       the x offset
+         * @param zOffset       the z offset
+         * @param yOffsetPass1  the y offset pass 1
+         * @param dyOffsetPass1 the dy offset pass 1
+         * @param yOffsetPass2  the y offset pass 2
+         * @param dyOffsetPass2 the dy offset pass 2
+         */
         public Offsets(float dx, float dy, float dz,
                        float xOffset, float zOffset,
                        float yOffsetPass1, float dyOffsetPass1,

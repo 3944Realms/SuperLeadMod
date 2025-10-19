@@ -25,14 +25,24 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.network.toClient.*;
 
 
+/**
+ * The type Network handler.
+ */
 public class NetworkHandler {
     private static int cid = 0;
+    /**
+     * The constant INSTANCE.
+     */
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(SuperLeadRope.MOD_ID, "main"),
             () -> SuperLeadRope.ModInfo.VERSION,
             SuperLeadRope.ModInfo.VERSION::equals,
             SuperLeadRope.ModInfo.VERSION::equals
     );
+
+    /**
+     * Register.
+     */
     public static void register() {
         INSTANCE.messageBuilder(LeashDataSyncPacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(LeashDataSyncPacket::decode)
@@ -60,9 +70,27 @@ public class NetworkHandler {
                 .consumerNetworkThread(LeashStateSyncPacket::handle)
                 .add();
     }
+
+    /**
+     * Send to player.
+     *
+     * @param <MSG>   the type parameter
+     * @param message the message
+     * @param player  the player
+     */
     public static <MSG> void sendToPlayer(MSG message, ServerPlayer player){
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
     }
+
+    /**
+     * Send to player.
+     *
+     * @param <MSG>             the type parameter
+     * @param <T>               the type parameter
+     * @param message           the message
+     * @param entity            the entity
+     * @param packetDistributor the packet distributor
+     */
     public static <MSG, T> void sendToPlayer(MSG message, T entity, PacketDistributor<T> packetDistributor){
         INSTANCE.send(packetDistributor.with(() -> entity), message);
     }

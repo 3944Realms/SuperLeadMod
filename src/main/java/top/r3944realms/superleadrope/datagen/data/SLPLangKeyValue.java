@@ -33,17 +33,29 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 
+/**
+ * The enum Slp lang key value.
+ */
 public enum SLPLangKeyValue {
+    /**
+     * The Item super lead rope.
+     */
     ITEM_SUPER_LEAD_ROPE(
             SLPItems.SUPER_LEAD_ROPE, ModPartEnum.ITEM,
             "Super Lead Rope", "超级拴绳", "超級拴繩","神駒羈縻索"
     ),
 
+    /**
+     * The Item eternal potato.
+     */
     ITEM_ETERNAL_POTATO(
             SLPItems.ETERNAL_POTATO, ModPartEnum.ITEM,
             "Eternal Potato", "永恒土豆", "永恆馬鈴薯", "不滅薯", true
     ),
 
+    /**
+     * The Ep tooltip title.
+     */
     EP_TOOLTIP_TITLE(
             EternalPotatoItem.getDescKey("title"), ModPartEnum.DESCRIPTION,
             "§6Mythical Item §7- §6Eternal Potato",
@@ -52,6 +64,9 @@ public enum SLPLangKeyValue {
             "§6永恒土豆 §7- §6传奇之物"
     ),
 
+    /**
+     * The Ep desc tooltip.
+     */
     EP_DESC_TOOLTIP(
             EternalPotatoItem.getDescKey("desc"), ModPartEnum.DESCRIPTION,
             "§7Symbol of server-wide contract, cannot be discarded",
@@ -60,6 +75,9 @@ public enum SLPLangKeyValue {
             "§7象征全服契约，绝不可弃"
     ),
 
+    /**
+     * The Ep bind owner.
+     */
     EP_BIND_OWNER(
             EternalPotatoItem.getDescKey("bind_owner"), ModPartEnum.DESCRIPTION,
             "§bBound Owner: §f%s",
@@ -68,6 +86,9 @@ public enum SLPLangKeyValue {
             "§b绑定主人: §f%s"
     ),
 
+    /**
+     * Ep unbound slp lang key value.
+     */
     EP_UNBOUND(EternalPotatoItem.getDescKey("unbound"), ModPartEnum.DESCRIPTION,
             "§cUnbound",
             "§c未绑定主人",
@@ -75,6 +96,9 @@ public enum SLPLangKeyValue {
             "§c尚未绑定主人"
     ),
 
+    /**
+     * The Ep obligation tooltip.
+     */
     EP_OBLIGATION_TOOLTIP(
             EternalPotatoItem.getDescKey("obligation"), ModPartEnum.DESCRIPTION,
             "§7Daily obligations remaining: §a%d §c(+%d§c overdue)",
@@ -83,6 +107,9 @@ public enum SLPLangKeyValue {
             "§7今日责务尚余: §a%d §c(+%d §c逾期未尽)"
     ),
 
+    /**
+     * The Ep punish tooltip.
+     */
     EP_PUNISH_TOOLTIP(
             EternalPotatoItem.getDescKey("punish"), ModPartEnum.DESCRIPTION,
             "§cOverdue punishments: §4%d §7(will be applied), grace exceeded: §4%d",
@@ -91,6 +118,9 @@ public enum SLPLangKeyValue {
             "§c逾期责务尚未完成: §4%d §7(將受懲罰)，超出寬限數: §4%d"
     ),
 
+    /**
+     * The Ep obligation info.
+     */
     EP_OBLIGATION_INFO(
             EternalPotatoItem.getMsgKey("obligation_info"), ModPartEnum.MESSAGE,
             "§e[Eternal Potato] §fThis is the server-wide shared person, remaining obligations today: §a%d§f.",
@@ -99,6 +129,9 @@ public enum SLPLangKeyValue {
             "§e[永恒土豆] §f此为全服共享之人，今日责务尚余：§a%d§f次。"
     ),
 
+    /**
+     * The Ep potato heal.
+     */
     EP_POTATO_HEAL(
             EternalPotatoItem.getMsgKey("potato_heal"), ModPartEnum.MESSAGE,
             "§aThe power of the Eternal Potato comforts you, it won't disappear.",
@@ -107,6 +140,9 @@ public enum SLPLangKeyValue {
             "§a永恒土豆之力慰心，永不消逝。"
     ),
 
+    /**
+     * The Ep cannot drop.
+     */
     EP_CANNOT_DROP(
             EternalPotatoItem.getMsgKey("cannot_drop"), ModPartEnum.MESSAGE,
             "§cThe Eternal Potato cannot be dropped! +%d punishments.",
@@ -115,6 +151,9 @@ public enum SLPLangKeyValue {
             "§c永恒土豆不可丟棄，懲罰數增加%d！"
     ),
 
+    /**
+     * The Ep bind msg.
+     */
     EP_BIND_MSG(
             EternalPotatoItem.getMsgKey("bind_msg"), ModPartEnum.MESSAGE,
             "§6Bound to you as the server-wide shared person.",
@@ -124,7 +163,9 @@ public enum SLPLangKeyValue {
     ),
 
 
-
+    /**
+     * The Ep obligation done.
+     */
     EP_OBLIGATION_DONE(
             EternalPotatoItem.getMsgKey("obligation_done"), ModPartEnum.MESSAGE,
             "§eObligation completed, remaining: §a%d§e",
@@ -133,6 +174,9 @@ public enum SLPLangKeyValue {
             "§e责务完成，尚余 §a%d §e次。"
     ),
 
+    /**
+     * The Ep obligation full.
+     */
     EP_OBLIGATION_FULL(
             EternalPotatoItem.getMsgKey("obligation_full"), ModPartEnum.MESSAGE,
             "§aAll obligations completed today!",
@@ -141,6 +185,9 @@ public enum SLPLangKeyValue {
             "§a今日责务尽矣！"
     ),
 
+    /**
+     * The Ep punish msg.
+     */
     EP_PUNISH_MSG(
             EternalPotatoItem.getMsgKey("punish_msg"), ModPartEnum.MESSAGE,
             "§cYesterday obligations incomplete, punished!",
@@ -149,6 +196,9 @@ public enum SLPLangKeyValue {
             "§c昨日之责未尽，受罚矣！"
     ),
 
+    /**
+     * The Ep obligation countdown.
+     */
     EP_OBLIGATION_COUNTDOWN(EternalPotatoItem.getMsgKey("obligation_countdown"), ModPartEnum.MESSAGE,
             "Punish Countdown: §a%d §fseconds remaining",
             "惩罚倒计时: §a%d §f秒",
@@ -156,6 +206,9 @@ public enum SLPLangKeyValue {
             "受罚倒数：§a%d §f瞬"
     ),
 
+    /**
+     * The Ep pickup not owner.
+     */
     EP_PICKUP_NOT_OWNER(
             EternalPotatoItem.getMsgKey("pickup_not_owner"), ModPartEnum.MESSAGE,
             "§cYou are not the rightful owner and cannot pick this up!",
@@ -164,6 +217,9 @@ public enum SLPLangKeyValue {
             "§c非汝所主，勿取！"
     ),
 
+    /**
+     * The Ep punish not owner.
+     */
     EP_PUNISH_NOT_OWNER(
             EternalPotatoItem.getMsgKey("punish_not_owner"), ModPartEnum.MESSAGE,
             "§cYou are not the rightful owner, punished by lightning!",
@@ -171,6 +227,9 @@ public enum SLPLangKeyValue {
             "§c非綁定主人使用，受到閃電懲罰！",
             "§c非汝所主，雷霆降身！"
     ),
+    /**
+     * The Ep punish not owner death msg.
+     */
     EP_PUNISH_NOT_OWNER_DEATH_MSG(
             "death.attack.eternal_potato_not_owner", ModPartEnum.MESSAGE,
             "§c%1$s was not the rightful owner, struck by lightning!",
@@ -178,6 +237,9 @@ public enum SLPLangKeyValue {
             "§c%1$s 因使用非自己綁定物品，受到閃電懲罰！",
             "§c%1$s 非汝所主，雷霆降身！"
     ),
+    /**
+     * The Ep punish not compete death msg.
+     */
     EP_PUNISH_NOT_COMPETE_DEATH_MSG(
             "death.attack.eternal_potato_not_complete", ModPartEnum.MESSAGE,
             "§c%1$s was not the rightful owner, struck by lightning!",
@@ -185,25 +247,40 @@ public enum SLPLangKeyValue {
             "§c%1$s 因使用非自己綁定物品，受到閃電懲罰！",
             "§c%1$s 非汝所主，雷霆降身！"
     ),
+    /**
+     * The Sound subtitle super lead break.
+     */
     SOUND_SUBTITLE_SUPER_LEAD_BREAK(
             SLPSoundEvents.getSubTitleTranslateKey("lead_break"), ModPartEnum.SOUND,
             "Lead Break", "拴绳断裂", "拴繩斷裂", "索絕"
     ),
 
+    /**
+     * The Sound subtitle super lead tied.
+     */
     SOUND_SUBTITLE_SUPER_LEAD_TIED(
             SLPSoundEvents.getSubTitleTranslateKey("lead_tied"), ModPartEnum.SOUND,
             "Lead Tied", "拴绳系上", "拴繩係上", "繫索"
     ),
 
+    /**
+     * The Sound subtitle super lead untied.
+     */
     SOUND_SUBTITLE_SUPER_LEAD_UNTIED(
             SLPSoundEvents.getSubTitleTranslateKey("lead_untied"), ModPartEnum.SOUND,
             "Lead Untie", "拴绳解开", "拴繩解開", "解索"
     ),
 
+    /**
+     * The Entity super lead knot.
+     */
     ENTITY_SUPER_LEAD_KNOT(
             SLPEntityTypes.getEntityNameKey("super_lead_knot"), ModPartEnum.ENTITY,
             "Super Lead Knot", "超级拴绳结", "超級拴繩結", "神駒羈縻索結"
     ),
+    /**
+     * The Teleport with leashed entities name.
+     */
     TELEPORT_WITH_LEASHED_ENTITIES_NAME(
             TeleportWithLeashedEntities.NAME_KEY, ModPartEnum.GAME_RULE,
             "Teleport leashed player with holder",
@@ -211,6 +288,9 @@ public enum SLPLangKeyValue {
             "被拴实体随持有者傳送",
             "繫畜隨持者傳送"
     ),
+    /**
+     * The Create super leash knot entity if absent name.
+     */
     CREATE_SUPER_LEASH_KNOT_ENTITY_IF_ABSENT_NAME(
             CreateSuperLeashKnotEntityIfAbsent.NAME_KEY, ModPartEnum.NAME,
             "Create Leash Fence Knot Entity if absent",
@@ -218,6 +298,9 @@ public enum SLPLangKeyValue {
             "如果缺失則創建超級拴繩結",
             "若阙则创超级繫绳结"
     ),
+    /**
+     * The Create super leash knot entity if absent description.
+     */
     CREATE_SUPER_LEASH_KNOT_ENTITY_IF_ABSENT_DESCRIPTION(
             CreateSuperLeashKnotEntityIfAbsent.DESCRIPTION_KEY, ModPartEnum.DESCRIPTION,
             "Create LeashKnot Entity if it's absent on fence or other supported positions",
@@ -225,6 +308,9 @@ public enum SLPLangKeyValue {
             "如果在柵欄等支持處缺失超級拴繩結，則創建它",
             "若栅等支处阙超级繫绳结，则创之"
     ),
+    /**
+     * The Teleport with leashed description.
+     */
     TELEPORT_WITH_LEASHED_DESCRIPTION(
             TeleportWithLeashedEntities.DESCRIPTION_KEY, ModPartEnum.DESCRIPTION,
             "Holder will teleport with their leashed players ",
@@ -232,6 +318,9 @@ public enum SLPLangKeyValue {
             "將被拴实体將隨持有者一起傳送",
             "傳送時繫畜隨持者同傳"
     ),
+    /**
+     * The Message motion adder successful.
+     */
     MESSAGE_MOTION_ADDER_SUCCESSFUL(
             MotionCommand.MOTION_ADDER_SUCCESSFUL, ModPartEnum.COMMAND,
             "§bAdd Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
@@ -239,6 +328,9 @@ public enum SLPLangKeyValue {
             "§b添加成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
             "§b增益既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
+    /**
+     * The Message motion setter successful.
+     */
     MESSAGE_MOTION_SETTER_SUCCESSFUL(
             MotionCommand.MOTION_SETTER_SUCCESSFUL, ModPartEnum.COMMAND,
             "§bSet Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
@@ -246,6 +338,9 @@ public enum SLPLangKeyValue {
             "§b設置成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
             "§b定值既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
+    /**
+     * The Message motion multiply successful.
+     */
     MESSAGE_MOTION_MULTIPLY_SUCCESSFUL(
             MotionCommand.MOTION_MULTIPLY_SUCCESSFUL, ModPartEnum.COMMAND,
             "§bMultiply Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
@@ -253,6 +348,9 @@ public enum SLPLangKeyValue {
             "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
             "§b倍乘既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
+    /**
+     * The Message leashdata get title.
+     */
     MESSAGE_LEASHDATA_GET_TITLE(
             LeashDataCommand.TITLE, ModPartEnum.COMMAND,
             "=== Leash Data for %s ===",
@@ -260,6 +358,9 @@ public enum SLPLangKeyValue {
             "=== %s 的拴繩數據 ===",
             "=== %s 之繫繩數據 ==="
     ),
+    /**
+     * The Message leashdata get total.
+     */
     MESSAGE_LEASHDATA_GET_TOTAL(
             LeashDataCommand.TOTAL, ModPartEnum.COMMAND,
             "Total leashes: %d",
@@ -267,6 +368,9 @@ public enum SLPLangKeyValue {
             "總拴繩數: %d",
             "繫繩總數: %d"
     ),
+    /**
+     * Message leashdata get block slp lang key value.
+     */
     MESSAGE_LEASHDATA_GET_BLOCK(
             LeashDataCommand.BLOCK, ModPartEnum.COMMAND,
             "§7Block: §e%s",
@@ -274,6 +378,9 @@ public enum SLPLangKeyValue {
             "§7方塊: §e%s",
             "§7磚石: §e%s"
     ),
+    /**
+     * Message leashdata get uuid slp lang key value.
+     */
     MESSAGE_LEASHDATA_GET_UUID(
             LeashDataCommand.UUID, ModPartEnum.COMMAND,
             "§7UUID: §b%s",
@@ -281,6 +388,9 @@ public enum SLPLangKeyValue {
             "§7UUID: §b%s",
             "§7UUID: §b%s"
     ),
+    /**
+     * Message leashdata get max slp lang key value.
+     */
     MESSAGE_LEASHDATA_GET_MAX(
             LeashDataCommand.MAX, ModPartEnum.COMMAND,
             "§7Max: §a%.1f",
@@ -288,6 +398,9 @@ public enum SLPLangKeyValue {
             "§7最大距離: §a%.1f",
             "§7極距: §a%.1f"
     ),
+    /**
+     * Message leashdata get elastic slp lang key value.
+     */
     MESSAGE_LEASHDATA_GET_ELASTIC(
             LeashDataCommand.ELASTIC, ModPartEnum.COMMAND,
             "§7Elastic: §6%.1f",
@@ -295,6 +408,9 @@ public enum SLPLangKeyValue {
             "§7彈性距離: §6%.1f",
             "§7彈距: §6%.1f"
     ),
+    /**
+     * Message leashdata get keep slp lang key value.
+     */
     MESSAGE_LEASHDATA_GET_KEEP(
             LeashDataCommand.KEEP, ModPartEnum.COMMAND,
             "§7Keep: §c%d§7/§c%d",
@@ -302,6 +418,9 @@ public enum SLPLangKeyValue {
             "§7保持: §c%d§7/§c%d",
             "§7持時: §c%d§7/§c%d"
     ),
+    /**
+     * Message leashdata get reserved slp lang key value.
+     */
     MESSAGE_LEASHDATA_GET_RESERVED(
             LeashDataCommand.RESERVED, ModPartEnum.COMMAND,
             "§7Reserved: §d%s",
@@ -309,6 +428,9 @@ public enum SLPLangKeyValue {
             "§7保留字段: §d%s",
             "§7備註: §d%s"
     ),
+    /**
+     * The Message leashdata add success.
+     */
     MESSAGE_LEASHDATA_ADD_SUCCESS(
             "command.leashdata.addApplyEntity.success", ModPartEnum.COMMAND,
             "§bAdded leash successfully. §a%s §7→ §e%s",
@@ -316,6 +438,9 @@ public enum SLPLangKeyValue {
             "§b添加拴繩成功. §a%s §7→ §e%s",
             "§b繫繩既添. §a%s §7→ §e%s"
     ),
+    /**
+     * The Message leashdata remove success.
+     */
     MESSAGE_LEASHDATA_REMOVE_SUCCESS(
             "command.leashdata.removeApplyEntity.success", ModPartEnum.COMMAND,
             "§bRemoved leash successfully. §a%s §7- §e%s",
@@ -323,6 +448,9 @@ public enum SLPLangKeyValue {
             "§b移除拴繩成功. §a%s §7- §e%s",
             "§b繫繩既除. §a%s §7- §e%s"
     ),
+    /**
+     * The Message leashdata transfer success.
+     */
     MESSAGE_LEASHDATA_TRANSFER_SUCCESS(
             "command.leashdata.transfer.success", ModPartEnum.COMMAND,
             "§bTransferred leash successfully. §a%s §7→ §e%s §7→ §6%s",
@@ -330,6 +458,9 @@ public enum SLPLangKeyValue {
             "§b轉移拴繩成功. §a%s §7→ §e%s §7→ §6%s",
             "§b繫繩既移. §a%s §7→ §e%s §7→ §6%s"
     ),
+    /**
+     * The Message leashdata set success.
+     */
     MESSAGE_LEASHDATA_SET_SUCCESS(
             "command.leashdata.setApplyEntity.success", ModPartEnum.COMMAND,
             "§bSet leash property successfully. §a%s §7: §e%s §7= §6%.1f",
@@ -385,6 +516,14 @@ public enum SLPLangKeyValue {
     SLPLangKeyValue(@NotNull String ResourceKey, ModPartEnum MPE, String US_EN, String SIM_CN, String TRA_CN) {
         this(ResourceKey, MPE, US_EN, SIM_CN, TRA_CN, null, false);
     }
+
+    /**
+     * Gets lan.
+     *
+     * @param lan the lan
+     * @param key the key
+     * @return the lan
+     */
     public static String getLan(LanguageEnum lan, SLPLangKeyValue key) {
         if (lan == null || lan == LanguageEnum.English) return getEnglish(key);
         else {
@@ -413,10 +552,23 @@ public enum SLPLangKeyValue {
     private static String getTraditionalChinese(SLPLangKeyValue key) {
         return key.TRA_CN;
     }
+
+    /**
+     * Gets literary chinese.
+     *
+     * @param key the key
+     * @return the literary chinese
+     */
     @Nullable
     public static String getLiteraryChinese(SLPLangKeyValue key) {
         return key.LZH;
     }
+
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     public String getKey() {
         if(key == null){
             switch (MPE) {//Don't need to use "break;"[Java feature];
@@ -429,19 +581,43 @@ public enum SLPLangKeyValue {
         }
         return key;
     }
+
+    /**
+     * Gets item.
+     *
+     * @return the item
+     */
     @SuppressWarnings("null")
     public Item getItem() {
         assert supplier != null;
         return (Item)supplier.get();
     }
+
+    /**
+     * Gets block.
+     *
+     * @return the block
+     */
     @SuppressWarnings("null")
     public Block getBlock() {
         assert supplier != null;
         return (Block)supplier.get();
     }
+
+    /**
+     * Is default item boolean.
+     *
+     * @return the boolean
+     */
     public boolean isDefaultItem(){
         return MPE == ModPartEnum.ITEM && Default;
     }
+
+    /**
+     * Is default block boolean.
+     *
+     * @return the boolean
+     */
     public boolean isDefaultBlock() {
         return MPE == ModPartEnum.BLOCK && Default;
     }

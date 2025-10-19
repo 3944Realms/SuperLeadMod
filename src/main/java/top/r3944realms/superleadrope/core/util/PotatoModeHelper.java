@@ -20,8 +20,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+/**
+ * The type Potato mode helper.
+ */
 public class PotatoModeHelper {
 
+    /**
+     * Gets current mode.
+     *
+     * @return the current mode
+     */
     public static PotatoMode getCurrentMode() {
         if (FMLEnvironment.dist.isClient()) {
             Minecraft mc = Minecraft.getInstance();

@@ -36,6 +36,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The type Super leash state resolver.
+ */
 //TODO: 未来实现更高级的渲染
 public class SuperLeashStateResolver {
 
@@ -52,6 +55,15 @@ public class SuperLeashStateResolver {
 
     /* ------------------------ 主解析方法 ------------------------ */
 
+    /**
+     * Resolve optional.
+     *
+     * @param holder        the holder
+     * @param leashedEntity the leashed entity
+     * @param leashInfo     the leash info
+     * @param partialTicks  the partial ticks
+     * @return the optional
+     */
     public static Optional<SuperLeashRenderState> resolve(Entity holder, Entity leashedEntity,
                                                           LeashInfo leashInfo, float partialTicks) {
 
@@ -156,12 +168,14 @@ public class SuperLeashStateResolver {
         return Optional.ofNullable(leashState.holderLocationOffset())
                 .orElse(leashState.defaultHolderLocationOffset());
     }
+
     /**
      * 将局部偏移向量应用到实体旋转，返回世界坐标位置
-     * @param entity 实体
-     * @param localOffset 局部偏移（相对于实体局部坐标系）
+     *
+     * @param entity       实体
+     * @param localOffset  局部偏移（相对于实体局部坐标系）
      * @param partialTicks 插值参数
-     * @return 偏移旋转后的世界坐标位置
+     * @return 偏移旋转后的世界坐标位置 vec 3
      */
     public static @NotNull Vec3 applyOffsetWithRotation(Entity entity, Vec3 localOffset, float partialTicks) {
         // 实体中心位置
@@ -226,6 +240,11 @@ public class SuperLeashStateResolver {
 
     /**
      * 获取实体挂点位置，支持旋转偏移
+     *
+     * @param entity       the entity
+     * @param baseOffset   the base offset
+     * @param partialTicks the partial ticks
+     * @return the entity leash holder pos
      */
     public static Vec3 getEntityLeashHolderPos(Entity entity, Vec3 baseOffset, float partialTicks) {
         // 从眼睛位置（头部）开始

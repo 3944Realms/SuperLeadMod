@@ -37,11 +37,29 @@ import java.util.List;
 import static top.r3944realms.superleadrope.content.command.Command.*;
 
 
+/**
+ * The type Motion command.
+ */
 public class MotionCommand {
     private final static String SLP_MOTION_MESSAGE_ = SuperLeadRope.MOD_ID + ".command.motion.message.";
+    /**
+     * The constant MOTION_SETTER_SUCCESSFUL.
+     */
     public final static String MOTION_SETTER_SUCCESSFUL = SLP_MOTION_MESSAGE_ + "setter.successful",
-            MOTION_ADDER_SUCCESSFUL = SLP_MOTION_MESSAGE_ + "adder.successful",
-            MOTION_MULTIPLY_SUCCESSFUL = SLP_MOTION_MESSAGE_ + "multiply.successful";
+    /**
+     * The Motion adder successful.
+     */
+    MOTION_ADDER_SUCCESSFUL = SLP_MOTION_MESSAGE_ + "adder.successful",
+    /**
+     * The Motion multiply successful.
+     */
+    MOTION_MULTIPLY_SUCCESSFUL = SLP_MOTION_MESSAGE_ + "multiply.successful";
+
+    /**
+     * Register.
+     *
+     * @param dispatcher the dispatcher
+     */
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         @Nullable List<LiteralArgumentBuilder<CommandSourceStack>> nodeList = SHOULD_USE_PREFIX ? null : new ArrayList<>();
         LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal(PREFIX);

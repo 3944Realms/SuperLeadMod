@@ -21,8 +21,17 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import top.r3944realms.superleadrope.SuperLeadRope;
 
+/**
+ * The type Slp tags.
+ */
 public class SLPTags {
+    /**
+     * The type Items.
+     */
     public static class Items {
+        /**
+         * The constant LEAD.
+         */
         public static final TagKey<Item> LEAD = tag("lead");
         private static TagKey<net.minecraft.world.item.Item> tag(String name)
         {

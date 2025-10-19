@@ -89,10 +89,25 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * The type Common event handler.
+ */
 public class CommonEventHandler {
+    /**
+     * The constant leashConfigManager.
+     */
     public volatile static LeashConfigManager leashConfigManager;
+
+    /**
+     * The type Game.
+     */
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
     public static class Game {
+        /**
+         * On entity join world.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
             Entity entity = event.getEntity();
@@ -110,6 +125,11 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * On entity leave world.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
             Entity entity = event.getEntity();
@@ -126,6 +146,12 @@ public class CommonEventHandler {
                 LeashStateInnerAPI.getLeashState(entity).ifPresent(LeashSyncManager.State::untrack);
             }
         }
+
+        /**
+         * On player logged in.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
             if (!(event.getEntity() instanceof ServerPlayer player)) return; // 只处理服务端
@@ -143,6 +169,11 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * On player right hit on block.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onPlayerRightHitOnBlock(PlayerInteractEvent.RightClickBlock event) {
             Level level = event.getLevel();
@@ -159,16 +190,33 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * Gets server level.
+         *
+         * @return the server level
+         */
         public static ServerLevel getServerLevel() {
             return sl;
         }
 
         private static ServerLevel sl;
+
+        /**
+         * On server starting.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onServerStarting(ServerStartingEvent event) {
             PotatoMode mode = PotatoModeHelper.getCurrentMode();
             EternalPotatoFacade.init(mode, true); // 服务端
         }
+
+        /**
+         * On world load.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onWorldLoad(LevelEvent.Load event) {
             if (event.getLevel() instanceof ServerLevel serverLevel) {
@@ -181,6 +229,11 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * On world unload.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onWorldUnload(LevelEvent.Unload event) {
             if (event.getLevel() instanceof ServerLevel serverLevel) {
@@ -192,11 +245,22 @@ public class CommonEventHandler {
             }
         }
 
-        // 服务器关闭
+        /**
+         * On server stopping.
+         *
+         * @param event the event
+         */
+// 服务器关闭
         @SubscribeEvent
         public static void onServerStopping(ServerStoppingEvent event) {
             EternalPotatoFacade.clear();
         }
+
+        /**
+         * On item drop.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onItemDrop(ItemTossEvent event) {
             Player player = event.getPlayer();
@@ -231,6 +295,12 @@ public class CommonEventHandler {
                 );
             }
         }
+
+        /**
+         * On item pickup.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onItemPickup(@NotNull PlayerEvent.ItemPickupEvent event) {
             Player player = event.getEntity();
@@ -256,6 +326,11 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * On entity teleport.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onEntityTeleport(EntityTeleportEvent event) {
             Entity telEntity = event.getEntity();
@@ -326,11 +401,23 @@ public class CommonEventHandler {
                 RidingApplier.applyRidingRelationship(filteredRelationship, serverLevel::getEntity);
             }
         }
+
+        /**
+         * On player clone.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onPlayerClone(PlayerEvent.Clone event) {
             CapabilityRemainder.onPlayerClone(event);
         }
         private static int tickCounter = 0;
+
+        /**
+         * On server tick.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onServerTick(TickEvent.ServerTickEvent event) {
             if (event.phase == TickEvent.Phase.END) {
@@ -350,42 +437,92 @@ public class CommonEventHandler {
                 LeashSyncManager.Data.forEach(ILeashData::applyLeashForces);
             }
         }
+
+        /**
+         * On entity attack.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onEntityAttack (AttackEntityEvent event) {
             LeashInteractHandler.onEntityLeftInteract(event.getEntity().level(), event.getTarget(), event.getEntity(), event);
         }
+
+        /**
+         * On entity interact.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onEntityInteract (PlayerInteractEvent.EntityInteract event) {
             LeashInteractHandler.onEntityRightInteract(event.getLevel(), event.getHand(), event.getTarget(), event.getEntity(), event); //处理实体互动
         }
 
+        /**
+         * Attach capability.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void attachCapability(AttachCapabilitiesEvent<?> event) {
             CapabilityHandler.attachCapability(event);
         }
+
+        /**
+         * On register command.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onRegisterCommand (RegisterCommandsEvent event) {
             CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
             MotionCommand.register(dispatcher);
         }
     }
+
+    /**
+     * The type Mod.
+     */
     @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, bus= net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.MOD)
     public static class Mod {
+        /**
+         * On fml common init.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onFMLCommonInit(FMLCommonSetupEvent event) {
             event.enqueueWork(Mod::checkAndSet);
             event.enqueueWork(SLPGameruleRegistry::register);//规则注册
         }
+
+        /**
+         * Register capability.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void registerCapability(RegisterCapabilitiesEvent event) {
             CapabilityHandler.registerCapability(event);
         }
+
+        /**
+         * On creative tab.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onCreativeTab (BuildCreativeModeTabContentsEvent event) {
             if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
                 event.accept(SLPItems.SUPER_LEAD_ROPE);
             }
         }
+
+        /**
+         * On config reloading.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public void onConfigReloading(ModConfigEvent.Reloading event) {
             if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
@@ -402,6 +539,11 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * On config loaded.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public void onConfigLoaded(ModConfigEvent.Loading event) {
             if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
@@ -410,6 +552,11 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * On config reloaded.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public void onConfigReloaded(ModConfigEvent.Reloading event) {
             if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
@@ -418,6 +565,11 @@ public class CommonEventHandler {
             }
         }
 
+        /**
+         * On config unloaded.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public void onConfigUnloaded(ModConfigEvent.Unloading event) {
             if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {

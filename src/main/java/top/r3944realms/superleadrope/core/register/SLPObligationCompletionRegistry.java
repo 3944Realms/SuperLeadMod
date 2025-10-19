@@ -31,7 +31,8 @@ public class SLPObligationCompletionRegistry {
 
     /**
      * 注册一个 IObligationCompletion 实例
-     * @param id 唯一 ID
+     *
+     * @param id         唯一 ID
      * @param completion 实例
      */
     public static void register(String id, IObligationCompletion completion) {
@@ -42,8 +43,9 @@ public class SLPObligationCompletionRegistry {
 
     /**
      * 根据 ID 获取 IObligationCompletion 实例
+     *
      * @param id ID
-     * @return 实例，如果未注册则返回 NONE
+     * @return 实例 ，如果未注册则返回 NONE
      */
     public static IObligationCompletion byId(String id) {
         return REGISTRY.getOrDefault(id, IObligationCompletion.NONE);
@@ -51,6 +53,8 @@ public class SLPObligationCompletionRegistry {
 
     /**
      * 获取只读注册表（用于调试或枚举）
+     *
+     * @return the all
      */
     public static Map<String, IObligationCompletion> getAll() {
         return Collections.unmodifiableMap(REGISTRY);

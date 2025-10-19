@@ -30,10 +30,22 @@ import top.r3944realms.superleadrope.api.SLPCapability;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.content.capability.impi.LeashStateImpl;
 
+/**
+ * The type Leash state provider.
+ */
 public class LeashStateProvider implements ICapabilitySerializable<CompoundTag> {
+    /**
+     * The constant LEASH_STATE_REL.
+     */
     public static final ResourceLocation LEASH_STATE_REL = new ResourceLocation(SuperLeadRope.MOD_ID, "leash_state");
     private final ILeashState instance;
     private final LazyOptional<ILeashState> optional;
+
+    /**
+     * Instantiates a new Leash state provider.
+     *
+     * @param entity the entity
+     */
     public LeashStateProvider(Entity entity) {
         this.instance = new LeashStateImpl(entity, CommonEventHandler.leashConfigManager.getDefaultEntityOffset(entity));
         this.optional = LazyOptional.of(() -> instance);

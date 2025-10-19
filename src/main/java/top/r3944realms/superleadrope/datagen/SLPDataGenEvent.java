@@ -29,9 +29,21 @@ import top.r3944realms.superleadrope.util.lang.LanguageEnum;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The type Slp data gen event.
+ */
 @Mod.EventBusSubscriber(modid = SuperLeadRope.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SLPDataGenEvent {
+    /**
+     * The Logger.
+     */
     static Logger logger = LoggerFactory.getLogger(SLPDataGenEvent.class);
+
+    /**
+     * Gather data.
+     *
+     * @param event the event
+     */
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
         logger.info("GatherDataEvent thread: {}", Thread.currentThread().getName());

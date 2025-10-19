@@ -20,12 +20,41 @@ import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 
 import java.util.UUID;
 
+/**
+ * The interface Eternal potato manager.
+ */
 public interface IEternalPotatoManager {
+    /**
+     * Gets or create.
+     *
+     * @param uuid the uuid
+     * @return the or create
+     */
     IEternalPotato getOrCreate(UUID uuid);
 
+    /**
+     * Remove.
+     *
+     * @param uuid the uuid
+     */
     void remove(UUID uuid);
 
+    /**
+     * Clear.
+     */
     void clear();
+
+    /**
+     * Save all compound tag.
+     *
+     * @return the compound tag
+     */
     CompoundTag saveAll();
+
+    /**
+     * Load all.
+     *
+     * @param tag the tag
+     */
     void loadAll(CompoundTag tag);
 }

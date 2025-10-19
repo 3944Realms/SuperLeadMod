@@ -32,14 +32,31 @@ import top.r3944realms.superleadrope.content.capability.provider.LeashDataProvid
 import top.r3944realms.superleadrope.content.capability.provider.LeashStateProvider;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 
+/**
+ * The type Capability handler.
+ */
 public class CapabilityHandler {
+    /**
+     * The constant ETERNAL_POTATO_CAP.
+     */
     public static final Capability<IEternalPotato> ETERNAL_POTATO_CAP = CapabilityManager.get(new CapabilityToken<>() {});
+
+    /**
+     * Register capability.
+     *
+     * @param event the event
+     */
     public static void registerCapability(@NotNull RegisterCapabilitiesEvent event) {
         event.register(ILeashData.class);
         event.register(IEternalPotato.class);
         event.register(ILeashState.class);
     }
 
+    /**
+     * Attach capability.
+     *
+     * @param event the event
+     */
     public static void attachCapability(@NotNull AttachCapabilitiesEvent<?> event) {
         Object object = event.getObject();
         if(object instanceof Entity entity &&

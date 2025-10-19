@@ -19,25 +19,77 @@ import top.r3944realms.superleadrope.core.register.SLPGameruleRegistry;
 
 import java.util.HashMap;
 
+/**
+ * The type Slp gamerules.
+ */
 public class SLPGamerules {
+    /**
+     * The constant GAMERULE_PREFIX.
+     */
     public static final String GAMERULE_PREFIX = "SLP.";
+    /**
+     * The constant GAMERULE_REGISTRY.
+     */
     public static final SLPGameruleRegistry GAMERULE_REGISTRY = SLPGameruleRegistry.INSTANCE;
+    /**
+     * The constant gamerulesBooleanValuesClient.
+     */
     public static final HashMap<String, Boolean> gamerulesBooleanValuesClient = new HashMap<>();
+    /**
+     * The constant gameruleIntegerValuesClient.
+     */
     public static final HashMap<String, Integer> gameruleIntegerValuesClient = new HashMap<>();
+    /**
+     * The constant RULE_KEY_PERFiX_.
+     */
     public static final String RULE_KEY_PERFiX_ = "gamerule." + GAMERULE_PREFIX;
+
+    /**
+     * Gets description key.
+     *
+     * @param gameRuleClass the game rule class
+     * @return the description key
+     */
     public static String getDescriptionKey(Class<?> gameRuleClass) {
         return RULE_KEY_PERFiX_ + gameRuleClass.getSimpleName() + ".description";
     }
+
+    /**
+     * Gets description key.
+     *
+     * @param gameRuleName the game rule name
+     * @return the description key
+     */
     public static String getDescriptionKey(String gameRuleName) {
         return RULE_KEY_PERFiX_ + gameRuleName + ".description";
     }
+
+    /**
+     * Gets gamerule name.
+     *
+     * @param clazz the clazz
+     * @return the gamerule name
+     */
     public static String getGameruleName(Class<?> clazz) {
         return SLPGamerules.GAMERULE_PREFIX + clazz.getSimpleName();
     }
+
+    /**
+     * Gets gamerule name.
+     *
+     * @param gamerulesName the gamerules name
+     * @return the gamerule name
+     */
     public static String getGameruleName(String gamerulesName) {
         return SLPGamerules.GAMERULE_PREFIX + gamerulesName;
     }
 
+    /**
+     * Gets name key.
+     *
+     * @param gameRuleClass the game rule class
+     * @return the name key
+     */
     public static String getNameKey(Class<?> gameRuleClass) {
         return RULE_KEY_PERFiX_ + gameRuleClass.getSimpleName();
     }

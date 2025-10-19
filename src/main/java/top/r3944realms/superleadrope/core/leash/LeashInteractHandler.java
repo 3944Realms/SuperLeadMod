@@ -37,8 +37,20 @@ import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.Optional;
 
+/**
+ * The type Leash interact handler.
+ */
 public class LeashInteractHandler {
-    //只有玩家可以互动触发（其它的暂不支持（考虑到0 Mixin)
+    /**
+     * On entity right interact.
+     *
+     * @param level  the level
+     * @param hand   the hand
+     * @param target the target
+     * @param player the player
+     * @param event  the event
+     */
+//只有玩家可以互动触发（其它的暂不支持（考虑到0 Mixin)
     public static void onEntityRightInteract(Level level, InteractionHand hand, Entity target , Player player, PlayerInteractEvent.EntityInteract event) {
         //WARNING: 主手和副手都会触发一次该事件
 
@@ -119,6 +131,15 @@ public class LeashInteractHandler {
         }
 
     }
+
+    /**
+     * On entity left interact.
+     *
+     * @param level  the level
+     * @param target the target
+     * @param player the player
+     * @param event  the event
+     */
     public static void onEntityLeftInteract(Level level, Entity target , Player player, AttackEntityEvent event) {
         boolean flag = LeashDataImpl.isLeashable(target) && player.getItemInHand(InteractionHand.MAIN_HAND).is(SLPItems.SUPER_LEAD_ROPE.get());
         if (level.isClientSide) {

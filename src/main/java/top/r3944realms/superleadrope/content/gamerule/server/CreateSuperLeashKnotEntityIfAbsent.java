@@ -20,13 +20,34 @@ import top.r3944realms.superleadrope.content.gamerule.SLPGamerules;
 
 import static top.r3944realms.superleadrope.content.gamerule.SLPGamerules.GAMERULE_REGISTRY;
 
+/**
+ * The type Create super leash knot entity if absent.
+ */
 public class CreateSuperLeashKnotEntityIfAbsent {
+    /**
+     * The constant DEFAULT_VALUE.
+     */
     public static final boolean DEFAULT_VALUE = true;
+    /**
+     * The constant ID.
+     */
     public static final String ID = SLPGamerules.getGameruleName(CreateSuperLeashKnotEntityIfAbsent.class);
+    /**
+     * The constant DESCRIPTION_KEY.
+     */
     public static final String DESCRIPTION_KEY = SLPGamerules.getDescriptionKey(CreateSuperLeashKnotEntityIfAbsent.class);
+    /**
+     * The constant NAME_KEY.
+     */
     public static final String NAME_KEY = SLPGamerules.getNameKey(CreateSuperLeashKnotEntityIfAbsent.class);
+    /**
+     * The constant CATEGORY.
+     */
     public static final GameRules.Category CATEGORY = GameRules.Category.PLAYER;
 
+    /**
+     * Register.
+     */
     public static void register() {
         GAMERULE_REGISTRY.registerGamerule(ID, CATEGORY, DEFAULT_VALUE);
     }

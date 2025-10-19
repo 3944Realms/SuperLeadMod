@@ -40,6 +40,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+/**
+ * The type Leash state.
+ */
 //TODO: 将拴绳状态与数据联系在一起
 public class LeashStateImpl implements ILeashState {
     private Entity entity;
@@ -50,6 +54,13 @@ public class LeashStateImpl implements ILeashState {
     @Nullable
     private volatile Vec3 staticApplyEntityLocationOffset;
     private volatile Vec3 defaultApplyEntityLocationOffset;
+
+    /**
+     * Instantiates a new Leash state.
+     *
+     * @param entity                           the entity
+     * @param defaultApplyEntityLocationOffset the default apply entity location offset
+     */
     public LeashStateImpl(Entity entity, Vec3 defaultApplyEntityLocationOffset) {
         this.entity = entity;
         this.defaultApplyEntityLocationOffset = defaultApplyEntityLocationOffset;
@@ -89,6 +100,11 @@ public class LeashStateImpl implements ILeashState {
         );
         lastSyncTime = System.currentTimeMillis();
         needsSync = false;
+    }
+
+    @Override
+    public Entity self() {
+        return entity;
     }
 
     @Override

@@ -18,8 +18,16 @@ package top.r3944realms.superleadrope.content.command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 
+/**
+ * The type Leash state command.
+ */
 public class LeashStateCommand {
-    // 获取State
+    /**
+     * Register.
+     *
+     * @param dispatcher the dispatcher
+     */
+// 获取State
     // 设置State
     //      <addApplyEntity/setApplyEntity/reset> Holder<BlockPos/Entity<需判断实体类型>>  <Holder/Entity> <x> <y> <z>
     //      设置对应目标的 拴绳偏移

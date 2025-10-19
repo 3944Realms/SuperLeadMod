@@ -21,6 +21,9 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.SuperLeadRope;
 
+/**
+ * The type Jei plugin.
+ */
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {
     private static final ResourceLocation UID = new ResourceLocation(SuperLeadRope.MOD_ID, "jei_plugin");

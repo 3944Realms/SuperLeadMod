@@ -31,7 +31,16 @@ import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The type Leash render handler.
+ */
 public class LeashRenderHandler {
+    /**
+     * On render level stage.
+     *
+     * @param poseStack   the pose stack
+     * @param partialTick the partial tick
+     */
     public static void onRenderLevelStage(PoseStack poseStack, float partialTick) {
         renderAllCustomLeashes(poseStack, partialTick);
     }

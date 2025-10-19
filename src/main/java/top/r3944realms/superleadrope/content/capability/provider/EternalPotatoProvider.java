@@ -32,8 +32,14 @@ import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
 
 import java.util.UUID;
 
+/**
+ * The type Eternal potato provider.
+ */
 public class EternalPotatoProvider implements ICapabilitySerializable<CompoundTag> {
 
+    /**
+     * The constant ETERNAL_POTATO_DATA_REL.
+     */
     public static final ResourceLocation ETERNAL_POTATO_DATA_REL =
             new ResourceLocation(SuperLeadRope.MOD_ID, "eternal_potato_data");
 
@@ -44,6 +50,11 @@ public class EternalPotatoProvider implements ICapabilitySerializable<CompoundTa
     // 新增引用 ItemStack
     private final ItemStack stack;
 
+    /**
+     * Instantiates a new Eternal potato provider.
+     *
+     * @param stack the stack
+     */
     public EternalPotatoProvider(ItemStack stack) {
         this.stack = stack;
         this.uuid = EternalPotatoItem.getOrCreateItemUUID(stack);

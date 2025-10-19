@@ -20,7 +20,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The type Potato saved data.
+ */
 public class PotatoSavedData extends SavedData {
+    /**
+     * The constant DATA_NAME.
+     */
     public static final String DATA_NAME = "eternal_potato";
 
 
@@ -31,6 +37,12 @@ public class PotatoSavedData extends SavedData {
         return tag;
     }
 
+    /**
+     * Load potato saved data.
+     *
+     * @param tag the tag
+     * @return the potato saved data
+     */
     public static PotatoSavedData load(CompoundTag tag) {
         IEternalPotatoManager manager = EternalPotatoFacade.getManager();
         PotatoSavedData data = new PotatoSavedData();
@@ -40,7 +52,13 @@ public class PotatoSavedData extends SavedData {
         return data;
     }
 
-    // 工厂方法（Forge 推荐写法）
+    /**
+     * Create potato saved data.
+     *
+     * @param level the level
+     * @return the potato saved data
+     */
+// 工厂方法（Forge 推荐写法）
     public static PotatoSavedData create(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
                 PotatoSavedData::load,

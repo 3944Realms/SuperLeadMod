@@ -28,18 +28,33 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The type Super leash knot model.
+ *
+ * @param <T> the type parameter
+ */
 @OnlyIn(Dist.CLIENT)
 public class SuperLeashKnotModel<T extends Entity> extends HierarchicalModel<T> {
 	private static final String KNOT = "knot";
 	private final ModelPart root;
 	private final ModelPart knot;
 
-	public SuperLeashKnotModel(ModelPart root) {
+    /**
+     * Instantiates a new Super leash knot model.
+     *
+     * @param root the root
+     */
+    public SuperLeashKnotModel(ModelPart root) {
 		this.root = root;
 		this.knot = root.getChild(KNOT);
 	}
 
-	public static LayerDefinition createBodyLayer() {
+    /**
+     * Create body layer layer definition.
+     *
+     * @return the layer definition
+     */
+    public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
 		partdefinition.addOrReplaceChild(KNOT,

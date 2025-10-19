@@ -104,6 +104,11 @@ public class LeashDataImpl implements ILeashData {
     // 引入解决 绳结不保存导致第二进入持有者不存在的问题
     private final Map<BlockPos, LeashInfo> leashKnots = new ConcurrentHashMap<>();
 
+    /**
+     * Instantiates a new Leash data.
+     *
+     * @param entity the entity
+     */
     public LeashDataImpl(Entity entity) {
         this.entity = entity;
     }
@@ -151,6 +156,11 @@ public class LeashDataImpl implements ILeashData {
         );
         lastSyncTime = System.currentTimeMillis();
         needsSync = false;
+    }
+
+    @Override
+    public Entity self() {
+        return entity;
     }
 
     @Override
@@ -399,6 +409,13 @@ public class LeashDataImpl implements ILeashData {
                 old.maxKeepLeashTicks()
         ));
     }
+
+    /**
+     * Sets max distance inner.
+     *
+     * @param holderUUID     the holder uuid
+     * @param newMaxDistance the new max distance
+     */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void setMaxDistanceInner(UUID holderUUID, @Nullable Double newMaxDistance) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return;
@@ -466,6 +483,12 @@ public class LeashDataImpl implements ILeashData {
         ));
     }
 
+    /**
+     * Sets max distance inner.
+     *
+     * @param knotPos        the knot pos
+     * @param newMaxDistance the new max distance
+     */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void setMaxDistanceInner(BlockPos knotPos, @Nullable Double newMaxDistance) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return;
@@ -540,6 +563,13 @@ public class LeashDataImpl implements ILeashData {
                 old.maxKeepLeashTicks()
         ));
     }
+
+    /**
+     * Sets elastic distance scale inner.
+     *
+     * @param holderUUID the holder uuid
+     * @param scale      the scale
+     */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void setElasticDistanceScaleInner(UUID holderUUID, @Nullable Double scale) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return;
@@ -572,6 +602,13 @@ public class LeashDataImpl implements ILeashData {
                 old.maxKeepLeashTicks()
         ));
     }
+
+    /**
+     * Sets elastic distance scale inner.
+     *
+     * @param knotPos the knot pos
+     * @param scale   the scale
+     */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void setElasticDistanceScaleInner(BlockPos knotPos, @Nullable Double scale) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return;
@@ -1145,7 +1182,13 @@ public class LeashDataImpl implements ILeashData {
         return !leashHolders.isEmpty();
     }
 
-    //只能系在这些实体上，在这里，其它情况一律忽略
+    /**
+     * Is leashable boolean.
+     *
+     * @param entity the entity
+     * @return the boolean
+     */
+//只能系在这些实体上，在这里，其它情况一律忽略
     //TODO: 未来更新计划 - 标签支持控制
     public static boolean isLeashable(Entity entity) {
         return entity instanceof LivingEntity || entity instanceof Boat || entity instanceof AbstractMinecart;

@@ -20,8 +20,14 @@ import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DeathMessageType;
 
+/**
+ * The type Slp damage types.
+ */
 public class SLPDamageTypes {
-    // 非绑定主人使用惩罚
+    /**
+     * The constant ETERNAL_POTATO_NOT_OWNER.
+     */
+// 非绑定主人使用惩罚
     public static final DamageType ETERNAL_POTATO_NOT_OWNER =
             new DamageType(
                     "eternal_potato_not_owner",
@@ -30,6 +36,9 @@ public class SLPDamageTypes {
                     DamageEffects.HURT,
                     DeathMessageType.DEFAULT
             );
+    /**
+     * The constant ETERNAL_POTATO_NOT_COMPLETE.
+     */
     public static final DamageType ETERNAL_POTATO_NOT_COMPLETE =
             new DamageType(
                     "eternal_potato_not_complete",

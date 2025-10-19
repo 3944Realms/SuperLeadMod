@@ -18,6 +18,9 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 
 import javax.annotation.Nullable;
 
+/**
+ * The enum Slp advancement key.
+ */
 public enum SLPAdvancementKey {
     ;
     private final String Name;
@@ -28,16 +31,38 @@ public enum SLPAdvancementKey {
         this.Parent = parent;
     }
 
+    /**
+     * Gets parent.
+     *
+     * @return the parent
+     */
     public @Nullable SLPAdvancementKey getParent() {
         return Parent;
     }
+
+    /**
+     * Gets name key.
+     *
+     * @return the name key
+     */
     public String getNameKey() {
         return "advancement." + SuperLeadRope.MOD_ID + "." + Name;
     }
 
+    /**
+     * Gets desc key.
+     *
+     * @return the desc key
+     */
     public String getDescKey() {
         return this.getNameKey() + ".desc";
     }
+
+    /**
+     * Gets name with name space.
+     *
+     * @return the name with name space
+     */
     public String getNameWithNameSpace() {
         return SuperLeadRope.MOD_ID + ":" + this.Name;
     }

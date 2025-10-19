@@ -21,8 +21,14 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import top.r3944realms.superleadrope.SuperLeadRope;
 
+/**
+ * The type Slp model layers.
+ */
 @OnlyIn(Dist.CLIENT)
 public class SLPModelLayers {
+    /**
+     * The constant SUPER_LEASH_KNOT.
+     */
     public static final ModelLayerLocation SUPER_LEASH_KNOT =
             new ModelLayerLocation(
                     new ResourceLocation(SuperLeadRope.MOD_ID, "super_leash_knot"),

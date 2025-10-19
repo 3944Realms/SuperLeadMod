@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The type Daily punishment handler.
+ */
 public class DailyPunishmentHandler {
 
     private static long lastProcessedDay = -1;
@@ -41,6 +44,9 @@ public class DailyPunishmentHandler {
     private static final Map<UUID, Integer> countdownMap = new ConcurrentHashMap<>();
 
 
+    /**
+     * On server tick.
+     */
     public static void onServerTick() {
 
         var server = ServerLifecycleHooks.getCurrentServer();

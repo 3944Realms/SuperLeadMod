@@ -30,18 +30,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * The type Super lead rope event.
+ */
 @SuppressWarnings("unused")
 public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     private final Entity LeashedEntity;
 
+    /**
+     * Instantiates a new Super lead rope event.
+     *
+     * @param leashedEntity the leashed entity
+     */
     protected SuperLeadRopeEvent(Entity leashedEntity) {
         LeashedEntity = leashedEntity;
     }
 
+    /**
+     * Gets leashed entity.
+     *
+     * @return the leashed entity
+     */
     public Entity getLeashedEntity() {
         return LeashedEntity;
     }
-    // ADD LEASH
+
+    /**
+     * The type Add leash.
+     */
+// ADD LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class AddLeash extends SuperLeadRopeEvent {
@@ -50,33 +67,85 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         private final Double maxLeashDistance;
         @Nullable
         private final Double elasticDistanceScale;
+
+        /**
+         * Instantiates a new Add leash.
+         *
+         * @param leashedEntity the leashed entity
+         * @param holderEntity  the holder entity
+         */
         public AddLeash(Entity leashedEntity, Entity holderEntity) {
            this(leashedEntity, holderEntity, null, null);
         }
+
+        /**
+         * Instantiates a new Add leash.
+         *
+         * @param leashedEntity        the leashed entity
+         * @param holderEntity         the holder entity
+         * @param maxLeashDistance     the max leash distance
+         * @param elasticDistanceScale the elastic distance scale
+         */
         public AddLeash(Entity leashedEntity, Entity holderEntity, @Nullable Double maxLeashDistance, @Nullable Double elasticDistanceScale) {
             super(leashedEntity);
             this.holderEntity = holderEntity;
             this.maxLeashDistance = maxLeashDistance;
             this.elasticDistanceScale = elasticDistanceScale;
         }
+
+        /**
+         * Gets holder entity.
+         *
+         * @return the holder entity
+         */
         public Entity getHolderEntity() {
             return holderEntity;
         }
+
+        /**
+         * Gets max leash distance.
+         *
+         * @return the max leash distance
+         */
         public @Nullable Double getMaxLeashDistance() {
             return maxLeashDistance;
         }
+
+        /**
+         * Gets elastic distance scale.
+         *
+         * @return the elastic distance scale
+         */
         public @Nullable Double getElasticDistanceScale() {
             return elasticDistanceScale;
         }
     }
-    // REMOVE LEASH
+
+    /**
+     * The type Remove leash.
+     */
+// REMOVE LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class RemoveLeash extends SuperLeadRopeEvent {
         private final LeashHolder leashHolder;
+
+        /**
+         * Instantiates a new Remove leash.
+         *
+         * @param leashedEntity the leashed entity
+         * @param holderEntity  the holder entity
+         */
         public RemoveLeash(Entity leashedEntity, UUID holderEntity) {
             this(leashedEntity, holderEntity, null, false);
         }
+
+        /**
+         * Instantiates a new Remove leash.
+         *
+         * @param leashedEntity the leashed entity
+         * @param holderKnot    the holder knot
+         */
         public RemoveLeash(Entity leashedEntity, BlockPos holderKnot) {
             this(leashedEntity, null, holderKnot, true);
         }
@@ -86,20 +155,45 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
                 leashHolder = new LeashHolder(holderPos);
             } else leashHolder = new LeashHolder(holderEntity);
         }
+
+        /**
+         * Gets leash holder.
+         *
+         * @return the leash holder
+         */
         public LeashHolder getLeashHolder() {
             return leashHolder;
         }
     }
 
-    // TRANSFORM LEASH
+    /**
+     * The type Transfer leash.
+     */
+// TRANSFORM LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class TransferLeash extends SuperLeadRopeEvent {
         private final LeashHolder oldLeashHolder;
         private final Entity newLeashHolder;
+
+        /**
+         * Instantiates a new Transfer leash.
+         *
+         * @param leashedEntity  the leashed entity
+         * @param holderEntity   the holder entity
+         * @param newLeashHolder the new leash holder
+         */
         public TransferLeash(Entity leashedEntity, UUID holderEntity, Entity newLeashHolder) {
             this(leashedEntity, holderEntity, null, false , newLeashHolder);
         }
+
+        /**
+         * Instantiates a new Transfer leash.
+         *
+         * @param leashedEntity  the leashed entity
+         * @param holderKnot     the holder knot
+         * @param newLeashHolder the new leash holder
+         */
         public TransferLeash(Entity leashedEntity, BlockPos holderKnot, Entity newLeashHolder) {
             this(leashedEntity, null, holderKnot, true, newLeashHolder);
         }
@@ -111,16 +205,29 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.newLeashHolder = newLeashHolder;
         }
 
+        /**
+         * Gets new leash holder.
+         *
+         * @return the new leash holder
+         */
         public Entity getNewLeashHolder() {
             return newLeashHolder;
         }
 
+        /**
+         * Gets old leash holder.
+         *
+         * @return the old leash holder
+         */
         public LeashHolder getOldLeashHolder() {
             return oldLeashHolder;
         }
     }
 
-    // MODIFY LEASH MAX_LEASH_LENGTH / ELASTIC_DISTANCE_SCALE
+    /**
+     * The type Modify value.
+     */
+// MODIFY LEASH MAX_LEASH_LENGTH / ELASTIC_DISTANCE_SCALE
     @SuppressWarnings("unused")
     @Cancelable
     public static class ModifyValue extends SuperLeadRopeEvent {
@@ -132,14 +239,44 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         private final Double newValue;
         private final Type type;
         private final Scope scope;
+
+        /**
+         * The enum Type.
+         */
         public enum Type {
+            /**
+             * Max distance type.
+             */
             MAX_DISTANCE,
+            /**
+             * Elastic distance scale type.
+             */
             ELASTIC_DISTANCE_SCALE,
         }
+
+        /**
+         * The enum Scope.
+         */
         public enum Scope {
+            /**
+             * Static scope.
+             */
             STATIC,
+            /**
+             * Instance scope.
+             */
             INSTANCE
         }
+
+        /**
+         * Instantiates a new Modify value.
+         *
+         * @param leashedEntity the leashed entity
+         * @param holderUUID    the holder uuid
+         * @param oldValue      the old value
+         * @param newValue      the new value
+         * @param type          the type
+         */
         public ModifyValue(Entity leashedEntity, UUID holderUUID, @Nullable Double oldValue, @Nullable Double newValue, Type type) {
             super(leashedEntity);
             this.holder = new LeashHolder(holderUUID);
@@ -148,6 +285,16 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.type = type;
             this.scope = Scope.INSTANCE;
         }
+
+        /**
+         * Instantiates a new Modify value.
+         *
+         * @param leashedEntity the leashed entity
+         * @param knotBlockpos  the knot blockpos
+         * @param oldValue      the old value
+         * @param newValue      the new value
+         * @param type          the type
+         */
         public ModifyValue(Entity leashedEntity, BlockPos knotBlockpos, @Nullable Double oldValue, @Nullable Double newValue, Type type) {
             super(leashedEntity);
             this.holder = new LeashHolder(knotBlockpos);
@@ -156,6 +303,15 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.type = type;
             this.scope = Scope.INSTANCE;
         }
+
+        /**
+         * Instantiates a new Modify value.
+         *
+         * @param leashedEntity the leashed entity
+         * @param oldValue      the old value
+         * @param newValue      the new value
+         * @param type          the type
+         */
         public ModifyValue(Entity leashedEntity, @Nullable Double oldValue, @Nullable Double newValue, Type type) {
             super(leashedEntity);
             this.holder = null;
@@ -164,29 +320,58 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.type = type;
             this.scope = Scope.STATIC;
         }
+
+        /**
+         * Gets holder.
+         *
+         * @return the holder
+         */
         public @Nullable LeashHolder getHolder() {
             return holder;
         }
 
+        /**
+         * Gets old value.
+         *
+         * @return the old value
+         */
         public @Nullable Double getOldValue() {
             return oldValue;
         }
 
+        /**
+         * Gets new value.
+         *
+         * @return the new value
+         */
         public @Nullable Double getNewValue() {
             return newValue;
         }
 
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
         public Type getType() {
             return type;
         }
 
+        /**
+         * Gets scope.
+         *
+         * @return the scope
+         */
         public Scope getScope() {
             return scope;
         }
 
     }
 
-    // HAS FOCUS
+    /**
+     * The type Has focus.
+     */
+// HAS FOCUS
     @SuppressWarnings("unused")
     @Cancelable
     public static class hasFocus extends SuperLeadRopeEvent {
@@ -194,6 +379,16 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         private final Map<BlockPos, LeashInfo> vaildLeashKnots;
         private final Entity finalForceTarget;
         private Vec3 combinedForce;
+
+        /**
+         * Instantiates a new Has focus.
+         *
+         * @param leashedEntity     the leashed entity
+         * @param finalForceTarget  the final force target
+         * @param combinedForce     the combined force
+         * @param vaildLeashHolders the vaild leash holders
+         * @param vaildLeashKnots   the vaild leash knots
+         */
         public hasFocus(Entity leashedEntity, Entity finalForceTarget, Vec3 combinedForce, Map<UUID, LeashInfo> vaildLeashHolders, Map<BlockPos, LeashInfo> vaildLeashKnots) {
             super(leashedEntity);
             this.finalForceTarget = finalForceTarget;
@@ -202,58 +397,134 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.vaildLeashKnots = new HashMap<>(vaildLeashKnots);
         }
 
+        /**
+         * Gets final force target.
+         *
+         * @return the final force target
+         */
         public Entity getFinalForceTarget() {
             return finalForceTarget;
         }
+
+        /**
+         * Gets combined force.
+         *
+         * @return the combined force
+         */
         public Vec3 getCombinedForce() {
             return combinedForce;
         }
 
+        /**
+         * Sets combined force.
+         *
+         * @param combinedForce the combined force
+         */
         public void setCombinedForce(Vec3 combinedForce) {
             this.combinedForce = combinedForce;
         }
+
+        /**
+         * Gets vaild leash holders.
+         *
+         * @return the vaild leash holders
+         */
         public Map<UUID, LeashInfo> getVaildLeashHolders() {
             return vaildLeashHolders;
         }
 
+        /**
+         * Gets vaild leash knots.
+         *
+         * @return the vaild leash knots
+         */
         public Map<BlockPos, LeashInfo> getVaildLeashKnots() {
             return vaildLeashKnots;
         }
     }
 
-    // KEEP NOT BREAK TICK
+    /**
+     * The type Keep not break tick.
+     */
+// KEEP NOT BREAK TICK
     @SuppressWarnings("unused")
     public static class keepNotBreakTick extends SuperLeadRopeEvent {
         private final int remainedTicks;
         private final Entity holderEntity;
         private final Map.Entry<?, LeashInfo> entry;
+
+        /**
+         * Instantiates a new Keep not break tick.
+         *
+         * @param leashedEntity the leashed entity
+         * @param remainedTicks the remained ticks
+         * @param holderEntity  the holder entity
+         * @param entry         the entry
+         */
         public keepNotBreakTick(Entity leashedEntity, int remainedTicks, Entity holderEntity, Map.Entry<?, LeashInfo> entry) {
             super(leashedEntity);
             this.remainedTicks = remainedTicks;
             this.holderEntity = holderEntity;
             this.entry = entry;
         }
+
+        /**
+         * Gets holder entity.
+         *
+         * @return the holder entity
+         */
         public Entity getHolderEntity() {
             return holderEntity;
         }
+
+        /**
+         * Gets remained ticks.
+         *
+         * @return the remained ticks
+         */
         public int getRemainedTicks() {
             return remainedTicks;
         }
+
+        /**
+         * Reset remained ticks.
+         */
         public void resetRemainedTicks() {
             entry.setValue(entry.getValue().resetKeepTicks());
         }
+
+        /**
+         * Gets max keep ticks.
+         *
+         * @return the max keep ticks
+         */
         public int getMaxKeepTicks() {
             return entry.getValue().maxKeepLeashTicks();
         }
 
     }
-    // TELEPORT
+
+    /**
+     * The type Teleport with holder.
+     */
+// TELEPORT
     @Cancelable
     @SuppressWarnings("unused")
     public static class teleportWithHolder extends SuperLeadRopeEvent {
         private final Entity holderEntity;
         private final Level originalLevel, newLevel;
         private final Vec3 originalPosition, newPosition;
+
+        /**
+         * Instantiates a new Teleport with holder.
+         *
+         * @param leashedEntity    the leashed entity
+         * @param holderEntity     the holder entity
+         * @param originalLevel    the original level
+         * @param newLevel         the new level
+         * @param originalPosition the original position
+         * @param newPosition      the new position
+         */
         public teleportWithHolder(Entity leashedEntity, Entity holderEntity, Level originalLevel, Level newLevel, Vec3 originalPosition, Vec3 newPosition) {
             super(leashedEntity);
             this.holderEntity = holderEntity;
@@ -262,21 +533,48 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.originalPosition = originalPosition;
             this.newPosition = newPosition;
         }
+
+        /**
+         * Gets holder entity.
+         *
+         * @return the holder entity
+         */
         public Entity getHolderEntity() {
             return holderEntity;
         }
+
+        /**
+         * Gets original position.
+         *
+         * @return the original position
+         */
         public Vec3 getOriginalPosition() {
             return originalPosition;
         }
 
+        /**
+         * Gets original level.
+         *
+         * @return the original level
+         */
         public Level getOriginalLevel() {
             return originalLevel;
         }
 
+        /**
+         * Gets new level.
+         *
+         * @return the new level
+         */
         public Level getNewLevel() {
             return newLevel;
         }
 
+        /**
+         * Gets new position.
+         *
+         * @return the new position
+         */
         public Vec3 getNewPosition() {
             return newPosition;
         }

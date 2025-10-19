@@ -10,6 +10,9 @@ import top.r3944realms.superleadrope.core.punishment.PunishmentDefinition;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+/**
+ * The type Eternal potato sync cap packet.
+ */
 public record EternalPotatoSyncCapPacket(
         UUID itemUUID,
         UUID ownerUUID,
@@ -23,7 +26,13 @@ public record EternalPotatoSyncCapPacket(
         IObligationCompletion completionRule
 ) {
 
-    // 编码
+    /**
+     * Encode.
+     *
+     * @param msg the msg
+     * @param buf the buf
+     */
+// 编码
     public static void encode(EternalPotatoSyncCapPacket msg, FriendlyByteBuf buf) {
         buf.writeUUID(msg.itemUUID);
 
@@ -48,7 +57,13 @@ public record EternalPotatoSyncCapPacket(
         }
     }
 
-    // 解码
+    /**
+     * Decode eternal potato sync cap packet.
+     *
+     * @param buf the buf
+     * @return the eternal potato sync cap packet
+     */
+// 解码
     public static EternalPotatoSyncCapPacket decode(FriendlyByteBuf buf) {
         UUID itemUUID = buf.readUUID();
         UUID ownerUUID = buf.readBoolean() ? buf.readUUID() : null;
@@ -73,7 +88,13 @@ public record EternalPotatoSyncCapPacket(
                 lastReset, lastPunishDate, punishment, completionRule);
     }
 
-    // 处理
+    /**
+     * Handle.
+     *
+     * @param msg the msg
+     * @param ctx the ctx
+     */
+// 处理
     public static void handle(EternalPotatoSyncCapPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             // 获取全局能力实例

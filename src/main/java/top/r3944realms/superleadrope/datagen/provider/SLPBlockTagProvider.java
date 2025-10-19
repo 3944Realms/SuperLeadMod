@@ -25,7 +25,17 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The type Slp block tag provider.
+ */
 public class SLPBlockTagProvider extends BlockTagsProvider {
+    /**
+     * Instantiates a new Slp block tag provider.
+     *
+     * @param output             the output
+     * @param lookupProvider     the lookup provider
+     * @param existingFileHelper the existing file helper
+     */
     public SLPBlockTagProvider(
             PackOutput output,
             CompletableFuture<HolderLookup.Provider> lookupProvider,

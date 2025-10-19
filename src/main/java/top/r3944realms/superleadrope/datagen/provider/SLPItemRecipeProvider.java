@@ -26,7 +26,15 @@ import top.r3944realms.superleadrope.core.register.SLPItems;
 
 import java.util.function.Consumer;
 
+/**
+ * The type Slp item recipe provider.
+ */
 public class SLPItemRecipeProvider extends RecipeProvider {
+    /**
+     * Instantiates a new Slp item recipe provider.
+     *
+     * @param output the output
+     */
     public SLPItemRecipeProvider(PackOutput output) {
         super(output);
     }

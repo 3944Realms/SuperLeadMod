@@ -42,6 +42,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The type Super lead rope item.
+ */
 //TODO:
 // 1. 可抛掷使用 ***（下个版本实现）
 // - 可转移拴绳
@@ -60,6 +63,11 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
     private static final float THROW_SPEED = 1.5F;
 
 
+    /**
+     * Instantiates a new Super lead rope item.
+     *
+     * @param pProperties the p properties
+     */
     public SuperLeadRopeItem(@NotNull Properties pProperties) {
         super(SLPToolTier.STRING,
                 pProperties
@@ -80,6 +88,12 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         return InteractionResultHolder.success(lead);
     }
 
+    /**
+     * Can use boolean.
+     *
+     * @param itemStack the item stack
+     * @return the boolean
+     */
     public static boolean canUse(@NotNull ItemStack itemStack) {
         return itemStack.getDamageValue() < 1000;
     }
@@ -99,23 +113,27 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         }
         return InteractionResult.SUCCESS;
     }
+
     /**
      * 右键蹲下绑定到另一实体上
+     *
      * @param newHolder 新实体
-     * @param player 明确持有玩家
-     * @param level 维度世界
-     * @return 是否成功
+     * @param player    明确持有玩家
+     * @param level     维度世界
+     * @return 是否成功 boolean
      */
     public static boolean bindToEntity(Entity newHolder, Player player, Level level) {
         return bindToEntity(newHolder, player, level, player.getOnPos());
     }
+
     /**
      * 右键蹲下绑定到另一实体上
+     *
      * @param newHolder 新实体
-     * @param player 明确持有玩家
-     * @param level 维度世界
-     * @param pos 坐标（一般是明确持有玩家的位置）
-     * @return 是否成功
+     * @param player    明确持有玩家
+     * @param level     维度世界
+     * @param pos       坐标（一般是明确持有玩家的位置）
+     * @return 是否成功 boolean
      */
     public static boolean bindToEntity(Entity newHolder, Player player, Level level, BlockPos pos) {
         boolean isSuccess = false;
@@ -146,15 +164,17 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
 
     /**
      * 右键蹲下绑定到支持方块上
-     * @param player 明确持有玩家
-     * @param level 维度世界
-     * @param leashStack 拴绳物品实例
+     *
+     * @param player         明确持有玩家
+     * @param level          维度世界
+     * @param leashStack     拴绳物品实例
      * @param shouldBindSelf 是否应该触发拴自己逻辑检查
-     * @return 是否成功
+     * @return 是否成功 boolean
      */
     public static boolean bindToBlock(Player player, Level level, ItemStack leashStack, boolean shouldBindSelf) {
         return bindToBlock(player, level, player.getOnPos(), leashStack, shouldBindSelf);
     }
+
     /**
      * 右键蹲下绑定到支持方块上
      *
@@ -163,7 +183,7 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
      * @param pos            坐标（一般是明确持有玩家的位置）
      * @param leashStack     拴绳物品实例
      * @param shouldBindSelf 是否应该触发拴自己逻辑检查
-     * @return 是否成功
+     * @return 是否成功 boolean
      */
     public static boolean bindToBlock(Player player, Level level, BlockPos pos, ItemStack leashStack, boolean shouldBindSelf) {
         SuperLeashKnotEntity knot = null;

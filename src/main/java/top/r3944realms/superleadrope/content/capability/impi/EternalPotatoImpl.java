@@ -29,6 +29,9 @@ import top.r3944realms.superleadrope.network.toClient.EternalPotatoSyncCapPacket
 
 import java.util.UUID;
 
+/**
+ * The type Eternal potato.
+ */
 public class EternalPotatoImpl implements IEternalPotato {
     private ItemStackSync itemStackSync;
     private Player boundPlayer;
@@ -51,18 +54,54 @@ public class EternalPotatoImpl implements IEternalPotato {
     private PunishmentDefinition punishment = PunishmentDefinition.DEFAULT;
 
     private IObligationCompletion completionRule = IObligationCompletion.NONE;
-    // NBT Keys
+    /**
+     * The constant TAG_LAST_PUNISH_DATE.
+     */
+// NBT Keys
     public static final String TAG_LAST_PUNISH_DATE = "last_punish_date";
+    /**
+     * The constant TAG_PENDING_PUNISHMENTS.
+     */
     public static final String TAG_PENDING_PUNISHMENTS = "pending_punishments";
+    /**
+     * The constant TAG_GRACE_PERIOD.
+     */
     public static final String TAG_GRACE_PERIOD = "grace_period";
+    /**
+     * The constant TAG_OWNER_UUID.
+     */
     public static final String TAG_OWNER_UUID = "owner_uuid";
+    /**
+     * The constant TAG_ITEM_UUID.
+     */
     public static final String TAG_ITEM_UUID = "item_uuid";
+    /**
+     * The constant TAG_OWNER_NAME.
+     */
     public static final String TAG_OWNER_NAME = "owner_name";
+    /**
+     * The constant TAG_OBLIGATIONS.
+     */
     public static final String TAG_OBLIGATIONS = "obligations";
+    /**
+     * The constant TAG_LAST_RESET.
+     */
     public static final String TAG_LAST_RESET = "last_reset";
+    /**
+     * The constant TAG_PUNISHMENT_TYPE.
+     */
     public static final String TAG_PUNISHMENT_TYPE = "punishment_type";
+    /**
+     * The constant TAG_PUNISHMENT_STRENGTH.
+     */
     public static final String TAG_PUNISHMENT_STRENGTH = "punishment_strength";
+    /**
+     * The constant TAG_PUNISHMENT_AFFECT_OTHERS.
+     */
     public static final String TAG_PUNISHMENT_AFFECT_OTHERS = "punishment_affect_others";
+    /**
+     * The constant TAG_COMPLETION_ID.
+     */
     public static final String TAG_COMPLETION_ID = "completion_id";
 
     @Override

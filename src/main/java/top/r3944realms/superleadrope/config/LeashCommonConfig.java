@@ -6,9 +6,21 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The type Leash common config.
+ */
 public class LeashCommonConfig {
+    /**
+     * The constant BUILDER.
+     */
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    /**
+     * The constant SPEC.
+     */
     public static final ForgeConfigSpec SPEC;
+    /**
+     * The constant COMMON.
+     */
     public static final Common COMMON;
 
     static {
@@ -17,38 +29,97 @@ public class LeashCommonConfig {
         SPEC = BUILDER.build();
     }
 
+    /**
+     * The type Common.
+     */
     public static class Common {
-        // Command
+        /**
+         * The Enable slp mod command prefix.
+         */
+// Command
         public final ForgeConfigSpec.BooleanValue enableSLPModCommandPrefix;
+        /**
+         * The Slp mod command prefix.
+         */
         public final ForgeConfigSpec.ConfigValue<String> SLPModCommandPrefix;
 
-        // Entity
+        /**
+         * The Teleport whitelist.
+         */
+// Entity
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> teleportWhitelist;
 
-        // Leash settings
+        /**
+         * The Max leash length.
+         */
+// Leash settings
         public final ForgeConfigSpec.DoubleValue maxLeashLength;
+        /**
+         * The Elastic distance scale.
+         */
         public final ForgeConfigSpec.DoubleValue elasticDistanceScale;
+        /**
+         * The Extreme snap factor.
+         */
         public final ForgeConfigSpec.DoubleValue extremeSnapFactor;
+        /**
+         * The Spring dampening.
+         */
         public final ForgeConfigSpec.DoubleValue springDampening;
+        /**
+         * The Axis specific elasticity.
+         */
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> axisSpecificElasticity;
+        /**
+         * The Max leashes per entity.
+         */
         public final ForgeConfigSpec.IntValue maxLeashesPerEntity;
 
-        // True damping
+        /**
+         * The Enable true damping.
+         */
+// True damping
         public final ForgeConfigSpec.BooleanValue enableTrueDamping;
+        /**
+         * The Damping factor.
+         */
         public final ForgeConfigSpec.DoubleValue dampingFactor;
+        /**
+         * The Max force.
+         */
         public final ForgeConfigSpec.DoubleValue maxForce;
+        /**
+         * The Player spring factor.
+         */
         public final ForgeConfigSpec.DoubleValue playerSpringFactor;
+        /**
+         * The Mob spring factor.
+         */
         public final ForgeConfigSpec.DoubleValue mobSpringFactor;
 
-        // Leash state offsets
+        /**
+         * The Default apply entity location offset.
+         */
+// Leash state offsets
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> defaultApplyEntityLocationOffset;
+        /**
+         * The Default holder location offset.
+         */
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> defaultHolderLocationOffset;
 
-        // 正则表达式模式
+        /**
+         * The constant OFFSET_PATTERN.
+         */
+// 正则表达式模式
         static final Pattern OFFSET_PATTERN = Pattern.compile(
                 "(?i)(?:vec3|vec3d|vector3|offset)\\s*\\(\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*,\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*,\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*\\)\\s*:\\s*\\[\\s*([^]]+?)\\s*]\\s*"
         );
 
+        /**
+         * Instantiates a new Common.
+         *
+         * @param builder the builder
+         */
         public Common(ForgeConfigSpec.Builder builder) {
             // ===== Command =====
             builder.push("Command");

@@ -21,7 +21,16 @@ import net.minecraftforge.common.capabilities.CapabilityToken;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 
+/**
+ * The type Slp capability.
+ */
 public class SLPCapability {
+    /**
+     * The constant LEASH_DATA_CAP.
+     */
     public static final Capability<ILeashData> LEASH_DATA_CAP = CapabilityManager.get(new CapabilityToken<>(){});
+    /**
+     * The constant LEASH_STATE_CAP.
+     */
     public static final Capability<ILeashState> LEASH_STATE_CAP = CapabilityManager.get(new CapabilityToken<>() {});
 }

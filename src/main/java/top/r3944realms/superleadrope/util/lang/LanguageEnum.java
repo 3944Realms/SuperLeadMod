@@ -15,12 +15,30 @@
 
 package top.r3944realms.superleadrope.util.lang;
 
+/**
+ * The enum Language enum.
+ */
 public enum LanguageEnum {
+    /**
+     * English language enum.
+     */
     English("en_us"),
+    /**
+     * Simple chinese language enum.
+     */
     SimpleChinese("zh_cn"),
+    /**
+     * Traditional chinese language enum.
+     */
     TraditionalChinese("zh_tw"),
+    /**
+     * Literary chinese language enum.
+     */
     LiteraryChinese("lzh"),
     ;
+    /**
+     * The Local.
+     */
     public final String local;
     LanguageEnum(String local) {
         this.local = local;

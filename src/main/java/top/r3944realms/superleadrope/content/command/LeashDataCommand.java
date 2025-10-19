@@ -47,18 +47,58 @@ import java.util.List;
 import java.util.Optional;
 
 import static top.r3944realms.superleadrope.content.command.Command.*;
+
+/**
+ * The type Leash data command.
+ */
 public class LeashDataCommand {
+    /**
+     * The constant SLP_LEASH_MESSAGE_.
+     */
     public static final String SLP_LEASH_MESSAGE_ = SuperLeadRope.MOD_ID + ".command.leash.message.";
+    /**
+     * The constant LEASH_DATA_GET_.
+     */
     public static final String LEASH_DATA_GET_ = SLP_LEASH_MESSAGE_ + ".get.",
-            TITLE       = LEASH_DATA_GET_ + "title",
-            TOTAL       = LEASH_DATA_GET_ + "total",
-            BLOCK       = LEASH_DATA_GET_ + "block",
-            UUID        = LEASH_DATA_GET_ + "uuid",
-            MAX         = LEASH_DATA_GET_ + "max",
-            ELASTIC     = LEASH_DATA_GET_ + "elastic",
-            KEEP        = LEASH_DATA_GET_ + "keep",
-            RESERVED    = LEASH_DATA_GET_ + "reserved"
+    /**
+     * The Title.
+     */
+    TITLE       = LEASH_DATA_GET_ + "title",
+    /**
+     * The Total.
+     */
+    TOTAL       = LEASH_DATA_GET_ + "total",
+    /**
+     * The Block.
+     */
+    BLOCK       = LEASH_DATA_GET_ + "block",
+    /**
+     * The Uuid.
+     */
+    UUID        = LEASH_DATA_GET_ + "uuid",
+    /**
+     * The Max.
+     */
+    MAX         = LEASH_DATA_GET_ + "max",
+    /**
+     * The Elastic.
+     */
+    ELASTIC     = LEASH_DATA_GET_ + "elastic",
+    /**
+     * The Keep.
+     */
+    KEEP        = LEASH_DATA_GET_ + "keep",
+    /**
+     * The Reserved.
+     */
+    RESERVED    = LEASH_DATA_GET_ + "reserved"
     ;
+
+    /**
+     * Register.
+     *
+     * @param dispatcher the dispatcher
+     */
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         @Nullable List<LiteralArgumentBuilder<CommandSourceStack>> nodeList = SHOULD_USE_PREFIX ? null : new ArrayList<>();
         LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal(PREFIX);
@@ -283,6 +323,10 @@ public class LeashDataCommand {
             }
         }
     }
+
+    /**
+     * The constant SET_MAX_DISTANCE.
+     */
     public static final String SET_MAX_DISTANCE = SLP_LEASH_MESSAGE_ + "set_apply_entity.max_distance";
     private static int setMaxDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setMaxDistance(context, CommonEventHandler.leashConfigManager.getMaxLeashLength(), "");
@@ -298,14 +342,26 @@ public class LeashDataCommand {
         }
         return -1;
     }
+
+    /**
+     * The constant REMOVE_ALL_BLOCK_LEASHES.
+     */
     public static final String REMOVE_ALL_BLOCK_LEASHES = SLP_LEASH_MESSAGE_ + "remove_apply_entity.all_block_leashes";
     private static int removeAllBlockLeashes(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return -1;
     }
+
+    /**
+     * The constant REMOVE_ALL_HOLDER_LEASHES.
+     */
     public static final String REMOVE_ALL_HOLDER_LEASHES = SLP_LEASH_MESSAGE_ + "remove_apply_entity.all_holder_leashes";
     private static int removeAllHolderLeashes(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return -1;
     }
+
+    /**
+     * The constant TRANSFER_FROM_BLOCK.
+     */
     public static final String TRANSFER_FROM_BLOCK = SLP_LEASH_MESSAGE_ + "transfer.from_block";
     private static int transferFromBlock(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return transferFromBlock(context, "");
@@ -313,6 +369,10 @@ public class LeashDataCommand {
     private static int transferFromBlock(CommandContext<CommandSourceStack> context, String reserved) throws CommandSyntaxException {
         return -1;
     }
+
+    /**
+     * The constant SET_ELASTIC_DISTANCE.
+     */
     public static final String SET_ELASTIC_DISTANCE = SLP_LEASH_MESSAGE_ + "set_apply_entity.elastic_distance";
     private static int setElasticDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setElasticDistance(context, 0 ,"");
@@ -323,6 +383,10 @@ public class LeashDataCommand {
     private static int setElasticDistance(CommandContext<CommandSourceStack> context, int keepTicks, String reserved) throws CommandSyntaxException {
         return -1;
     }
+
+    /**
+     * The constant SET_BLOCK_MAX_DISTANCE.
+     */
     public static final String SET_BLOCK_MAX_DISTANCE = SLP_LEASH_MESSAGE_ + "set_apply_entity.block_max_distance";
     private static int setBlockMaxDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setBlockMaxDistance(context, 0 ,"");
@@ -333,6 +397,10 @@ public class LeashDataCommand {
     private static int setBlockMaxDistance(CommandContext<CommandSourceStack> context, int keepTicks, String reserved) throws CommandSyntaxException {
         return -1;
     }
+
+    /**
+     * The constant SET_BLOCK_ELASTIC_DISTANCE.
+     */
     public static final String SET_BLOCK_ELASTIC_DISTANCE = SLP_LEASH_MESSAGE_ + "set_apply_entity.block_elastic_distance";
     private static int setBlockElasticDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return setBlockElasticDistance(context, 0 ,"");

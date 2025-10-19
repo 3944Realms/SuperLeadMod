@@ -30,9 +30,18 @@ import java.util.regex.Matcher;
 
 import static top.r3944realms.superleadrope.config.LeashCommonConfig.Common.OFFSET_PATTERN;
 
+/**
+ * The type Leash config manager.
+ */
 public class LeashConfigManager {
-    // ========== 最值检测 ==========
+    /**
+     * The constant MAX_DISTANCE_CHECK.
+     */
+// ========== 最值检测 ==========
     public static final Predicate<Double> MAX_DISTANCE_CHECK = distance -> distance == null || (distance >= 6.0 && distance <= 256.0);
+    /**
+     * The constant ELASTIC_DISTANCE_CHECK.
+     */
     public static final Predicate<Double> ELASTIC_DISTANCE_CHECK = distance -> distance == null || (distance >= 0.2 && distance <= 4.0);
     // ========== 偏移映射 ==========
     private final Map<String, double[]> entityHolderMap = new ConcurrentHashMap<>();
@@ -60,6 +69,9 @@ public class LeashConfigManager {
     private volatile List<Double> axisElasticity = List.of(0.8, 0.2, 0.8);
     private volatile int maxLeashesPerEntity = 6;
 
+    /**
+     * Instantiates a new Leash config manager.
+     */
     public LeashConfigManager() {
         reloadAll();
     }
@@ -102,6 +114,9 @@ public class LeashConfigManager {
         );
     }
 
+    /**
+     * Parse offset config.
+     */
     public void parseOffsetConfig() {
         Map<String, Map<String, double[]>> holder = parseOffsetList(LeashCommonConfig.COMMON.defaultHolderLocationOffset.get());
         entityHolderMap.clear(); entityHolderMap.putAll(holder.get("entity"));
@@ -126,6 +141,12 @@ public class LeashConfigManager {
         return modMap.getOrDefault("*", null);
     }
 
+    /**
+     * Gets default entity offset.
+     *
+     * @param type the type
+     * @return the default entity offset
+     */
     @SuppressWarnings({"DuplicatedCode", "deprecation"})
     public Vec3 getDefaultEntityOffset(EntityType<?> type) {
         String entityId = type.builtInRegistryHolder().key().location().toString();
@@ -137,6 +158,12 @@ public class LeashConfigManager {
         return offset != null ? new Vec3(offset[0], offset[1], offset[2]) : Vec3.ZERO;
     }
 
+    /**
+     * Gets default holder offset.
+     *
+     * @param type the type
+     * @return the default holder offset
+     */
     @SuppressWarnings({"DuplicatedCode", "deprecation"})
     public Vec3 getDefaultHolderOffset(EntityType<?> type) {
         String entityId = type.builtInRegistryHolder().key().location().toString();
@@ -148,11 +175,36 @@ public class LeashConfigManager {
         return offset != null ? new Vec3(offset[0], offset[1], offset[2]) : Vec3.ZERO;
     }
 
+    /**
+     * Gets default entity offset.
+     *
+     * @param entity the entity
+     * @return the default entity offset
+     */
     public Vec3 getDefaultEntityOffset(Entity entity) { return getDefaultEntityOffset(entity.getType()); }
+
+    /**
+     * Gets default holder offset.
+     *
+     * @param entity the entity
+     * @return the default holder offset
+     */
     public Vec3 getDefaultHolderOffset(Entity entity) { return getDefaultHolderOffset(entity.getType()); }
 
-    // ================== 白名单 ==================
+    /**
+     * Gets teleport whitelist.
+     *
+     * @return the teleport whitelist
+     */
+// ================== 白名单 ==================
     public List<String> getTeleportWhitelist() { return Collections.unmodifiableList(teleportWhitelistCache); }
+
+    /**
+     * Is entity teleport allowed boolean.
+     *
+     * @param type the type
+     * @return the boolean
+     */
     @SuppressWarnings({"DuplicatedCode", "deprecation"})
     public boolean isEntityTeleportAllowed(EntityType<?> type) {
         String entityId = type.builtInRegistryHolder().key().location().toString();
@@ -173,36 +225,146 @@ public class LeashConfigManager {
         return false;
     }
 
+    /**
+     * Is entity teleport allowed boolean.
+     *
+     * @param entity the entity
+     * @return the boolean
+     */
     public boolean isEntityTeleportAllowed(Entity entity) { return isEntityTeleportAllowed(entity.getType()); }
 
-    // ================== 命令 ==================
+    /**
+     * Gets command prefix.
+     *
+     * @return the command prefix
+     */
+// ================== 命令 ==================
     public String getCommandPrefix() { return commandPrefixCache; }
+
+    /**
+     * Is command prefix enabled boolean.
+     *
+     * @return the boolean
+     */
     public boolean isCommandPrefixEnabled() { return commandPrefixEnabledCache; }
+
+    /**
+     * Gets full command.
+     *
+     * @param subCommand the sub command
+     * @return the full command
+     */
     public String getFullCommand(String subCommand) {
         return isCommandPrefixEnabled() ? getCommandPrefix() + " " + subCommand : subCommand;
     }
 
-    // ================== 拴绳物理参数 ==================
+    /**
+     * Is enable true damping boolean.
+     *
+     * @return the boolean
+     */
+// ================== 拴绳物理参数 ==================
     public boolean isEnableTrueDamping() { return enableTrueDamping; }
+
+    /**
+     * Gets max force.
+     *
+     * @return the max force
+     */
     public double getMaxForce() { return maxForce; }
+
+    /**
+     * Gets player spring factor.
+     *
+     * @return the player spring factor
+     */
     public double getPlayerSpringFactor() { return playerSpringFactor; }
+
+    /**
+     * Gets mob spring factor.
+     *
+     * @return the mob spring factor
+     */
     public double getMobSpringFactor() { return mobSpringFactor; }
 
+    /**
+     * Gets max leash length.
+     *
+     * @return the max leash length
+     */
     public double getMaxLeashLength() { return maxLeashLength; }
+
+    /**
+     * Gets elastic distance scale.
+     *
+     * @return the elastic distance scale
+     */
     public double getElasticDistanceScale() { return elasticDistanceScale; }
+
+    /**
+     * Gets extreme snap factor.
+     *
+     * @return the extreme snap factor
+     */
     public double getExtremeSnapFactor() { return extremeSnapFactor; }
+
+    /**
+     * Gets spring dampening.
+     *
+     * @return the spring dampening
+     */
     public double getSpringDampening() { return springDampening; }
+
+    /**
+     * Gets axis elasticity.
+     *
+     * @return the axis elasticity
+     */
     public List<Double> getAxisElasticity() { return Collections.unmodifiableList(axisElasticity); }
+
+    /**
+     * Gets x elasticity.
+     *
+     * @return the x elasticity
+     */
     public double getXElasticity() { return !axisElasticity.isEmpty() ? axisElasticity.get(0) : 0.8; }
+
+    /**
+     * Gets y elasticity.
+     *
+     * @return the y elasticity
+     */
     public double getYElasticity() { return axisElasticity.size() > 1 ? axisElasticity.get(1) : 0.2; }
+
+    /**
+     * Gets z elasticity.
+     *
+     * @return the z elasticity
+     */
     public double getZElasticity() { return axisElasticity.size() > 2 ? axisElasticity.get(2) : 0.8; }
 
+    /**
+     * Gets max leashes per entity.
+     *
+     * @return the max leashes per entity
+     */
     public int getMaxLeashesPerEntity() { return maxLeashesPerEntity; }
+
+    /**
+     * Can entity accept more leashes boolean.
+     *
+     * @param entity       the entity
+     * @param currentCount the current count
+     * @return the boolean
+     */
     public boolean canEntityAcceptMoreLeashes(Entity entity, int currentCount) {
         return currentCount < maxLeashesPerEntity;
     }
 
-    // ================== 管理 ==================
+    /**
+     * Reload all.
+     */
+// ================== 管理 ==================
     public void reloadAll() {
         parseOffsetConfig();
 
@@ -225,24 +387,47 @@ public class LeashConfigManager {
         SuperLeadRope.logger.debug("Configs reloaded: {}", getStats());
     }
 
+    /**
+     * Clear.
+     */
     public void clear() {
         entityHolderMap.clear(); tagHolderMap.clear(); modHolderMap.clear();
         entityLeashMap.clear(); tagLeashMap.clear(); modLeashMap.clear();
         teleportWhitelistCache = Collections.emptyList();
     }
 
+    /**
+     * Loading.
+     *
+     * @param manager the manager
+     */
     public static void loading(LeashConfigManager manager) {
         manager.reloadAll();
     }
 
+    /**
+     * Reloading.
+     *
+     * @param manager the manager
+     */
     public static void reloading(LeashConfigManager manager) {
         manager.reloadAll();
     }
 
+    /**
+     * Unloading.
+     *
+     * @param manager the manager
+     */
     public static void unloading(LeashConfigManager manager) {
         if(manager != null) manager.clear();
     }
 
+    /**
+     * Gets stats.
+     *
+     * @return the stats
+     */
     public String getStats() {
         return String.format(
                 "Holder: Entities: %d, Tags: %d, Mods: %d\nLeash: Entities: %d, Tags: %d, Mods: %d, TeleportWhitelist: %d",

@@ -24,9 +24,18 @@ import net.minecraftforge.registries.RegistryObject;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
+/**
+ * The type Slp entity types.
+ */
 public class SLPEntityTypes {
+    /**
+     * The Entity types.
+     */
     public static DeferredRegister<EntityType<?>> ENTITY_TYPES =
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, SuperLeadRope.MOD_ID);
+    /**
+     * The Super lead knot.
+     */
     public static RegistryObject<EntityType<SuperLeashKnotEntity>> SUPER_LEAD_KNOT =  ENTITY_TYPES.register(
             "super_lead_knot",
             () -> EntityType.Builder.<SuperLeashKnotEntity>of(SuperLeashKnotEntity::new, MobCategory.MISC)
@@ -36,9 +45,22 @@ public class SLPEntityTypes {
                     .updateInterval(Integer.MAX_VALUE)
                     .build("super_lead_knot")
     );
+
+    /**
+     * Gets entity name key.
+     *
+     * @param entityName the entity name
+     * @return the entity name key
+     */
     public static String getEntityNameKey(String entityName) {
         return "entity." + SuperLeadRope.MOD_ID + "." + entityName;
     }
+
+    /**
+     * Register.
+     *
+     * @param bus the bus
+     */
     public static void register(IEventBus bus) {
         ENTITY_TYPES.register(bus);
     }

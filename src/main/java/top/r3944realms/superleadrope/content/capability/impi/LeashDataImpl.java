@@ -293,7 +293,9 @@ public class LeashDataImpl implements ILeashData {
             return false;
         }
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(maxDistance) || !LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(elasticDistanceScale)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.AddLeash(holder, this.entity, maxDistance, elasticDistanceScale))) return false;
+        SuperLeadRopeEvent.AddLeash event = new SuperLeadRopeEvent.AddLeash(holder, this.entity, maxDistance, elasticDistanceScale);
+        //再次检查
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getMaxLeashDistance()) && LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getElasticDistanceScale()))) return false;
         if (!canBeLeashed()) {
             Optional<UUID> uuidOptional = occupyLeash();
             if (uuidOptional.isEmpty()) {
@@ -305,8 +307,8 @@ public class LeashDataImpl implements ILeashData {
         LeashInfo info = LeashInfo.create(
                 holder,
                 reserved,
-                maxDistance,
-                elasticDistanceScale,
+                event.getMaxLeashDistance(),
+                event.getElasticDistanceScale(),
                 maxKeepLeashTicks,
                 maxKeepLeashTicks
         );
@@ -397,13 +399,14 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setMaxDistance(UUID holderUUID, @Nullable Double newMaxDistance) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
                 old.holderUUIDOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
@@ -419,13 +422,14 @@ public class LeashDataImpl implements ILeashData {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void setMaxDistanceInner(UUID holderUUID, @Nullable Double newMaxDistance) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return;
         updateLeashInfoInner(leashHolders, holderUUID, old -> new LeashInfo(
                 old.holderUUIDOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
@@ -436,13 +440,14 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setMaxDistance(UUID holderUUID, @Nullable Double newMaxDistance, int newMaxKeepLeashTicks) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
                 old.holderUUIDOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
                 newMaxKeepLeashTicks
@@ -453,13 +458,14 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setMaxDistance(UUID holderUUID, @Nullable Double newMaxDistance, int maxKeepTicks, String reserved) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
                 old.holderUUIDOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 reserved,
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 Math.min(old.keepLeashTicks(), maxKeepTicks),
                 maxKeepTicks
@@ -470,13 +476,14 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setMaxDistance(BlockPos knotPos, @Nullable Double newMaxDistance) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
@@ -492,13 +499,14 @@ public class LeashDataImpl implements ILeashData {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void setMaxDistanceInner(BlockPos knotPos, @Nullable Double newMaxDistance) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return;
         updateLeashInfoInner(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
@@ -509,13 +517,14 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setMaxDistance(BlockPos knotPos, @Nullable Double newMaxDistance, int newMaxKeepLeashTicks) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
                 newMaxKeepLeashTicks
@@ -526,13 +535,14 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setMaxDistance(BlockPos knotPos, @Nullable Double newMaxDistance, int maxKeepTicks, String reserved) {
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 reserved,
-                newMaxDistance,
+                event.getNewValue(),
                 old.elasticDistanceScale(),
                 Math.min(old.keepLeashTicks(), maxKeepTicks),
                 maxKeepTicks
@@ -551,14 +561,15 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setElasticDistanceScale(UUID holderUUID, @Nullable Double scale) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
                 old.holderUUIDOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
                 old.maxDistance(),
-                scale,
+                event.getNewValue(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
         ));
@@ -590,14 +601,15 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setElasticDistanceScale(BlockPos knotPos, @Nullable Double scale) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
                 old.maxDistance(),
-                scale,
+                event.getNewValue(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
         ));
@@ -612,14 +624,15 @@ public class LeashDataImpl implements ILeashData {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void setElasticDistanceScaleInner(BlockPos knotPos, @Nullable Double scale) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE))) return;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getNewValue()))) return;
         updateLeashInfoInner(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
                 old.maxDistance(),
-                scale,
+                event.getNewValue(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
         ));
@@ -644,14 +657,15 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setElasticDistanceScale(UUID holderUUID, @Nullable Double scale, int newMaxKeepLeashTicks) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
                 old.holderUUIDOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
                 old.maxDistance(),
-                scale,
+                event.getNewValue(),
                 Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
                 newMaxKeepLeashTicks
         ));
@@ -661,14 +675,15 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setElasticDistanceScale(UUID holderUUID, @Nullable Double scale, int maxKeepTicks, String reserved) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, holderUUID, leashHolders.get(holderUUID).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
                 old.holderUUIDOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 reserved,
                 old.maxDistance(),
-                scale,
+                event.getNewValue(),
                 Math.min(old.keepLeashTicks(), maxKeepTicks),
                 maxKeepTicks
         ));
@@ -678,14 +693,15 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setElasticDistanceScale(BlockPos knotPos, @Nullable Double scale, int newMaxKeepLeashTicks) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
                 old.maxDistance(),
-                scale,
+                event.getNewValue(),
                 old.keepLeashTicks(),
                 old.maxKeepLeashTicks()
         ));
@@ -695,14 +711,15 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean setElasticDistanceScale(BlockPos knotPos, @Nullable Double scale, int newMaxKeepLeashTicks, String reserved) {
         if (!LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(scale)) return false;
-        if (MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE))) return false;
+        SuperLeadRopeEvent.ModifyValue event = new SuperLeadRopeEvent.ModifyValue(this.entity, knotPos, leashKnots.get(knotPos).elasticDistanceScale(), scale, SuperLeadRopeEvent.ModifyValue.Type.ELASTIC_DISTANCE_SCALE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getNewValue()))) return false;
         return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
                 old.blockPosOpt().get(),
                 old.holderIdOpt().get(),
                 old.marks(),
                 reserved,
                 old.maxDistance(),
-                scale,
+                event.getNewValue(),
                 Math.min(old.keepLeashTicks(), newMaxKeepLeashTicks),
                 newMaxKeepLeashTicks
         ));
@@ -1390,7 +1407,7 @@ public class LeashDataImpl implements ILeashData {
             );
         } else throw new IllegalArgumentException("Unknown LeashInfo");
     }
-    private static Set<String> getMarks(CompoundTag infoTag) {
+    private static Set<String> getMarks(@NotNull CompoundTag infoTag) {
         if (infoTag.contains("Marks")) {
             CompoundTag marks = infoTag.getCompound("Marks");
             int size = marks.getInt("MarkSize");

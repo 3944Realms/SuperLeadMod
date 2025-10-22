@@ -37,8 +37,8 @@ public class LeashConfigManager {
     /**
      * The constant MAX_DISTANCE_CHECK.
      */
-// ========== 最值检测 ==========
-    public static final Predicate<Double> MAX_DISTANCE_CHECK = distance -> distance == null || (distance >= 6.0 && distance <= 256.0);
+    // ========== 最值检测 ==========
+    public static final Predicate<Double> MAX_DISTANCE_CHECK = distance -> distance == null || (distance >= 1.0 && distance <= 256.0);
     /**
      * The constant ELASTIC_DISTANCE_CHECK.
      */

@@ -53,7 +53,7 @@ public class LeashHelper implements ILeashHelper {
             }
 
             @Override
-            public Set<ILeashData> getLeash(Class<Entity> clazz, AABB box, Predicate<Entity> filter) {
+            public <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz, AABB box, Predicate<T> filter) {
                 return SuperLeadRopeApi.leashableInArea(getHolderEntity(), clazz, box, filter)
                         .stream()
                         .map(i -> i.getCapability(SLPCapability.LEASH_DATA_CAP).resolve())
@@ -65,6 +65,7 @@ public class LeashHelper implements ILeashHelper {
             @Override
             public boolean leashEntity(UUID uuid) {
                 Entity entity = CommonEventHandler.Game.getServerLevel().getEntity(uuid);
+
                 if (entity != null && SuperLeadRopeApi.isLeashable(entity)) {
                     return LeashDataInnerAPI.getLeashData(entity).map(i-> i.addLeash(entity)).orElse(false);
                 }

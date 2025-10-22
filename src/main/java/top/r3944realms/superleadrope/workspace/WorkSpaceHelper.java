@@ -47,7 +47,7 @@ public class WorkSpaceHelper implements IWorkSpaceHelper {
     }
 
     @Override
-    public @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Class<Entity> clazz, @Nullable Predicate<Entity> filter, AABB box) {
+    public <T extends Entity> @NotNull List<T> leashableInArea(@NotNull Level pLevel, Class<T> clazz, @Nullable Predicate<T> filter, AABB box) {
         return pLevel.getEntitiesOfClass(clazz, box, e -> LeashDataImpl.isLeashable(e) && Objects.requireNonNullElse(filter, entity -> true).test(e));
     }
 

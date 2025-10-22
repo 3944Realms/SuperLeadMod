@@ -51,9 +51,11 @@ public interface IWorkSpaceHelper {
      * @param clazz  the clazz
      * @param filter the filter
      * @param box    the box
+     * @param <T>    实体类型
+     *
      * @return the list
      */
-    @NotNull List<Entity> leashableInArea(@NotNull Level pLevel, Class<Entity> clazz,Predicate<Entity> filter, AABB box);
+    @NotNull <T extends Entity> List<T> leashableInArea(@NotNull Level pLevel, Class<T> clazz,Predicate<T> filter, AABB box);
 
 
     /**

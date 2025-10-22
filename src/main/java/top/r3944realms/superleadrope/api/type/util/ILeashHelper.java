@@ -86,8 +86,9 @@ public interface ILeashHelper {
          *
          * @return {@link Set<Entity> 持有的实体集合}
          */
-        default Set<Entity> getLeashEntities (Class<Entity> clazz, AABB box, Predicate<Entity> filter) {
-            return getLeash(clazz, box, filter).stream().map(ILeashData::self).collect(Collectors.toSet());
+        @SuppressWarnings("unchecked")
+         default <T extends Entity> Set<T> getLeashEntities (Class<T> clazz, AABB box, Predicate<T> filter) {
+            return (Set<T>) getLeash(clazz, box, filter).stream().map(ILeashData::self).collect(Collectors.toSet());
         }
         /**
          * 获取该实体持有的符合条件实体的拴绳数据能力
@@ -98,7 +99,7 @@ public interface ILeashHelper {
          *
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
-        Set<ILeashData> getLeash(Class<Entity> clazz, AABB box, Predicate<Entity> filter);
+        <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz, AABB box, Predicate<T> filter);
 
         /**
          * 获取该实体持有的符合条件实体实例
@@ -109,8 +110,9 @@ public interface ILeashHelper {
          *
          * @return {@link Set<Entity> 持有的实体实例}
          */
-        default Set<Entity> getLeashEntities (Class<Entity> clazz, double fetchDistance, Predicate<Entity> filter) {
-            return getLeash(clazz, fetchDistance, filter).stream().map(ILeashData::self).collect(Collectors.toSet());
+        @SuppressWarnings("unchecked")
+        default <T extends Entity> Set<T> getLeashEntities (Class<T> clazz, double fetchDistance, Predicate<T> filter) {
+            return (Set<T>) getLeash(clazz, fetchDistance, filter).stream().map(ILeashData::self).collect(Collectors.toSet());
         }
 
         /**
@@ -122,7 +124,7 @@ public interface ILeashHelper {
          *
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
-        default Set<ILeashData> getLeash(Class<Entity> clazz, double fetchDistance, Predicate<Entity> filter) {
+        default <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz, double fetchDistance, Predicate<T> filter) {
             return getLeash(clazz, AABB.ofSize(getHolderEntity().position(), fetchDistance, fetchDistance, fetchDistance), filter);
         }
         /**
@@ -133,8 +135,9 @@ public interface ILeashHelper {
          *
          * @return {@link Set<Entity> 持有的实体实例}
          */
-        default Set<Entity> getLeashEntities (Class<Entity> clazz, Predicate<Entity> filter) {
-            return getLeash(clazz, filter).stream().map(ILeashData::self).collect(Collectors.toSet());
+        @SuppressWarnings("unchecked")
+        default <T extends Entity> Set<T> getLeashEntities (Class<T> clazz, Predicate<T> filter) {
+            return (Set<T>) getLeash(clazz, filter).stream().map(ILeashData::self).collect(Collectors.toSet());
         }
 
         /**
@@ -145,7 +148,7 @@ public interface ILeashHelper {
          *
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
-        default Set<ILeashData> getLeash(Class<Entity> clazz, Predicate<Entity> filter) {
+        default <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz, Predicate<T> filter) {
             return getLeash(clazz, 1024D, filter);
         }
         /**
@@ -155,8 +158,9 @@ public interface ILeashHelper {
          *
          * @return {@link Set<Entity> 持有的实体实例}
          */
-        default Set<Entity> getLeashEntities (Class<Entity> clazz) {
-            return getLeash(clazz).stream().map(ILeashData::self).collect(Collectors.toSet());
+        @SuppressWarnings("unchecked")
+        default <T extends Entity> Set<T> getLeashEntities (Class<T> clazz) {
+            return (Set<T>) getLeash(clazz).stream().map(ILeashData::self).collect(Collectors.toSet());
         }
 
         /**
@@ -166,7 +170,7 @@ public interface ILeashHelper {
          *
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
-        default Set<ILeashData> getLeash(Class<Entity> clazz) {
+        default <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz) {
             return getLeash(clazz, 1024D, null);
         }
 

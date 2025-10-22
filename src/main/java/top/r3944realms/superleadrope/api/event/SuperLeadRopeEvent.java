@@ -36,6 +36,27 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     private final Entity LeashedEntity;
+    /**
+     * The Has modified.
+     */
+    protected boolean hasModified;
+
+    /**
+     * Is modified boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isModified() {
+        return hasModified;
+    }
+
+    /**
+     * Mark modified.
+     */
+    public void markModified() {
+        this.hasModified = true;
+    }
+
 
     /**
      * Instantiates a new Super lead rope event.
@@ -58,15 +79,15 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Add leash.
      */
-// ADD LEASH
+    // ADD LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class AddLeash extends SuperLeadRopeEvent {
         private final Entity holderEntity;
         @Nullable
-        private final Double maxLeashDistance;
+        private Double maxLeashDistance;
         @Nullable
-        private final Double elasticDistanceScale;
+        private Double elasticDistanceScale;
 
         /**
          * Instantiates a new Add leash.
@@ -91,6 +112,26 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.holderEntity = holderEntity;
             this.maxLeashDistance = maxLeashDistance;
             this.elasticDistanceScale = elasticDistanceScale;
+        }
+
+        /**
+         * Sets elastic distance scale.
+         *
+         * @param elasticDistanceScale the elastic distance scale
+         */
+        public void setElasticDistanceScale(@Nullable Double elasticDistanceScale) {
+            markModified();
+            this.elasticDistanceScale = elasticDistanceScale;
+        }
+
+        /**
+         * Sets max leash distance.
+         *
+         * @param maxLeashDistance the max leash distance
+         */
+        public void setMaxLeashDistance(@Nullable Double maxLeashDistance) {
+            markModified();
+            this.maxLeashDistance = maxLeashDistance;
         }
 
         /**
@@ -124,7 +165,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Remove leash.
      */
-// REMOVE LEASH
+    // REMOVE LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class RemoveLeash extends SuperLeadRopeEvent {
@@ -169,7 +210,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Transfer leash.
      */
-// TRANSFORM LEASH
+    // TRANSFORM LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class TransferLeash extends SuperLeadRopeEvent {
@@ -227,7 +268,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Modify value.
      */
-// MODIFY LEASH MAX_LEASH_LENGTH / ELASTIC_DISTANCE_SCALE
+    // MODIFY LEASH MAX_LEASH_LENGTH / ELASTIC_DISTANCE_SCALE
     @SuppressWarnings("unused")
     @Cancelable
     public static class ModifyValue extends SuperLeadRopeEvent {
@@ -236,7 +277,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         @Nullable
         private final Double oldValue;
         @Nullable
-        private final Double newValue;
+        private Double newValue;
         private final Type type;
         private final Scope scope;
 
@@ -366,12 +407,21 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             return scope;
         }
 
+        /**
+         * Sets new value.
+         *
+         * @param newValue the new value
+         */
+        public void setNewValue(@Nullable Double newValue) {
+            markModified();
+            this.newValue = newValue;
+        }
     }
 
     /**
      * The type Has focus.
      */
-// HAS FOCUS
+    // HAS FOCUS
     @SuppressWarnings("unused")
     @Cancelable
     public static class hasFocus extends SuperLeadRopeEvent {
@@ -421,6 +471,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
          * @param combinedForce the combined force
          */
         public void setCombinedForce(Vec3 combinedForce) {
+            markModified();
             this.combinedForce = combinedForce;
         }
 
@@ -446,7 +497,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Keep not break tick.
      */
-// KEEP NOT BREAK TICK
+    // KEEP NOT BREAK TICK
     @SuppressWarnings("unused")
     public static class keepNotBreakTick extends SuperLeadRopeEvent {
         private final int remainedTicks;
@@ -507,7 +558,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Teleport with holder.
      */
-// TELEPORT
+    // TELEPORT
     @Cancelable
     @SuppressWarnings("unused")
     public static class teleportWithHolder extends SuperLeadRopeEvent {

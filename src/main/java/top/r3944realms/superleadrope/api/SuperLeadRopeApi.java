@@ -117,13 +117,15 @@ public class SuperLeadRopeApi {
     /**
      * Leashable in area list.
      *
+     * @param <T>    the type parameter
      * @param holder the holder
      * @param clazz  the clazz
      * @param box    the box
      * @param filter the filter
+     *
      * @return the list
      */
-    public static @NotNull List<Entity> leashableInArea(Entity holder, Class<Entity> clazz, AABB box, Predicate<Entity> filter) {
+    public static  <T extends Entity> @NotNull List<T> leashableInArea(Entity holder, Class<T> clazz, AABB box, Predicate<T> filter) {
         return Services.WORK_SPACE.leashableInArea(holder.level(), clazz, i -> isLeashHolder(i, holder), box);
     }
 

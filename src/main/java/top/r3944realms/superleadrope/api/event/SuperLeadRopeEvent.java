@@ -79,7 +79,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Add leash.
      */
-    // ADD LEASH
+// ADD LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class AddLeash extends SuperLeadRopeEvent {
@@ -165,7 +165,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Remove leash.
      */
-    // REMOVE LEASH
+// REMOVE LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class RemoveLeash extends SuperLeadRopeEvent {
@@ -210,7 +210,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Transfer leash.
      */
-    // TRANSFORM LEASH
+// TRANSFORM LEASH
     @SuppressWarnings("unused")
     @Cancelable
     public static class TransferLeash extends SuperLeadRopeEvent {
@@ -268,57 +268,44 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Modify value.
      */
-    // MODIFY LEASH MAX_LEASH_LENGTH / ELASTIC_DISTANCE_SCALE
+// MODIFY LEASH MAX_LEASH_LENGTH / ELASTIC_DISTANCE_SCALE
     @SuppressWarnings("unused")
     @Cancelable
-    public static class ModifyValue extends SuperLeadRopeEvent {
+    public static class ModifyValue<T> extends SuperLeadRopeEvent {
         @Nullable
         private final LeashHolder holder;
         @Nullable
-        private final Double oldValue;
+        private final T oldValue;
         @Nullable
-        private Double newValue;
+        private T newValue;
         private final Type type;
         private final Scope scope;
 
-        /**
-         * The enum Type.
-         */
         public enum Type {
-            /**
-             * Max distance type.
-             */
-            MAX_DISTANCE,
-            /**
-             * Elastic distance scale type.
-             */
-            ELASTIC_DISTANCE_SCALE,
-        }
+            MAX_DISTANCE(Double.class),
+            ELASTIC_DISTANCE_SCALE(Double.class),
+            MAX_KEEP_LEASH_TICKS(Integer.class),
+            CUSTOM_DATA(String.class); // 支持更多类型
 
-        /**
-         * The enum Scope.
-         */
+            private final Class<?> valueType;
+
+            Type(Class<?> valueType) {
+                this.valueType = valueType;
+            }
+
+            public Class<?> getValueType() {
+                return valueType;
+            }
+        }
         public enum Scope {
-            /**
-             * Static scope.
-             */
-            STATIC,
-            /**
-             * Instance scope.
-             */
-            INSTANCE
+            INSTANCE,
+            STATIC
         }
 
-        /**
-         * Instantiates a new Modify value.
-         *
-         * @param leashedEntity the leashed entity
-         * @param holderUUID    the holder uuid
-         * @param oldValue      the old value
-         * @param newValue      the new value
-         * @param type          the type
-         */
-        public ModifyValue(Entity leashedEntity, UUID holderUUID, @Nullable Double oldValue, @Nullable Double newValue, Type type) {
+        // 构造方法 - UUID holder
+        public ModifyValue(Entity leashedEntity, UUID holderUUID,
+                           @Nullable T oldValue, @Nullable T newValue,
+                           Type type) {
             super(leashedEntity);
             this.holder = new LeashHolder(holderUUID);
             this.oldValue = oldValue;
@@ -327,16 +314,10 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.scope = Scope.INSTANCE;
         }
 
-        /**
-         * Instantiates a new Modify value.
-         *
-         * @param leashedEntity the leashed entity
-         * @param knotBlockpos  the knot blockpos
-         * @param oldValue      the old value
-         * @param newValue      the new value
-         * @param type          the type
-         */
-        public ModifyValue(Entity leashedEntity, BlockPos knotBlockpos, @Nullable Double oldValue, @Nullable Double newValue, Type type) {
+        // 构造方法 - BlockPos holder
+        public ModifyValue(Entity leashedEntity, BlockPos knotBlockpos,
+                           @Nullable T oldValue, @Nullable T newValue,
+                           Type type) {
             super(leashedEntity);
             this.holder = new LeashHolder(knotBlockpos);
             this.oldValue = oldValue;
@@ -345,15 +326,10 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.scope = Scope.INSTANCE;
         }
 
-        /**
-         * Instantiates a new Modify value.
-         *
-         * @param leashedEntity the leashed entity
-         * @param oldValue      the old value
-         * @param newValue      the new value
-         * @param type          the type
-         */
-        public ModifyValue(Entity leashedEntity, @Nullable Double oldValue, @Nullable Double newValue, Type type) {
+        // 构造方法 - 静态作用域
+        public ModifyValue(Entity leashedEntity,
+                           @Nullable T oldValue, @Nullable T newValue,
+                           Type type) {
             super(leashedEntity);
             this.holder = null;
             this.oldValue = oldValue;
@@ -362,66 +338,49 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.scope = Scope.STATIC;
         }
 
-        /**
-         * Gets holder.
-         *
-         * @return the holder
-         */
-        public @Nullable LeashHolder getHolder() {
-            return holder;
+
+        // 类型安全的获取方法
+        @SuppressWarnings("unchecked")
+        public <R> R getOldValueAs(Class<R> clazz) {
+            if (clazz.isInstance(oldValue)) {
+                return (R) oldValue;
+            }
+            return null;
         }
 
-        /**
-         * Gets old value.
-         *
-         * @return the old value
-         */
-        public @Nullable Double getOldValue() {
-            return oldValue;
+        @SuppressWarnings("unchecked")
+        public <R> R getNewValueAs(Class<R> clazz) {
+            if (clazz.isInstance(newValue)) {
+                return (R) newValue;
+            }
+            return null;
         }
 
-        /**
-         * Gets new value.
-         *
-         * @return the new value
-         */
-        public @Nullable Double getNewValue() {
-            return newValue;
+        @SuppressWarnings("unchecked")
+        public T getOldValue() {
+            return (T) getOldValueAs(type.valueType);
+        }
+        @SuppressWarnings("unchecked")
+        public T getNewValue() {
+            return (T) getNewValueAs(type.valueType);
         }
 
-        /**
-         * Gets type.
-         *
-         * @return the type
-         */
-        public Type getType() {
-            return type;
-        }
 
-        /**
-         * Gets scope.
-         *
-         * @return the scope
-         */
-        public Scope getScope() {
-            return scope;
-        }
-
-        /**
-         * Sets new value.
-         *
-         * @param newValue the new value
-         */
-        public void setNewValue(@Nullable Double newValue) {
+        public void setNewValue(@Nullable T newValue) {
+            if (newValue != null && !type.valueType.isInstance(newValue)) {
+                throw new IllegalArgumentException(
+                        "Expected value of type " + type.valueType + ", but got " + newValue.getClass());
+            }
             markModified();
             this.newValue = newValue;
         }
+
     }
 
     /**
      * The type Has focus.
      */
-    // HAS FOCUS
+// HAS FOCUS
     @SuppressWarnings("unused")
     @Cancelable
     public static class hasFocus extends SuperLeadRopeEvent {
@@ -497,7 +456,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Keep not break tick.
      */
-    // KEEP NOT BREAK TICK
+// KEEP NOT BREAK TICK
     @SuppressWarnings("unused")
     public static class keepNotBreakTick extends SuperLeadRopeEvent {
         private final int remainedTicks;
@@ -558,7 +517,7 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     /**
      * The type Teleport with holder.
      */
-    // TELEPORT
+// TELEPORT
     @Cancelable
     @SuppressWarnings("unused")
     public static class teleportWithHolder extends SuperLeadRopeEvent {

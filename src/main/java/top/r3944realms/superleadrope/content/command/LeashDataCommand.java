@@ -517,7 +517,9 @@ public class LeashDataCommand {
         Entity holder = EntityArgument.getEntity(context, "holder");
         CommandSourceStack source = context.getSource();
         int successCount = 0;
-
+        /*
+        Removed leash from %s[more than 4只显示前4个]  held by %s[如果有失败则加上, But no leash found form %s  on %s[more than 4 只显示前4个]]
+         */
         for (Entity target : targets) {
             boolean success = LeashDataInnerAPI.LeashOperations.detach(target, holder);
 

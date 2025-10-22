@@ -432,7 +432,7 @@ public enum SLPLangKeyValue {
      * The Message leashdata add success.
      */
     MESSAGE_LEASHDATA_ADD_SUCCESS(
-            "command.leashdata.addApplyEntity.success", ModPartEnum.COMMAND,
+            "command.leashdata.add_apply_entity.success", ModPartEnum.COMMAND,
             "§bAdded leash successfully. §a%s §7→ §e%s",
             "§b添加拴绳成功. §a%s §7→ §e%s",
             "§b添加拴繩成功. §a%s §7→ §e%s",

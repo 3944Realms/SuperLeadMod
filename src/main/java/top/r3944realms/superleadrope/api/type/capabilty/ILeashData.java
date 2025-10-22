@@ -506,6 +506,58 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
      */
     boolean transferLeash(BlockPos knotPos, Entity newHolder, String reserved);
 
+
+    /**
+     * Sets max keep ticks.
+     *
+     * @param holder       the holder
+     * @param maxKeepTicks the max keep ticks
+     * @return the max keep ticks
+     */
+    boolean setMaxKeepTicks(Entity holder, int maxKeepTicks);
+
+    /**
+     * Sets max keep ticks.
+     *
+     * @param holderUUID   the holder uuid
+     * @param maxKeepTicks the max keep ticks
+     * @return the max keep ticks
+     */
+    boolean setMaxKeepTicks(UUID holderUUID, int maxKeepTicks);
+
+    /**
+     * Sets max keep ticks.
+     *
+     * @param knotPos      the knot pos
+     * @param maxKeepTicks the max keep ticks
+     * @return the max keep ticks
+     */
+    boolean setMaxKeepTicks(BlockPos knotPos, int maxKeepTicks);
+
+    /**
+     * Gets max keep ticks.
+     *
+     * @param holder the holder
+     * @return the max keep ticks
+     */
+    int getMaxKeepTicks(Entity holder);
+
+    /**
+     * Gets max keep ticks.
+     *
+     * @param holderUUID the holder uuid
+     * @return the max keep ticks
+     */
+    int getMaxKeepTicks(UUID holderUUID);
+
+    /**
+     * Gets max keep ticks.
+     *
+     * @param knotPos the knot pos
+     * @return the max keep ticks
+     */
+    int getMaxKeepTicks(BlockPos knotPos);
+
     /**
      * Has leash boolean.
      *

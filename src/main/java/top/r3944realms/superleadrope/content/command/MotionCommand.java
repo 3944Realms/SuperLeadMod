@@ -150,7 +150,7 @@ public class MotionCommand {
 
         LiteralArgumentBuilder<CommandSourceStack> Motion = $$motionRoot.requires(cs -> cs.hasPermission(2))
                 .then(Commands.argument("targets", EntityArgument.entities())
-                        .then(Commands.literal("addApplyEntity")
+                        .then(Commands.literal("add")
                                 .then(Commands.argument("vecX", DoubleArgumentType.doubleArg())
                                         .then(Commands.argument("vecY", DoubleArgumentType.doubleArg())
                                                 .then(Commands.argument("vecZ", DoubleArgumentType.doubleArg())
@@ -159,7 +159,7 @@ public class MotionCommand {
                                         )
                                 )
                         )
-                        .then(Commands.literal("setApplyEntity")
+                        .then(Commands.literal("set")
                                 .then(Commands.argument("vecX", DoubleArgumentType.doubleArg())
                                         .then(Commands.argument("vecY", DoubleArgumentType.doubleArg())
                                                 .then(Commands.argument("vecZ", DoubleArgumentType.doubleArg())

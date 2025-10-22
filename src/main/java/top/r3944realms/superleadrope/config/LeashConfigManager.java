@@ -21,6 +21,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import top.r3944realms.superleadrope.SuperLeadRope;
 
 import java.util.*;
@@ -33,16 +35,33 @@ import static top.r3944realms.superleadrope.config.LeashCommonConfig.Common.OFFS
 /**
  * The type Leash config manager.
  */
+@SuppressWarnings("unused")
 public class LeashConfigManager {
+    // ========== 最值检测 ==========
     /**
      * The constant MAX_DISTANCE_CHECK.
      */
-    // ========== 最值检测 ==========
-    public static final Predicate<Double> MAX_DISTANCE_CHECK = distance -> distance == null || (distance >= 1.0 && distance <= 256.0);
+    public static final Double MAX_DISTANCE_MAX_VALUE = 256.0;
+    /**
+     * The constant MAX_DISTANCE_MIN_VALUE.
+     */
+    public static final Double MAX_DISTANCE_MIN_VALUE = 1.0;
+    /**
+     * The constant MAX_DISTANCE_CHECK.
+     */
+    public static final Predicate<Double> MAX_DISTANCE_CHECK = distance -> distance == null || (distance >= MAX_DISTANCE_MIN_VALUE && distance <= MAX_DISTANCE_MAX_VALUE);
     /**
      * The constant ELASTIC_DISTANCE_CHECK.
      */
-    public static final Predicate<Double> ELASTIC_DISTANCE_CHECK = distance -> distance == null || (distance >= 0.2 && distance <= 4.0);
+    public static final Double ELASTIC_DISTANCE_MAX_VALUE = 4.0;
+    /**
+     * The constant ELASTIC_DISTANCE_MIN_VALUE.
+     */
+    public static final Double ELASTIC_DISTANCE_MIN_VALUE = 0.2;
+    /**
+     * The constant ELASTIC_DISTANCE_CHECK.
+     */
+    public static final Predicate<Double> ELASTIC_DISTANCE_CHECK = distance -> distance == null || (distance >= ELASTIC_DISTANCE_MIN_VALUE && distance <= ELASTIC_DISTANCE_MAX_VALUE);
     // ========== 偏移映射 ==========
     private final Map<String, double[]> entityHolderMap = new ConcurrentHashMap<>();
     private final Map<String, double[]> tagHolderMap = new ConcurrentHashMap<>();
@@ -77,7 +96,7 @@ public class LeashConfigManager {
     }
 
     // ================== 偏移解析 ==================
-    private Map<String, Map<String, double[]>> parseOffsetList(List<? extends String> offsetConfigs) {
+    private @NotNull @Unmodifiable Map<String, Map<String, double[]>> parseOffsetList(@NotNull List<? extends String> offsetConfigs) {
         Map<String, double[]> entityMap = new HashMap<>();
         Map<String, double[]> tagMap = new HashMap<>();
         Map<String, double[]> modMap = new HashMap<>();
@@ -131,7 +150,7 @@ public class LeashConfigManager {
 
     // ================== 获取偏移 ==================
     private double[] getOffset(String entityId, String modId, List<String> tags,
-                               Map<String,double[]> entityMap,
+                               @NotNull Map<String,double[]> entityMap,
                                Map<String,double[]> tagMap,
                                Map<String,double[]> modMap) {
 
@@ -148,7 +167,7 @@ public class LeashConfigManager {
      * @return the default entity offset
      */
     @SuppressWarnings({"DuplicatedCode", "deprecation"})
-    public Vec3 getDefaultEntityOffset(EntityType<?> type) {
+    public Vec3 getDefaultEntityOffset(@NotNull EntityType<?> type) {
         String entityId = type.builtInRegistryHolder().key().location().toString();
         String modId = entityId.split(":")[0];
         List<String> tags = new ArrayList<>();
@@ -165,7 +184,7 @@ public class LeashConfigManager {
      * @return the default holder offset
      */
     @SuppressWarnings({"DuplicatedCode", "deprecation"})
-    public Vec3 getDefaultHolderOffset(EntityType<?> type) {
+    public Vec3 getDefaultHolderOffset(@NotNull EntityType<?> type) {
         String entityId = type.builtInRegistryHolder().key().location().toString();
         String modId = entityId.split(":")[0];
         List<String> tags = new ArrayList<>();
@@ -181,7 +200,7 @@ public class LeashConfigManager {
      * @param entity the entity
      * @return the default entity offset
      */
-    public Vec3 getDefaultEntityOffset(Entity entity) { return getDefaultEntityOffset(entity.getType()); }
+    public Vec3 getDefaultEntityOffset(@NotNull Entity entity) { return getDefaultEntityOffset(entity.getType()); }
 
     /**
      * Gets default holder offset.
@@ -189,7 +208,7 @@ public class LeashConfigManager {
      * @param entity the entity
      * @return the default holder offset
      */
-    public Vec3 getDefaultHolderOffset(Entity entity) { return getDefaultHolderOffset(entity.getType()); }
+    public Vec3 getDefaultHolderOffset(@NotNull Entity entity) { return getDefaultHolderOffset(entity.getType()); }
 
     /**
      * Gets teleport whitelist.
@@ -206,7 +225,7 @@ public class LeashConfigManager {
      * @return the boolean
      */
     @SuppressWarnings({"DuplicatedCode", "deprecation"})
-    public boolean isEntityTeleportAllowed(EntityType<?> type) {
+    public boolean isEntityTeleportAllowed(@NotNull EntityType<?> type) {
         String entityId = type.builtInRegistryHolder().key().location().toString();
         String modId = entityId.split(":")[0];
 
@@ -231,7 +250,7 @@ public class LeashConfigManager {
      * @param entity the entity
      * @return the boolean
      */
-    public boolean isEntityTeleportAllowed(Entity entity) { return isEntityTeleportAllowed(entity.getType()); }
+    public boolean isEntityTeleportAllowed(@NotNull Entity entity) { return isEntityTeleportAllowed(entity.getType()); }
 
     /**
      * Gets command prefix.
@@ -401,7 +420,7 @@ public class LeashConfigManager {
      *
      * @param manager the manager
      */
-    public static void loading(LeashConfigManager manager) {
+    public static void loading(@NotNull LeashConfigManager manager) {
         manager.reloadAll();
     }
 
@@ -410,7 +429,7 @@ public class LeashConfigManager {
      *
      * @param manager the manager
      */
-    public static void reloading(LeashConfigManager manager) {
+    public static void reloading(@NotNull LeashConfigManager manager) {
         manager.reloadAll();
     }
 

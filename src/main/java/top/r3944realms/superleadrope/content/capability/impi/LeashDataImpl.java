@@ -295,7 +295,7 @@ public class LeashDataImpl implements ILeashData {
             return false;
         }
         if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(maxDistance) || !LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(elasticDistanceScale)) return false;
-        SuperLeadRopeEvent.AddLeash event = new SuperLeadRopeEvent.AddLeash(holder, this.entity, maxDistance, elasticDistanceScale);
+        SuperLeadRopeEvent.AddLeash event = new SuperLeadRopeEvent.AddLeash(this.entity, holder, maxDistance, elasticDistanceScale, maxKeepLeashTicks);
         //再次检查
         if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getMaxLeashDistance()) && LeashConfigManager.ELASTIC_DISTANCE_CHECK.test(event.getElasticDistanceScale()))) return false;
         if (!canBeLeashed()) {
@@ -311,7 +311,7 @@ public class LeashDataImpl implements ILeashData {
                 reserved,
                 event.getMaxLeashDistance(),
                 event.getElasticDistanceScale(),
-                maxKeepLeashTicks,
+                event.getMaxKeepLeashTicks(),
                 maxKeepLeashTicks
         );
 
@@ -384,6 +384,13 @@ public class LeashDataImpl implements ILeashData {
     }
 
     @Override
+    public boolean setMaxDistance(Entity holder, Double distance, String reserved) {
+        return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
+                setMaxDistance(superLeashKnotEntity.getPos(), distance, reserved) :
+                setMaxDistance(holder.getUUID(),distance , reserved);
+    }
+
+    @Override
     public boolean setMaxDistance(Entity holder, @Nullable Double newMaxDistance, int newMaxKeepLeashTicks) {
         return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
                 setMaxDistance(superLeashKnotEntity.getPos(), newMaxDistance, newMaxKeepLeashTicks) :
@@ -408,6 +415,24 @@ public class LeashDataImpl implements ILeashData {
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
+                event.getNewValue(),
+                old.elasticDistanceScale(),
+                old.keepLeashTicks(),
+                old.maxKeepLeashTicks()
+        ));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setMaxDistance(UUID holderUUID, Double newMaxDistance, String reserved) {
+        if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
+        SuperLeadRopeEvent.ModifyValue<Double> event = new SuperLeadRopeEvent.ModifyValue<>(this.entity, holderUUID, leashHolders.get(holderUUID).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
+        return updateLeashInfo(leashHolders, holderUUID, old -> new LeashInfo(
+                old.holderUUIDOpt().get(),
+                old.holderIdOpt().get(),
+                old.marks(),
+                reserved,
                 event.getNewValue(),
                 old.elasticDistanceScale(),
                 old.keepLeashTicks(),
@@ -485,6 +510,24 @@ public class LeashDataImpl implements ILeashData {
                 old.holderIdOpt().get(),
                 old.marks(),
                 old.reserved(),
+                event.getNewValue(),
+                old.elasticDistanceScale(),
+                old.keepLeashTicks(),
+                old.maxKeepLeashTicks()
+        ));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public boolean setMaxDistance(BlockPos knotPos, Double newMaxDistance, String reserved) {
+        if (!LeashConfigManager.MAX_DISTANCE_CHECK.test(newMaxDistance)) return false;
+        SuperLeadRopeEvent.ModifyValue<Double> event = new SuperLeadRopeEvent.ModifyValue<>(this.entity, knotPos, leashKnots.get(knotPos).maxDistance(), newMaxDistance, SuperLeadRopeEvent.ModifyValue.Type.MAX_DISTANCE);
+        if (MinecraftForge.EVENT_BUS.post(event) || event.isModified() && !(LeashConfigManager.MAX_DISTANCE_CHECK.test(event.getNewValue()))) return false;
+        return updateLeashInfo(leashKnots, knotPos, old -> new LeashInfo(
+                old.blockPosOpt().get(),
+                old.holderIdOpt().get(),
+                old.marks(),
+                reserved,
                 event.getNewValue(),
                 old.elasticDistanceScale(),
                 old.keepLeashTicks(),
@@ -1122,14 +1165,17 @@ public class LeashDataImpl implements ILeashData {
     // 将拴绳持有者转移到新实体(非拴绳结 -> 任意)
     @Override
     public boolean transferLeash(UUID oldHolderUUID, Entity newHolder) {
-        if(MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.TransferLeash(this.entity, oldHolderUUID, newHolder))) return false;
+        LeashInfo preInfo = leashHolders.get(oldHolderUUID);
+        if(preInfo == null) return false;
+        SuperLeadRopeEvent.TransferLeash event = new SuperLeadRopeEvent.TransferLeash(this.entity, oldHolderUUID, newHolder, preInfo.maxKeepLeashTicks());
+        if(MinecraftForge.EVENT_BUS.post(event)) return false;
         LeashInfo info = leashHolders.remove(oldHolderUUID);
         if (info == null || newHolder == null) return false;
         if(newHolder instanceof SuperLeashKnotEntity superLeashKnotEntity) {
-            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity);
+            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, event.getMaxKeepLeashTicks());
             leashKnots.put(superLeashKnotEntity.getPos(), leashInfo);
         } else {
-            LeashInfo leashInfo = info.transferHolder(newHolder);
+            LeashInfo leashInfo = info.transferHolder(newHolder, event.getMaxKeepLeashTicks());
             leashHolders.put(newHolder.getUUID(), leashInfo);
         }
         LeashStateInnerAPI.Operations.transfer(entity, oldHolderUUID, newHolder);
@@ -1138,14 +1184,17 @@ public class LeashDataImpl implements ILeashData {
     }
     @Override
     public boolean transferLeash(UUID oldHolderUUID, Entity newHolder, String reserved) {
-        if(MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.TransferLeash(this.entity, oldHolderUUID, newHolder))) return false;
+        LeashInfo preInfo = leashHolders.get(oldHolderUUID);
+        if(preInfo == null) return false;
+        SuperLeadRopeEvent.TransferLeash event = new SuperLeadRopeEvent.TransferLeash(this.entity, oldHolderUUID, newHolder, preInfo.maxKeepLeashTicks());
+        if(MinecraftForge.EVENT_BUS.post(event)) return false;
         LeashInfo info = leashHolders.remove(oldHolderUUID);
         if (info == null || newHolder == null) return false;
         if(newHolder instanceof SuperLeashKnotEntity superLeashKnotEntity) {
-            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, reserved);
+            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, event.getMaxKeepLeashTicks(), reserved);
             leashKnots.put(superLeashKnotEntity.getPos(), leashInfo);
         } else {
-            LeashInfo leashInfo = info.transferHolder(newHolder, reserved);
+            LeashInfo leashInfo = info.transferHolder(newHolder, event.getMaxKeepLeashTicks(), reserved);
             leashHolders.put(newHolder.getUUID(), leashInfo);
         }
         LeashStateInnerAPI.Operations.transfer(entity, oldHolderUUID, newHolder);
@@ -1155,14 +1204,17 @@ public class LeashDataImpl implements ILeashData {
 
     @Override
     public boolean transferLeash(BlockPos knotPos, Entity newHolder) {
-        if(MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.TransferLeash(this.entity, knotPos, newHolder))) return false;
+        LeashInfo preInfo = leashKnots.get(knotPos);
+        if(preInfo == null) return false;
+        SuperLeadRopeEvent.TransferLeash event = new SuperLeadRopeEvent.TransferLeash(this.entity, knotPos, newHolder, preInfo.maxKeepLeashTicks());
+        if (MinecraftForge.EVENT_BUS.post(event)) return false;
         LeashInfo info = leashKnots.remove(knotPos);
         if (info == null || newHolder == null) return false;
         if(newHolder instanceof SuperLeashKnotEntity superLeashKnotEntity) {
-            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity);
+            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, event.getMaxKeepLeashTicks());
             leashKnots.put(superLeashKnotEntity.getPos(), leashInfo);
         } else {
-            LeashInfo leashInfo = info.transferHolder(newHolder);
+            LeashInfo leashInfo = info.transferHolder(newHolder, event.getMaxKeepLeashTicks());
             leashHolders.put(newHolder.getUUID(), leashInfo);
         }
         LeashStateInnerAPI.Operations.transfer(entity, knotPos, newHolder);
@@ -1172,14 +1224,17 @@ public class LeashDataImpl implements ILeashData {
 
     @Override
     public boolean transferLeash(BlockPos knotPos, Entity newHolder, String reserved) {
-        if(MinecraftForge.EVENT_BUS.post(new SuperLeadRopeEvent.TransferLeash(this.entity, knotPos, newHolder))) return false;
+        LeashInfo preInfo = leashKnots.get(knotPos);
+        if(preInfo == null) return false;
+        SuperLeadRopeEvent.TransferLeash event = new SuperLeadRopeEvent.TransferLeash(this.entity, knotPos, newHolder, preInfo.maxKeepLeashTicks());
+        if(MinecraftForge.EVENT_BUS.post(event)) return false;
         LeashInfo info = leashKnots.remove(knotPos);
         if (info == null || newHolder == null) return false;
         if(newHolder instanceof SuperLeashKnotEntity superLeashKnotEntity) {
-            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, reserved);
+            LeashInfo leashInfo = info.transferHolder(superLeashKnotEntity, event.getMaxKeepLeashTicks(), reserved);
             leashKnots.put(superLeashKnotEntity.getPos(), leashInfo);
         } else {
-            LeashInfo leashInfo = info.transferHolder(newHolder, reserved);
+            LeashInfo leashInfo = info.transferHolder(newHolder, event.getMaxKeepLeashTicks(), reserved);
             leashHolders.put(newHolder.getUUID(), leashInfo);
         }
         LeashStateInnerAPI.Operations.transfer(entity, knotPos, newHolder);

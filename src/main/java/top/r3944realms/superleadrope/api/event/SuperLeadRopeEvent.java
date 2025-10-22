@@ -88,15 +88,17 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         private Double maxLeashDistance;
         @Nullable
         private Double elasticDistanceScale;
+        private int maxKeepLeashTicks;
 
         /**
          * Instantiates a new Add leash.
          *
-         * @param leashedEntity the leashed entity
-         * @param holderEntity  the holder entity
+         * @param leashedEntity     the leashed entity
+         * @param holderEntity      the holder entity
+         * @param maxKeepLeashTicks the max keep leash ticks
          */
-        public AddLeash(Entity leashedEntity, Entity holderEntity) {
-           this(leashedEntity, holderEntity, null, null);
+        public AddLeash(Entity leashedEntity, Entity holderEntity, int maxKeepLeashTicks) {
+           this(leashedEntity, holderEntity, null, null, maxKeepLeashTicks);
         }
 
         /**
@@ -106,12 +108,14 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
          * @param holderEntity         the holder entity
          * @param maxLeashDistance     the max leash distance
          * @param elasticDistanceScale the elastic distance scale
+         * @param maxKeepLeashTicks    the max keep leash ticks
          */
-        public AddLeash(Entity leashedEntity, Entity holderEntity, @Nullable Double maxLeashDistance, @Nullable Double elasticDistanceScale) {
+        public AddLeash(Entity leashedEntity, Entity holderEntity, @Nullable Double maxLeashDistance, @Nullable Double elasticDistanceScale, int maxKeepLeashTicks) {
             super(leashedEntity);
             this.holderEntity = holderEntity;
             this.maxLeashDistance = maxLeashDistance;
             this.elasticDistanceScale = elasticDistanceScale;
+            this.maxKeepLeashTicks = maxKeepLeashTicks;
         }
 
         /**
@@ -132,6 +136,26 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         public void setMaxLeashDistance(@Nullable Double maxLeashDistance) {
             markModified();
             this.maxLeashDistance = maxLeashDistance;
+        }
+
+        /**
+         * Sets max keep leash ticks.
+         *
+         * @param maxKeepLeashTicks the max keep leash ticks
+         */
+        public void setMaxKeepLeashTicks(int maxKeepLeashTicks) {
+            if (maxKeepLeashTicks < 0) return;
+            markModified();
+            this.maxKeepLeashTicks = maxKeepLeashTicks;
+        }
+
+        /**
+         * Gets max keep leash ticks.
+         *
+         * @return the max keep leash ticks
+         */
+        public int getMaxKeepLeashTicks() {
+            return maxKeepLeashTicks;
         }
 
         /**
@@ -216,34 +240,38 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
     public static class TransferLeash extends SuperLeadRopeEvent {
         private final LeashHolder oldLeashHolder;
         private final Entity newLeashHolder;
+        private int maxKeepLeashTicks;
 
         /**
          * Instantiates a new Transfer leash.
          *
-         * @param leashedEntity  the leashed entity
-         * @param holderEntity   the holder entity
-         * @param newLeashHolder the new leash holder
+         * @param leashedEntity     the leashed entity
+         * @param holderEntity      the holder entity
+         * @param newLeashHolder    the new leash holder
+         * @param maxKeepLeashTicks the max keep leash ticks
          */
-        public TransferLeash(Entity leashedEntity, UUID holderEntity, Entity newLeashHolder) {
-            this(leashedEntity, holderEntity, null, false , newLeashHolder);
+        public TransferLeash(Entity leashedEntity, UUID holderEntity, Entity newLeashHolder, int maxKeepLeashTicks) {
+            this(leashedEntity, holderEntity, null, false , newLeashHolder, maxKeepLeashTicks);
         }
 
         /**
          * Instantiates a new Transfer leash.
          *
-         * @param leashedEntity  the leashed entity
-         * @param holderKnot     the holder knot
-         * @param newLeashHolder the new leash holder
+         * @param leashedEntity     the leashed entity
+         * @param holderKnot        the holder knot
+         * @param newLeashHolder    the new leash holder
+         * @param maxKeepLeashTicks the max keep leash ticks
          */
-        public TransferLeash(Entity leashedEntity, BlockPos holderKnot, Entity newLeashHolder) {
-            this(leashedEntity, null, holderKnot, true, newLeashHolder);
+        public TransferLeash(Entity leashedEntity, BlockPos holderKnot, Entity newLeashHolder, int maxKeepLeashTicks) {
+            this(leashedEntity, null, holderKnot, true, newLeashHolder, maxKeepLeashTicks);
         }
-        private TransferLeash(Entity leashedEntity, @Nullable UUID holderEntity, @Nullable BlockPos holderPos, boolean isSuperLeadRopeKnot, Entity newLeashHolder) {
+        private TransferLeash(Entity leashedEntity, @Nullable UUID holderEntity, @Nullable BlockPos holderPos, boolean isSuperLeadRopeKnot, Entity newLeashHolder, int maxKeepLeashTicks) {
             super(leashedEntity);
             if (isSuperLeadRopeKnot) {
                 oldLeashHolder = new LeashHolder(holderPos);
             } else oldLeashHolder = new LeashHolder(holderEntity);
             this.newLeashHolder = newLeashHolder;
+            this.maxKeepLeashTicks = maxKeepLeashTicks;
         }
 
         /**
@@ -263,10 +291,32 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         public LeashHolder getOldLeashHolder() {
             return oldLeashHolder;
         }
+
+        /**
+         * Sets max keep leash ticks.
+         *
+         * @param maxKeepLeashTicks the max keep leash ticks
+         */
+        public void setMaxKeepLeashTicks(int maxKeepLeashTicks) {
+            if(maxKeepLeashTicks < 0) return;
+            markModified();
+            this.maxKeepLeashTicks = maxKeepLeashTicks;
+        }
+
+        /**
+         * Gets max keep leash ticks.
+         *
+         * @return the max keep leash ticks
+         */
+        public int getMaxKeepLeashTicks() {
+            return maxKeepLeashTicks;
+        }
     }
 
     /**
      * The type Modify value.
+     *
+     * @param <T> the type parameter
      */
 // MODIFY LEASH MAX_LEASH_LENGTH / ELASTIC_DISTANCE_SCALE
     @SuppressWarnings("unused")
@@ -281,10 +331,25 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         private final Type type;
         private final Scope scope;
 
+        /**
+         * The enum Type.
+         */
         public enum Type {
+            /**
+             * Max distance type.
+             */
             MAX_DISTANCE(Double.class),
+            /**
+             * Elastic distance scale type.
+             */
             ELASTIC_DISTANCE_SCALE(Double.class),
+            /**
+             * Max keep leash ticks type.
+             */
             MAX_KEEP_LEASH_TICKS(Integer.class),
+            /**
+             * Custom data type.
+             */
             CUSTOM_DATA(String.class); // 支持更多类型
 
             private final Class<?> valueType;
@@ -293,16 +358,40 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
                 this.valueType = valueType;
             }
 
+            /**
+             * Gets value type.
+             *
+             * @return the value type
+             */
             public Class<?> getValueType() {
                 return valueType;
             }
         }
+
+        /**
+         * The enum Scope.
+         */
         public enum Scope {
+            /**
+             * Instance scope.
+             */
             INSTANCE,
+            /**
+             * Static scope.
+             */
             STATIC
         }
 
-        // 构造方法 - UUID holder
+        /**
+         * Instantiates a new Modify value.
+         *
+         * @param leashedEntity the leashed entity
+         * @param holderUUID    the holder uuid
+         * @param oldValue      the old value
+         * @param newValue      the new value
+         * @param type          the type
+         */
+// 构造方法 - UUID holder
         public ModifyValue(Entity leashedEntity, UUID holderUUID,
                            @Nullable T oldValue, @Nullable T newValue,
                            Type type) {
@@ -314,7 +403,16 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.scope = Scope.INSTANCE;
         }
 
-        // 构造方法 - BlockPos holder
+        /**
+         * Instantiates a new Modify value.
+         *
+         * @param leashedEntity the leashed entity
+         * @param knotBlockpos  the knot blockpos
+         * @param oldValue      the old value
+         * @param newValue      the new value
+         * @param type          the type
+         */
+// 构造方法 - BlockPos holder
         public ModifyValue(Entity leashedEntity, BlockPos knotBlockpos,
                            @Nullable T oldValue, @Nullable T newValue,
                            Type type) {
@@ -326,7 +424,15 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             this.scope = Scope.INSTANCE;
         }
 
-        // 构造方法 - 静态作用域
+        /**
+         * Instantiates a new Modify value.
+         *
+         * @param leashedEntity the leashed entity
+         * @param oldValue      the old value
+         * @param newValue      the new value
+         * @param type          the type
+         */
+// 构造方法 - 静态作用域
         public ModifyValue(Entity leashedEntity,
                            @Nullable T oldValue, @Nullable T newValue,
                            Type type) {
@@ -339,7 +445,14 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
         }
 
 
-        // 类型安全的获取方法
+        /**
+         * Gets old value as.
+         *
+         * @param <R>   the type parameter
+         * @param clazz the clazz
+         * @return the old value as
+         */
+// 类型安全的获取方法
         @SuppressWarnings("unchecked")
         public <R> R getOldValueAs(Class<R> clazz) {
             if (clazz.isInstance(oldValue)) {
@@ -348,6 +461,13 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             return null;
         }
 
+        /**
+         * Gets new value as.
+         *
+         * @param <R>   the type parameter
+         * @param clazz the clazz
+         * @return the new value as
+         */
         @SuppressWarnings("unchecked")
         public <R> R getNewValueAs(Class<R> clazz) {
             if (clazz.isInstance(newValue)) {
@@ -356,16 +476,32 @@ public abstract class SuperLeadRopeEvent extends Event implements IModBusEvent {
             return null;
         }
 
+        /**
+         * Gets old value.
+         *
+         * @return the old value
+         */
         @SuppressWarnings("unchecked")
         public T getOldValue() {
             return (T) getOldValueAs(type.valueType);
         }
+
+        /**
+         * Gets new value.
+         *
+         * @return the new value
+         */
         @SuppressWarnings("unchecked")
         public T getNewValue() {
             return (T) getNewValueAs(type.valueType);
         }
 
 
+        /**
+         * Sets new value.
+         *
+         * @param newValue the new value
+         */
         public void setNewValue(@Nullable T newValue) {
             if (newValue != null && !type.valueType.isInstance(newValue)) {
                 throw new IllegalArgumentException(

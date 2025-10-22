@@ -232,7 +232,37 @@ public record LeashInfo(
                 !isKnot ? Optional.of(entity.getUUID()) : Optional.empty(),
                 Optional.of(entity.getId()),
                 marks, newReserved, maxDistance, elasticDistanceScale,
-                keepLeashTicks, maxKeepLeashTicks
+                maxKeepLeashTicks, maxKeepLeashTicks
+        );
+    }
+
+    /**
+     * Transfer holder leash info.
+     *
+     * @param entity            the entity
+     * @param maxKeepLeashTicks the max keep leash ticks
+     * @return the leash info
+     */
+    public LeashInfo transferHolder(Entity entity, int maxKeepLeashTicks) {
+        return transferHolder(entity, maxKeepLeashTicks, reserved);
+    }
+
+    /**
+     * Transfer holder leash info.
+     *
+     * @param entity            the entity
+     * @param maxKeepLeashTicks the max keep leash ticks
+     * @param newReserved       the new reserved
+     * @return the leash info
+     */
+    public LeashInfo transferHolder(Entity entity, int maxKeepLeashTicks, String newReserved) {
+        boolean isKnot = SuperLeadRopeApi.isSuperLeadKnot(entity);
+        return new LeashInfo(
+                isKnot ? Optional.of(SuperLeadRopeApi.getSuperLeadKnotPos(entity)) : Optional.empty(),
+                !isKnot ? Optional.of(entity.getUUID()) : Optional.empty(),
+                Optional.of(entity.getId()),
+                marks, newReserved, maxDistance, elasticDistanceScale,
+                maxKeepLeashTicks, maxKeepLeashTicks
         );
     }
 

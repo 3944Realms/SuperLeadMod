@@ -20,6 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.api.SLPCapability;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
@@ -83,7 +84,7 @@ public final class LeashDataInnerAPI {
          * @param maxDistance the max distance
          * @return the boolean
          */
-        public static boolean attach(Entity entity, Entity holder, double maxDistance) {
+        public static boolean attach(Entity entity, Entity holder, @Nullable Double maxDistance) {
             return getLeashData(entity).map(data -> data.addLeash(holder, maxDistance)).orElse(false);
         }
 
@@ -93,12 +94,12 @@ public final class LeashDataInnerAPI {
          * @param entity          the entity
          * @param holder          the holder
          * @param maxDistance     the max distance
-         * @param elasticDistance the elastic distance
+         * @param elasticdDistanceScale the elastic distance
          * @param maxKeepTicks    the max keep ticks
          * @return the boolean
          */
-        public static boolean attach(Entity entity, Entity holder, double maxDistance, double elasticDistance, int maxKeepTicks) {
-            return getLeashData(entity).map(data -> data.addLeash(holder, maxDistance, elasticDistance, maxKeepTicks)).orElse(false);
+        public static boolean attach(Entity entity, Entity holder, @Nullable Double maxDistance, @Nullable Double elasticdDistanceScale, int maxKeepTicks) {
+            return getLeashData(entity).map(data -> data.addLeash(holder, maxDistance, elasticdDistanceScale, maxKeepTicks)).orElse(false);
         }
 
         /**
@@ -110,7 +111,7 @@ public final class LeashDataInnerAPI {
          * @param reserved    the reserved
          * @return the boolean
          */
-        public static boolean attach(Entity entity, Entity holder, double maxDistance, String reserved) {
+        public static boolean attach(Entity entity, Entity holder, @Nullable Double maxDistance, String reserved) {
             return getLeashData(entity).map(data -> data.addLeash(holder, maxDistance, reserved)).orElse(false);
         }
 
@@ -120,13 +121,13 @@ public final class LeashDataInnerAPI {
          * @param entity          the entity
          * @param holder          the holder
          * @param maxDistance     the max distance
-         * @param elasticDistance the elastic distance
+         * @param elasticDistanceScale the elastic distance
          * @param maxKeepTicks    the max keep ticks
          * @param reserved        the reserved
          * @return the boolean
          */
-        public static boolean attach(Entity entity, Entity holder, double maxDistance, double elasticDistance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.addLeash(holder, maxDistance, elasticDistance, maxKeepTicks, reserved)).orElse(false);
+        public static boolean attach(Entity entity, Entity holder, @Nullable Double maxDistance, @Nullable Double elasticDistanceScale, int maxKeepTicks, String reserved) {
+            return getLeashData(entity).map(data -> data.addLeash(holder, maxDistance, elasticDistanceScale, maxKeepTicks, reserved)).orElse(false);
         }
 
         /**
@@ -239,9 +240,25 @@ public final class LeashDataInnerAPI {
          * @param distance the distance
          * @return the max distance
          */
-// ---------------------- 设置最大距离 ----------------------
-        public static boolean setMaxDistance(Entity entity, Entity holder, double distance) {
+        // ---------------------- 设置最大距离 ----------------------
+        public static boolean setMaxDistance(Entity entity, Entity holder, @Nullable Double distance) {
             return getLeashData(entity).map(data -> data.setMaxDistance(holder, distance)).orElse(false);
+        }
+        /**
+         * Sets max distance.
+         *
+         * @param entity   the entity
+         * @param holder   the holder
+         * @param distance the distance
+         * @return the max distance
+         */
+        public static boolean setMaxDistance(Entity entity, Entity holder, @Nullable Double distance, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data -> reserved != null ?
+                            data.setMaxDistance(holder, distance, reserved) :
+                            data.setMaxDistance(holder, distance))
+                    .orElse(false);
         }
 
         /**
@@ -253,7 +270,7 @@ public final class LeashDataInnerAPI {
          * @param maxKeepTicks the max keep ticks
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, Entity holder, double distance, int maxKeepTicks) {
+        public static boolean setMaxDistance(Entity entity, Entity holder, @Nullable Double distance, int maxKeepTicks) {
             return getLeashData(entity).map(data -> data.setMaxDistance(holder, distance, maxKeepTicks)).orElse(false);
         }
 
@@ -267,8 +284,12 @@ public final class LeashDataInnerAPI {
          * @param reserved     the reserved
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, Entity holder, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setMaxDistance(holder, distance, maxKeepTicks, reserved)).orElse(false);
+        public static boolean setMaxDistance(Entity entity, Entity holder, @Nullable Double distance, int maxKeepTicks, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(data -> reserved != null ?
+                            data.setMaxDistance(holder, distance, maxKeepTicks, reserved) :
+                            data.setMaxDistance(holder, distance, maxKeepTicks))
+                    .orElse(false);
         }
 
         /**
@@ -279,7 +300,7 @@ public final class LeashDataInnerAPI {
          * @param distance   the distance
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, UUID holderUUID, double distance) {
+        public static boolean setMaxDistance(Entity entity, UUID holderUUID, @Nullable Double distance) {
             return getLeashData(entity).map(data -> data.setMaxDistance(holderUUID, distance)).orElse(false);
         }
 
@@ -292,7 +313,7 @@ public final class LeashDataInnerAPI {
          * @param maxKeepTicks the max keep ticks
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, UUID holderUUID, double distance, int maxKeepTicks) {
+        public static boolean setMaxDistance(Entity entity, UUID holderUUID, @Nullable Double distance, int maxKeepTicks) {
             return getLeashData(entity).map(data -> data.setMaxDistance(holderUUID, distance, maxKeepTicks)).orElse(false);
         }
 
@@ -306,8 +327,14 @@ public final class LeashDataInnerAPI {
          * @param reserved     the reserved
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, UUID holderUUID, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setMaxDistance(holderUUID, distance, maxKeepTicks, reserved)).orElse(false);
+        public static boolean setMaxDistance(Entity entity, UUID holderUUID, @Nullable Double distance, int maxKeepTicks,@Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.setMaxDistance(holderUUID, distance, maxKeepTicks, reserved) :
+                                    data.setMaxDistance(holderUUID, distance, maxKeepTicks)
+                    )
+                    .orElse(false);
         }
 
         /**
@@ -318,7 +345,7 @@ public final class LeashDataInnerAPI {
          * @param distance the distance
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, BlockPos knotPos, double distance) {
+        public static boolean setMaxDistance(Entity entity, BlockPos knotPos, @Nullable Double distance) {
             return getLeashData(entity).map(data -> data.setMaxDistance(knotPos, distance)).orElse(false);
         }
 
@@ -331,7 +358,7 @@ public final class LeashDataInnerAPI {
          * @param maxKeepTicks the max keep ticks
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, BlockPos knotPos, double distance, int maxKeepTicks) {
+        public static boolean setMaxDistance(Entity entity, BlockPos knotPos, @Nullable Double distance, int maxKeepTicks) {
             return getLeashData(entity).map(data -> data.setMaxDistance(knotPos, distance, maxKeepTicks)).orElse(false);
         }
 
@@ -345,126 +372,150 @@ public final class LeashDataInnerAPI {
          * @param reserved     the reserved
          * @return the max distance
          */
-        public static boolean setMaxDistance(Entity entity, BlockPos knotPos, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setMaxDistance(knotPos, distance, maxKeepTicks, reserved)).orElse(false);
+        public static boolean setMaxDistance(Entity entity, BlockPos knotPos, @Nullable Double distance, int maxKeepTicks,@Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.setMaxDistance(knotPos, distance, maxKeepTicks, reserved) :
+                                    data.setMaxDistance(knotPos, distance, maxKeepTicks)
+                    )
+                    .orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity   the entity
          * @param holder   the holder
-         * @param distance the distance
-         * @return the elastic distance
+         * @param scale the scale
+         * @return the elastic scale
          */
 // ---------------------- 设置弹性距离 ----------------------
-        public static boolean setElasticDistance(Entity entity, Entity holder, double distance) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, distance)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, Entity holder, @Nullable Double scale) {
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, scale)).orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity       the entity
          * @param holder       the holder
-         * @param distance     the distance
+         * @param scale     the scale
          * @param maxKeepTicks the max keep ticks
-         * @return the elastic distance
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, Entity holder, double distance, int maxKeepTicks) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, distance, maxKeepTicks)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, Entity holder, @Nullable Double scale, int maxKeepTicks) {
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, scale, maxKeepTicks)).orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity       the entity
          * @param holder       the holder
-         * @param distance     the distance
+         * @param scale     the scale
          * @param maxKeepTicks the max keep ticks
          * @param reserved     the reserved
-         * @return the elastic distance
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, Entity holder, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holder, distance, maxKeepTicks, reserved)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, Entity holder, @Nullable Double scale, int maxKeepTicks, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.setElasticDistanceScale(holder, scale, maxKeepTicks, reserved) :
+                                    data.setElasticDistanceScale(holder, scale, maxKeepTicks)
+                    )
+                    .orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity     the entity
          * @param holderUUID the holder uuid
-         * @param distance   the distance
-         * @return the elastic distance
+         * @param scale   the scale
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, UUID holderUUID, double distance) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, distance)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, UUID holderUUID, @Nullable Double scale) {
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, scale)).orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity       the entity
          * @param holderUUID   the holder uuid
-         * @param distance     the distance
+         * @param scale     the scale
          * @param maxKeepTicks the max keep ticks
-         * @return the elastic distance
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, UUID holderUUID, double distance, int maxKeepTicks) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, distance, maxKeepTicks)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, UUID holderUUID, @Nullable Double scale, int maxKeepTicks) {
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, scale, maxKeepTicks)).orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity       the entity
          * @param holderUUID   the holder uuid
-         * @param distance     the distance
+         * @param scale     the scale
          * @param maxKeepTicks the max keep ticks
          * @param reserved     the reserved
-         * @return the elastic distance
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, UUID holderUUID, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(holderUUID, distance, maxKeepTicks, reserved)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, UUID holderUUID, @Nullable Double scale, int maxKeepTicks, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.setElasticDistanceScale(holderUUID, scale, maxKeepTicks, reserved) :
+                                    data.setElasticDistanceScale(holderUUID, scale, maxKeepTicks)
+                    )
+                    .orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity   the entity
          * @param knotPos  the knot pos
-         * @param distance the distance
-         * @return the elastic distance
+         * @param scale the scale
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, BlockPos knotPos, double distance) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, distance)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, BlockPos knotPos, @Nullable Double scale) {
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, scale)).orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity       the entity
          * @param knotPos      the knot pos
-         * @param distance     the distance
+         * @param scale     the scale
          * @param maxKeepTicks the max keep ticks
-         * @return the elastic distance
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, BlockPos knotPos, double distance, int maxKeepTicks) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, distance, maxKeepTicks)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, BlockPos knotPos, @Nullable Double scale, int maxKeepTicks) {
+            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, scale, maxKeepTicks)).orElse(false);
         }
 
         /**
-         * Sets elastic distance.
+         * Sets elastic scale.
          *
          * @param entity       the entity
          * @param knotPos      the knot pos
-         * @param distance     the distance
+         * @param scale     the scale
          * @param maxKeepTicks the max keep ticks
          * @param reserved     the reserved
-         * @return the elastic distance
+         * @return the elastic scale
          */
-        public static boolean setElasticDistance(Entity entity, BlockPos knotPos, double distance, int maxKeepTicks, String reserved) {
-            return getLeashData(entity).map(data -> data.setElasticDistanceScale(knotPos, distance, maxKeepTicks, reserved)).orElse(false);
+        public static boolean setElasticDistanceScale(Entity entity, BlockPos knotPos, @Nullable Double scale, int maxKeepTicks, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.setElasticDistanceScale(knotPos, scale, maxKeepTicks, reserved) :
+                                    data.setElasticDistanceScale(knotPos, scale, maxKeepTicks)
+                    )
+                    .orElse(false);
         }
     }
 
@@ -515,8 +566,14 @@ public final class LeashDataInnerAPI {
          * @param reserved  the reserved
          * @return the boolean
          */
-        public static boolean transfer(Entity entity, Entity holder, Entity newHolder, String reserved) {
-            return getLeashData(entity).map(data -> data.transferLeash(holder, newHolder, reserved)).orElse(false);
+        public static boolean transfer(Entity entity, Entity holder, Entity newHolder, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.transferLeash(holder, newHolder, reserved) :
+                                    data.transferLeash(holder, newHolder)
+                    )
+                    .orElse(false);
         }
 
         /**
@@ -540,8 +597,14 @@ public final class LeashDataInnerAPI {
          * @param reserved   the reserved
          * @return the boolean
          */
-        public static boolean transfer(Entity entity, UUID holderUUID, Entity newHolder, String reserved) {
-            return getLeashData(entity).map(data -> data.transferLeash(holderUUID, newHolder, reserved)).orElse(false);
+        public static boolean transfer(Entity entity, UUID holderUUID, Entity newHolder, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.transferLeash(holderUUID, newHolder, reserved) :
+                                    data.transferLeash(holderUUID, newHolder)
+                    )
+                    .orElse(false);
         }
 
         /**
@@ -565,8 +628,14 @@ public final class LeashDataInnerAPI {
          * @param reserved  the reserved
          * @return the boolean
          */
-        public static boolean transfer(Entity entity, BlockPos knotPos, Entity newHolder, String reserved) {
-            return getLeashData(entity).map(data -> data.transferLeash(knotPos, newHolder, reserved)).orElse(false);
+        public static boolean transfer(Entity entity, BlockPos knotPos, Entity newHolder, @Nullable String reserved) {
+            return getLeashData(entity)
+                    .map(
+                            data ->  reserved != null ?
+                                    data.transferLeash(knotPos, newHolder, reserved) :
+                                    data.transferLeash(knotPos, newHolder)
+                    )
+                    .orElse(false);
         }
     }
 

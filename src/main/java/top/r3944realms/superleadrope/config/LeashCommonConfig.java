@@ -1,6 +1,7 @@
 package top.r3944realms.superleadrope.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -120,7 +121,7 @@ public class LeashCommonConfig {
          *
          * @param builder the builder
          */
-        public Common(ForgeConfigSpec.Builder builder) {
+        public Common(ForgeConfigSpec.@NotNull Builder builder) {
             // ===== Command =====
             builder.push("Command");
             enableSLPModCommandPrefix = builder
@@ -153,11 +154,11 @@ public class LeashCommonConfig {
             builder.push("LeashSettings");
             maxLeashLength = builder
                     .comment("Maximum leash distance (in blocks) for any entity")
-                    .defineInRange("maxLeashLength", 6.0, 1.0, 256.0);
+                    .defineInRange("maxLeashLength", 6.0, LeashConfigManager.MAX_DISTANCE_MIN_VALUE, LeashConfigManager.MAX_DISTANCE_MAX_VALUE);
 
             elasticDistanceScale = builder
                     .comment("Default elastic distance for the Super Lead rope")
-                    .defineInRange("elasticDistanceScale", 1.0, 0.2, 4.0);
+                    .defineInRange("elasticDistanceScale", 1.0, LeashConfigManager.ELASTIC_DISTANCE_MIN_VALUE, LeashConfigManager.ELASTIC_DISTANCE_MAX_VALUE);
 
             extremeSnapFactor = builder
                     .comment("Leash break factor = maxDistance * factor")

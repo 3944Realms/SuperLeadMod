@@ -270,6 +270,16 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
     /**
      * Sets max distance.
      *
+     * @param holder   the holder
+     * @param distance the distance
+     * @param reserved the reserved
+     * @return the max distance
+     */
+    boolean setMaxDistance(Entity holder, Double distance, String reserved);
+
+    /**
+     * Sets max distance.
+     *
      * @param holder       the holder
      * @param distance     the distance
      * @param maxKeepTicks the max keep ticks
@@ -296,6 +306,17 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
      * @return the max distance
      */
     boolean setMaxDistance(UUID holderUUID, Double distance);
+
+    /**
+     * Sets max distance.
+     *
+     * @param holderUUID the holder uuid
+     * @param distance   the distance
+     * @param reserved   the reserved
+     * @return the max distance
+     */
+    boolean setMaxDistance(UUID holderUUID, Double distance, String reserved);
+
 
     /**
      * Sets max distance.
@@ -330,6 +351,16 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
     /**
      * Sets max distance.
      *
+     * @param knotPos  the knot pos
+     * @param distance the distance
+     * @param reserved the reserved
+     * @return the max distance
+     */
+    boolean setMaxDistance(BlockPos knotPos, Double distance, String reserved);
+
+    /**
+     * Sets max distance.
+     *
      * @param knotPos      the knot pos
      * @param distance     the distance
      * @param maxKeepTicks the max keep ticks
@@ -356,6 +387,7 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
      * @return the elastic distance scale
      */
     boolean setElasticDistanceScale(Entity holder, Double scale);
+
 
     /**
      * Sets elastic distance scale.

@@ -18,8 +18,13 @@ package top.r3944realms.superleadrope.content.command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.CommonEventHandler;
+import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 
 import java.util.List;
 
@@ -35,6 +40,27 @@ public class Command {
      * The constant SHOULD_USE_PREFIX.
      */
     public static boolean SHOULD_USE_PREFIX = CommonEventHandler.leashConfigManager.isCommandPrefixEnabled();
+    /**
+     * The constant BASE_.
+     */
+    public static final String BASE_ = SuperLeadRope.MOD_ID + ".command.";
+    /**
+     * The constant ABBREVIATION.
+     */
+    public static final String ABBREVIATION = BASE_ + "abbreviation";
+    public static final String BLOCK_POS = BASE_ + ".block_pos";
+
+    public static final int MAX_SHOW_NUMBER = 4;
+    public static Component getSLPName(Entity entity) {
+        if (entity instanceof SuperLeashKnotEntity superLeashKnot) {
+            BlockPos pos = superLeashKnot.getPos();
+            return Component.translatable(BLOCK_POS, pos.getX(), pos.getY(), pos.getZ());
+        }
+        return entity.getName();
+    }
+    public static Component getSLPName(BlockPos pos) {
+        return Component.translatable(BLOCK_POS, pos.getX(), pos.getY(), pos.getZ());
+    }
 
     /**
      * Gets liter argument builder of css.

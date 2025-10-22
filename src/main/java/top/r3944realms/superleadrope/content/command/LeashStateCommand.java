@@ -27,7 +27,7 @@ public class LeashStateCommand {
      *
      * @param dispatcher the dispatcher
      */
-// 获取State
+    // 获取State
     // 设置State
     //      <addApplyEntity/setApplyEntity/reset> Holder<BlockPos/Entity<需判断实体类型>>  <Holder/Entity> <x> <y> <z>
     //      设置对应目标的 拴绳偏移

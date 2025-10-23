@@ -77,26 +77,28 @@ public interface ILeashHelper {
         default Set<Entity> getAllLeashedEntities() {
             return getAllLeash().stream().map(ILeashData::self).collect(Collectors.toSet());
         }
+
         /**
          * 获取该实体持有的指定实体实例
          *
-         * @param clazz 实体类型
-         * @param box 搜索范围
+         * @param <T>    the type parameter
+         * @param clazz  实体类型
+         * @param box    搜索范围
          * @param filter {@link Predicate<Entity> 实体过滤器}
-         *
          * @return {@link Set<Entity> 持有的实体集合}
          */
         @SuppressWarnings("unchecked")
          default <T extends Entity> Set<T> getLeashEntities (Class<T> clazz, AABB box, Predicate<T> filter) {
             return (Set<T>) getLeash(clazz, box, filter).stream().map(ILeashData::self).collect(Collectors.toSet());
         }
+
         /**
          * 获取该实体持有的符合条件实体的拴绳数据能力
          *
-         * @param clazz 实体类型
-         * @param box 搜索范围
+         * @param <T>    the type parameter
+         * @param clazz  实体类型
+         * @param box    搜索范围
          * @param filter {@link Predicate<Entity> 实体过滤器}
-         *
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
         <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz, AABB box, Predicate<T> filter);
@@ -104,10 +106,10 @@ public interface ILeashHelper {
         /**
          * 获取该实体持有的符合条件实体实例
          *
-         * @param clazz 实体类型
+         * @param <T>           the type parameter
+         * @param clazz         实体类型
          * @param fetchDistance 搜索范围(以实体为中心的正方体{@link AABB#ofSize(Vec3, double, double, double) 包围盒})
-         * @param filter {@link Predicate<Entity> 实体过滤器}
-         *
+         * @param filter        {@link Predicate<Entity> 实体过滤器}
          * @return {@link Set<Entity> 持有的实体实例}
          */
         @SuppressWarnings("unchecked")
@@ -118,21 +120,22 @@ public interface ILeashHelper {
         /**
          * 获取该实体持有的符合条件实体的拴绳数据能力
          *
-         * @param clazz 实体类型
+         * @param <T>           the type parameter
+         * @param clazz         实体类型
          * @param fetchDistance 搜索范围(以实体为中心的正方体{@link AABB#ofSize(Vec3, double, double, double) 包围盒})
-         * @param filter {@link Predicate<Entity> 实体过滤器}
-         *
+         * @param filter        {@link Predicate<Entity> 实体过滤器}
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
         default <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz, double fetchDistance, Predicate<T> filter) {
             return getLeash(clazz, AABB.ofSize(getHolderEntity().position(), fetchDistance, fetchDistance, fetchDistance), filter);
         }
+
         /**
          * 获取该实体持有的符合条件实体实例
          *
-         * @param clazz 实体类型
+         * @param <T>    the type parameter
+         * @param clazz  实体类型
          * @param filter {@link Predicate<Entity> 实体过滤器}
-         *
          * @return {@link Set<Entity> 持有的实体实例}
          */
         @SuppressWarnings("unchecked")
@@ -143,19 +146,20 @@ public interface ILeashHelper {
         /**
          * 获取该实体持有的符合条件实体的拴绳数据能力
          *
-         * @param clazz 实体类型
+         * @param <T>    the type parameter
+         * @param clazz  实体类型
          * @param filter {@link Predicate<Entity> 实体过滤器}
-         *
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
         default <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz, Predicate<T> filter) {
             return getLeash(clazz, 1024D, filter);
         }
+
         /**
          * 获取该实体持有的符合条件实体实例
          *
+         * @param <T>   the type parameter
          * @param clazz 实体类型
-         *
          * @return {@link Set<Entity> 持有的实体实例}
          */
         @SuppressWarnings("unchecked")
@@ -166,8 +170,8 @@ public interface ILeashHelper {
         /**
          * 获取该实体持有的符合条件实体的拴绳数据能力
          *
+         * @param <T>   the type parameter
          * @param clazz 实体类型
-         *
          * @return {@link Set<ILeashData> 持有的实体的拴绳数据能力集合}
          */
         default <T extends Entity> Set<ILeashData> getLeash(Class<T> clazz) {
@@ -186,6 +190,8 @@ public interface ILeashHelper {
 
         /**
          * 检查是否持有任何拴绳
+         *
+         * @return the boolean
          */
         default boolean hasLeashes() {
             return !getAllLeash().isEmpty();

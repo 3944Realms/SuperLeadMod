@@ -48,9 +48,38 @@ public class Command {
      * The constant ABBREVIATION.
      */
     public static final String ABBREVIATION = BASE_ + "abbreviation";
+    /**
+     * The constant BLOCK_POS.
+     */
     public static final String BLOCK_POS = BASE_ + ".block_pos";
+    /**
+     * The constant SUC.
+     */
+    public static final String SUC = "suc";
+    /**
+     * The constant FAIL.
+     */
+    public static final String FAIL = "fail";
+    /**
+     * The constant SUC_FAIL.
+     */
+    public static final String SUC_FAIL = "suc_fail";
+    /**
+     * The constant COLON.
+     */
+    public static final String COLON = BASE_ + ".colon";
 
+    /**
+     * The constant MAX_SHOW_NUMBER.
+     */
     public static final int MAX_SHOW_NUMBER = 4;
+
+    /**
+     * Gets slp name.
+     *
+     * @param entity the entity
+     * @return the slp name
+     */
     public static Component getSLPName(Entity entity) {
         if (entity instanceof SuperLeashKnotEntity superLeashKnot) {
             BlockPos pos = superLeashKnot.getPos();
@@ -58,6 +87,13 @@ public class Command {
         }
         return entity.getName();
     }
+
+    /**
+     * Gets slp name.
+     *
+     * @param pos the pos
+     * @return the slp name
+     */
     public static Component getSLPName(BlockPos pos) {
         return Component.translatable(BLOCK_POS, pos.getX(), pos.getY(), pos.getZ());
     }

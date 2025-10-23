@@ -37,7 +37,7 @@ public class LeashCommonConfig {
         /**
          * The Enable slp mod command prefix.
          */
-        // Command
+// Command
         public final ForgeConfigSpec.BooleanValue enableSLPModCommandPrefix;
         /**
          * The Slp mod command prefix.
@@ -47,13 +47,13 @@ public class LeashCommonConfig {
         /**
          * The Teleport whitelist.
          */
-        // Entity
+// Entity
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> teleportWhitelist;
 
         /**
          * The Max leash length.
          */
-        // Leash settings
+// Leash settings
         public final ForgeConfigSpec.DoubleValue maxLeashLength;
         /**
          * The Elastic distance scale.
@@ -79,7 +79,7 @@ public class LeashCommonConfig {
         /**
          * The Enable true damping.
          */
-        // True damping
+// True damping
         public final ForgeConfigSpec.BooleanValue enableTrueDamping;
         /**
          * The Damping factor.
@@ -101,7 +101,7 @@ public class LeashCommonConfig {
         /**
          * The Default apply entity location offset.
          */
-        // Leash state offsets
+// Leash state offsets
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> defaultApplyEntityLocationOffset;
         /**
          * The Default holder location offset.
@@ -111,7 +111,7 @@ public class LeashCommonConfig {
         /**
          * The constant OFFSET_PATTERN.
          */
-        // 正则表达式模式
+// 正则表达式模式
         static final Pattern OFFSET_PATTERN = Pattern.compile(
                 "(?i)(?:vec3|vec3d|vector3|offset)\\s*\\(\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*,\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*,\\s*([-+]?[0-9]*\\.?[0-9]+)\\s*\\)\\s*:\\s*\\[\\s*([^]]+?)\\s*]\\s*"
         );

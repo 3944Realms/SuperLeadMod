@@ -58,6 +58,8 @@ public record PunishmentDefinition(PunishmentDefinition.Type type, float strengt
 
     /**
      * 序列化到网络  @param buf the buf
+     *
+     * @param buf the buf
      */
     public void toNetwork(FriendlyByteBuf buf) {
         buf.writeEnum(this.type);
@@ -68,6 +70,7 @@ public record PunishmentDefinition(PunishmentDefinition.Type type, float strengt
     /**
      * 从网络反序列化  @param buf the buf
      *
+     * @param buf the buf
      * @return the punishment definition
      */
     public static PunishmentDefinition fromNetwork(FriendlyByteBuf buf) {

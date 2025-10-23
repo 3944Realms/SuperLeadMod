@@ -349,26 +349,6 @@ public enum SLPLangKeyValue {
             "§b倍乘既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
     /**
-     * The Message leashdata get title.
-     */
-    MESSAGE_LEASHDATA_GET_TITLE(
-            LeashDataCommand.TITLE, ModPartEnum.COMMAND,
-            "=== Leash Data for %s ===",
-            "=== %s 的拴绳数据 ===",
-            "=== %s 的拴繩數據 ===",
-            "=== %s 之繫繩數據 ==="
-    ),
-    /**
-     * The Message leashdata get total.
-     */
-    MESSAGE_LEASHDATA_GET_TOTAL(
-            LeashDataCommand.TOTAL, ModPartEnum.COMMAND,
-            "Total leashes: %d",
-            "总拴绳数: %d",
-            "總拴繩數: %d",
-            "繫繩總數: %d"
-    ),
-    /**
      * Message leashdata get block slp lang key value.
      */
     MESSAGE_LEASHDATA_GET_BLOCK(

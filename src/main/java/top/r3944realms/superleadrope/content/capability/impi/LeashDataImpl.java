@@ -1344,6 +1344,16 @@ public class LeashDataImpl implements ILeashData {
     }
 
     @Override
+    public Collection<LeashInfo> getAllHolderLeashes() {
+        return Collections.unmodifiableCollection(leashHolders.values());
+    }
+
+    @Override
+    public Collection<LeashInfo> getAllKnotLeashes() {
+        return Collections.unmodifiableCollection(leashKnots.values());
+    }
+
+    @Override
     public boolean isLeashedBy(Entity holder) {
         return holder instanceof SuperLeashKnotEntity superLeashKnotEntity ?
                 isLeashedBy(superLeashKnotEntity.getPos()) :

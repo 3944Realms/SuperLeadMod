@@ -622,6 +622,20 @@ public interface ILeashData extends INBTSerializable<CompoundTag> {
     Collection<LeashInfo> getAllLeashes();
 
     /**
+     * Gets all leashes.
+     *
+     * @return the all leashes
+     */
+    Collection<LeashInfo> getAllHolderLeashes();
+
+    /**
+     * Gets all leashes.
+     *
+     * @return the all leashes
+     */
+    Collection<LeashInfo> getAllKnotLeashes();
+
+    /**
      * Is leashed by boolean.
      *
      * @param holder the holder

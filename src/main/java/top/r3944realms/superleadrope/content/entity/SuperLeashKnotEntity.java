@@ -35,6 +35,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
+import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 

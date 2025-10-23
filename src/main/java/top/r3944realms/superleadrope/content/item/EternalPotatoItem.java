@@ -66,6 +66,7 @@ public class EternalPotatoItem extends Item {
     /**
      * 获取或生成 ItemStack 的唯一 UUID  @param stack the stack
      *
+     * @param stack the stack
      * @return the or create item uuid
      */
     public static UUID getOrCreateItemUUID(ItemStack stack) {

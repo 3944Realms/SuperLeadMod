@@ -91,11 +91,11 @@ public final class LeashDataInnerAPI {
         /**
          * Attach boolean.
          *
-         * @param entity          the entity
-         * @param holder          the holder
-         * @param maxDistance     the max distance
+         * @param entity                the entity
+         * @param holder                the holder
+         * @param maxDistance           the max distance
          * @param elasticdDistanceScale the elastic distance
-         * @param maxKeepTicks    the max keep ticks
+         * @param maxKeepTicks          the max keep ticks
          * @return the boolean
          */
         public static boolean attach(Entity entity, Entity holder, @Nullable Double maxDistance, @Nullable Double elasticdDistanceScale, int maxKeepTicks) {
@@ -118,12 +118,12 @@ public final class LeashDataInnerAPI {
         /**
          * Attach boolean.
          *
-         * @param entity          the entity
-         * @param holder          the holder
-         * @param maxDistance     the max distance
+         * @param entity               the entity
+         * @param holder               the holder
+         * @param maxDistance          the max distance
          * @param elasticDistanceScale the elastic distance
-         * @param maxKeepTicks    the max keep ticks
-         * @param reserved        the reserved
+         * @param maxKeepTicks         the max keep ticks
+         * @param reserved             the reserved
          * @return the boolean
          */
         public static boolean attach(Entity entity, Entity holder, @Nullable Double maxDistance, @Nullable Double elasticDistanceScale, int maxKeepTicks, String reserved) {
@@ -240,16 +240,18 @@ public final class LeashDataInnerAPI {
          * @param distance the distance
          * @return the max distance
          */
-        // ---------------------- 设置最大距离 ----------------------
+// ---------------------- 设置最大距离 ----------------------
         public static boolean setMaxDistance(Entity entity, Entity holder, @Nullable Double distance) {
             return getLeashData(entity).map(data -> data.setMaxDistance(holder, distance)).orElse(false);
         }
+
         /**
          * Sets max distance.
          *
          * @param entity   the entity
          * @param holder   the holder
          * @param distance the distance
+         * @param reserved the reserved
          * @return the max distance
          */
         public static boolean setMaxDistance(Entity entity, Entity holder, @Nullable Double distance, @Nullable String reserved) {
@@ -385,9 +387,9 @@ public final class LeashDataInnerAPI {
         /**
          * Sets elastic scale.
          *
-         * @param entity   the entity
-         * @param holder   the holder
-         * @param scale the scale
+         * @param entity the entity
+         * @param holder the holder
+         * @param scale  the scale
          * @return the elastic scale
          */
 // ---------------------- 设置弹性距离 ----------------------
@@ -400,7 +402,7 @@ public final class LeashDataInnerAPI {
          *
          * @param entity       the entity
          * @param holder       the holder
-         * @param scale     the scale
+         * @param scale        the scale
          * @param maxKeepTicks the max keep ticks
          * @return the elastic scale
          */
@@ -413,7 +415,7 @@ public final class LeashDataInnerAPI {
          *
          * @param entity       the entity
          * @param holder       the holder
-         * @param scale     the scale
+         * @param scale        the scale
          * @param maxKeepTicks the max keep ticks
          * @param reserved     the reserved
          * @return the elastic scale
@@ -433,7 +435,7 @@ public final class LeashDataInnerAPI {
          *
          * @param entity     the entity
          * @param holderUUID the holder uuid
-         * @param scale   the scale
+         * @param scale      the scale
          * @return the elastic scale
          */
         public static boolean setElasticDistanceScale(Entity entity, UUID holderUUID, @Nullable Double scale) {
@@ -445,7 +447,7 @@ public final class LeashDataInnerAPI {
          *
          * @param entity       the entity
          * @param holderUUID   the holder uuid
-         * @param scale     the scale
+         * @param scale        the scale
          * @param maxKeepTicks the max keep ticks
          * @return the elastic scale
          */
@@ -458,7 +460,7 @@ public final class LeashDataInnerAPI {
          *
          * @param entity       the entity
          * @param holderUUID   the holder uuid
-         * @param scale     the scale
+         * @param scale        the scale
          * @param maxKeepTicks the max keep ticks
          * @param reserved     the reserved
          * @return the elastic scale
@@ -476,9 +478,9 @@ public final class LeashDataInnerAPI {
         /**
          * Sets elastic scale.
          *
-         * @param entity   the entity
-         * @param knotPos  the knot pos
-         * @param scale the scale
+         * @param entity  the entity
+         * @param knotPos the knot pos
+         * @param scale   the scale
          * @return the elastic scale
          */
         public static boolean setElasticDistanceScale(Entity entity, BlockPos knotPos, @Nullable Double scale) {
@@ -490,7 +492,7 @@ public final class LeashDataInnerAPI {
          *
          * @param entity       the entity
          * @param knotPos      the knot pos
-         * @param scale     the scale
+         * @param scale        the scale
          * @param maxKeepTicks the max keep ticks
          * @return the elastic scale
          */
@@ -503,7 +505,7 @@ public final class LeashDataInnerAPI {
          *
          * @param entity       the entity
          * @param knotPos      the knot pos
-         * @param scale     the scale
+         * @param scale        the scale
          * @param maxKeepTicks the max keep ticks
          * @param reserved     the reserved
          * @return the elastic scale

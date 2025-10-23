@@ -62,6 +62,7 @@ import top.r3944realms.superleadrope.content.capability.CapabilityHandler;
 import top.r3944realms.superleadrope.content.capability.CapabilityRemainder;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
+import top.r3944realms.superleadrope.content.command.LeashDataCommand;
 import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
@@ -477,6 +478,7 @@ public class CommonEventHandler {
         public static void onRegisterCommand (RegisterCommandsEvent event) {
             CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
             MotionCommand.register(dispatcher);
+            LeashDataCommand.register(dispatcher);
         }
     }
 

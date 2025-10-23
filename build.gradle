@@ -197,33 +197,60 @@ tasks.named('javadoc', Javadoc).configure {
     options.links("https://docs.oracle.com/en/java/javase/17/docs/api/")
     options.memberLevel = JavadocMemberLevel.PUBLIC
     options.addBooleanOption('Xdoclint:none', true)
-    options.addStringOption('doctitle', "${mod_id} ${mod_version} Javadoc")
+    options.addStringOption('doctitle', "${mod_id} ${minecraft_version} ${mod_version} Javadoc")
 }
-
+// =====================（class/ java） =====================
+tasks.register('deobfJar', Jar) {
+    from(sourceSets.main.output) // class
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
+    }
+    dependsOn classes
+}
+tasks.register('sourceJar', Jar) {
+    from(sourceSets.main.allSource) // java
+    archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-sources.jar"
+    archiveClassifier.set("sources")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
+    }
+    dependsOn classes
+}
 // ===================== 普通 Javadoc =====================
 tasks.register('javadocJar', Jar) {
-    archiveClassifier.set('javadoc')
+    archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-javadoc.jar"
+    archiveClassifier.set("javadoc")
     from tasks.javadoc
     dependsOn tasks.javadoc
 }
 
-tasks.register('apiJavadocJar', Jar) {
-    archiveClassifier.set('api-javadoc')
-    from tasks.javadoc
-    include "top/r3944realms/superleadrope/api/**/*"
-    dependsOn tasks.javadoc
-}
-
-
-// ===================== API Jar（class + java 混杂） =====================
+// ===================== API Jar（class / java） =====================
 tasks.register('apiJar', Jar) {
-    archiveClassifier.set('api')
+    archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-api.jar"
+    archiveClassifier.set("api")
     manifest {
         attributes 'FMLModType': 'GAMELIBRARY'
     }
 
     // 打包 class 和 java
-    from(sourceSets.main.allSource) // java
     from(sourceSets.main.output) { // class
         exclude 'assets/**', 'data/**'
     }
@@ -232,6 +259,31 @@ tasks.register('apiJar', Jar) {
     include "top/r3944realms/superleadrope/SuperLeadRopeAPI.*"
 
     dependsOn classes
+}
+tasks.register('apiSourceJar', Jar) {
+    archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-api-sources.jar"
+    archiveClassifier.set("api-sources")
+    manifest {
+        attributes 'FMLModType': 'GAMELIBRARY'
+    }
+
+    // 打包 class 和 java
+    from(sourceSets.main.allSource) { // java
+        exclude 'assets/**', 'data/**'
+    }
+
+    include "top/r3944realms/superleadrope/api/**/*"
+    include "top/r3944realms/superleadrope/SuperLeadRopeAPI.*"
+
+    dependsOn classes
+}
+
+tasks.register('apiJavadocJar', Jar) {
+    archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-api-javadoc.jar"
+    archiveClassifier.set("api-javadoc")
+    from tasks.javadoc
+    include "top/r3944realms/superleadrope/api/**/*"
+    dependsOn tasks.javadoc
 }
 
 tasks.register('apiJavadoc', Javadoc) {
@@ -252,31 +304,8 @@ tasks.register('apiJavadoc', Javadoc) {
     options.addStringOption('doctitle', "${mod_name} API ${mod_version} Javadoc")
 }
 
-tasks.register('javadocApiJar', Jar) {
-    archiveClassifier.set('api-javadoc')
-    from tasks.apiJavadoc
-    dependsOn tasks.apiJavadoc
-}
-// ===================== 主包完整 Jar（class + java） =====================
-tasks.register('fullJar', Jar) {
-    archiveClassifier.set('all') // Maven 上会是 -all.jar
-    from(sourceSets.main.allSource) // java
-    from(sourceSets.main.output) // class
-    // === 避免重复打包资源（即使混入其他 jar 时也不会重复） ===
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1',
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-        ])
-    }
-    dependsOn classes
-}
+
+
 
 // ===================== 主 Jar 与混淆 =====================
 jar {
@@ -291,10 +320,7 @@ jar {
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
         ])
     }
-    archiveFileName = "${mod_id}-${mod_version}-origin.jar"
-
-    // 可选：排除 API 类（如果你不想在主 jar 中包含 API）
-    // exclude "top/r3944realms/superleadrope/api/**/*"
+    archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-origin.jar"
 
     finalizedBy 'proguard'
 }
@@ -374,10 +400,11 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = mod_id
 
-            artifact fullJar
-            artifact apiJar
-            // 可选
+            artifact deobfJar
+            artifact sourceJar
             artifact javadocJar
+            artifact apiJar
+            artifact apiSourceJar
             artifact apiJavadocJar
 
             pom {
@@ -402,7 +429,8 @@ publishing {
 
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            name = "local"
+            url = layout.buildDirectory.dir("repo")
         }
         maven {
             name = 'LTDNexus'
@@ -417,7 +445,7 @@ publishing {
 
 // ===================== 构建任务依赖 =====================
 tasks.named('build') {
-    dependsOn apiJar, javadocApiJar
+    dependsOn apiJar, apiJavadocJar
 }
 
 tasks.named('clean') {
@@ -456,5 +484,19 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+afterEvaluate {
+    tasks.named('deobfJar') {
+        doLast {
+            def jar = file(layout.buildDirectory.dir("repo") + "${mod_id}-${minecraft_version}-${mod_version}.jar")
+            if (jar.exists()) ant.delete(jar)
+        }
+    }
+    tasks.named('apiJar') {
+        doLast {
+            def jar = file(layout.buildDirectory.dir("repo") + "${mod_id}-${minecraft_version}-${mod_version}-api.jar")
+            if (jar.exists()) ant.delete(jar)
+        }
     }
 }

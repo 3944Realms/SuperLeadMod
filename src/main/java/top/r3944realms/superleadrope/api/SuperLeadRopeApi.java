@@ -122,7 +122,6 @@ public class SuperLeadRopeApi {
      * @param clazz  the clazz
      * @param box    the box
      * @param filter the filter
-     *
      * @return the list
      */
     public static  <T extends Entity> @NotNull List<T> leashableInArea(Entity holder, Class<T> clazz, AABB box, Predicate<T> filter) {

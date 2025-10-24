@@ -1,8 +1,8 @@
 # 🪢 Super Lead Rope / 超级拴绳
 
 ## ⚠️ 注意 / Warning
-**提示：目前属于早期测试版，已确认未有问题，如在服务器上使用不保证后续版本兼容，请慎重考虑。**  
-**Notice:** This is an **early test release** and has been confirmed to have no known issues. However, **compatibility with future versions on servers is not guaranteed — use with caution.**  
+**提示：目前属于早期测试版，如在服务器上使用不保证后续版本兼容，请慎重考虑。**  
+**Notice:** This is an **early test release**. So, **compatibility with future versions on servers is not guaranteed — use with caution.**  
 建议在正式服务器部署前先在备份或测试服中验证。  
 We recommend testing on backups or a development server before deploying to production.
 

@@ -67,13 +67,14 @@ public class Command {
     /**
      * The constant COLON.
      */
-    public static final String COLON = BASE_ + ".colon";
+    public static final String COLON = BASE_ + "colon";
 
     /**
      * The constant MAX_SHOW_NUMBER.
      */
     public static final int MAX_SHOW_NUMBER = 4;
-
+    public static final String END = BASE_ + "end";
+    public static final String NONE = BASE_ + "none";
     /**
      * Gets slp name.
      *
@@ -85,7 +86,7 @@ public class Command {
             BlockPos pos = superLeashKnot.getPos();
             return Component.translatable(BLOCK_POS, pos.getX(), pos.getY(), pos.getZ());
         }
-        return entity.getName();
+        return entity.getDisplayName();
     }
 
     /**

@@ -231,7 +231,24 @@ public final class LeashDataInnerAPI {
      */
     public static final class PropertyOperations {
         private PropertyOperations() {}
-
+        /**
+         * Set static max distance.
+         *
+         * @param entity   the entity
+         * @param distance the distance
+         */
+        public static void setStaticMaxDistance(Entity entity, @Nullable Double distance) {
+           getLeashData(entity).ifPresent(data -> data.setStaticMaxDistance(distance));
+        }
+        /**
+         * Set static elastic distance scale.
+         *
+         * @param entity   the entity
+         * @param distance the distance
+         */
+        public static void setElasticDistanceScale(Entity entity, @Nullable Double distance) {
+            getLeashData(entity).ifPresent(data -> data.setStaticElasticDistanceScale(distance));
+        }
         /**
          * Sets max distance.
          *

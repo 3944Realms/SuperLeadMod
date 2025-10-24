@@ -18,6 +18,7 @@ package top.r3944realms.superleadrope.datagen.data;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
+import top.r3944realms.superleadrope.content.command.Command;
 import top.r3944realms.superleadrope.content.command.LeashDataCommand;
 import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.gamerule.server.CreateSuperLeashKnotEntityIfAbsent;
@@ -348,106 +349,438 @@ public enum SLPLangKeyValue {
             "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
             "§b倍乘既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
+    MESSAGE_ABBREVIATION(
+            Command.ABBREVIATION, ModPartEnum.COMMAND,
+            "...",
+            "...",
+            "...",
+            "..."
+    ),
+    MESSAGE_END(
+            Command.END, ModPartEnum.COMMAND,
+            ".",
+            "。",
+            "。",
+            "。"
+    ),
+    MESSAGE_COLON(
+            Command.COLON, ModPartEnum.COMMAND,
+            ":",
+            ":",
+            ":",
+            ":"
+    ),
+    MESSAGE_BLOCK_POS(
+            Command.BLOCK_POS, ModPartEnum.COMMAND,
+            "§7[§fX: %d, Y: %d, Z: %d§7]",
+            "§7[§fX: %d, Y: %d, Z: %d§7]",
+            "§7[§fX: %d, Y: %d, Z: %d§7]",
+            "§7[§fX: %d, Y: %d, Z: %d§7]"
+    ),
+    MESSAGE_NONE(
+            Command.NONE, ModPartEnum.COMMAND,
+            "<None>",
+            "无",
+            "無",
+            "無"
+    ),
+    MESSAGE_LEASHDATA_ALL_KNOTS(
+            LeashDataCommand.ALL_KNOTS, ModPartEnum.COMMAND,
+            "All Knots",
+            "所有绳结",
+            "所有繩結",
+            "諸結"
+    ),
+    MESSAGE_LEASHDATA_ALL_HOLDERS(
+            LeashDataCommand.ALL_HOLDERS, ModPartEnum.COMMAND,
+            "All Holders",
+            "所有持有者",
+            "所有持有者",
+            "諸持者"
+    ),
+    MESSAGE_LEASHDATA_SET_STATIC_MAX_DISTANCE(
+            LeashDataCommand.SET_STATIC_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
+            "Successfully set the static max distance of leash to %.2f from %s",
+            "已成功设置%.2f为%s的全局最大距离",
+            "已成功設定%.2f為%s的全域最大距離",
+            "繩距定為%.2f，已立%s之全域極距"
+    ),
+    MESSAGE_LEASHDATA_RESET_STATIC_MAX_DISTANCE(
+            LeashDataCommand.RESET_STATIC_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
+            "Successfully reset the static max distance of leash from %s",
+            "已成功重置%s的全局最大距离",
+            "已成功重置%s的全域最大距離",
+            "%s之全域極距，今已復初"
+    ),
+    MESSAGE_LEASHDATA_SET_STATIC_ELASTIC_DISTANCE_SCALE(
+            LeashDataCommand.SET_STATIC_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
+            "Successfully set the static elastic distance scale of leash to %.2f from %s",
+            "已成功设置%.2f为%s的全局弹性距离比例",
+            "已成功設定%.2f為%s的全域彈性距離比例",
+            "繩距彈性比例定為%.2f，已立%s之全域伸縮度"
+    ),
+    MESSAGE_LEASHDATA_RESET_STATIC_ELASTIC_DISTANCE_SCALE(
+            LeashDataCommand.RESET_STATIC_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
+            "Successfully reset the static elastic distance scale of leash from %s",
+            "成功重置%s的全局弹性距离比例",
+            "成功重置%s的全域彈性距離比例",
+            "%s之全域伸縮比例，今已復初"
+    ),
+    MESSAGE_LEASHDATA_SET_MAX_DISTANCE_SUC(
+            LeashDataCommand.SET_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
+            "Successfully adjusted the max distance of leash from %s to %s",
+            "成功调整%s到%s的拴绳最大距离",
+            "成功調整%s到%s的拴繩最大距離",
+            "%s至%s之拴繩極距，今已定"
+    ),
+    MESSAGE_LEASHDATA_SET_MAX_DISTANCE_SUC_FAIL(
+            LeashDataCommand.SET_MAX_DISTANCE_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to adjust it from %s to %s",
+            "，但未能调整%s到%s的拴绳最大距离",
+            "，但未能調整%s到%s的拴繩最大距離",
+            "，然%s至%s之拴繩極距未定"
+    ),
+    MESSAGE_LEASHDATA_SET_MAX_DISTANCE_FAIL(
+            LeashDataCommand.SET_MAX_DISTANCE_FAIL, ModPartEnum.COMMAND,
+            "Failed to adjust the max distance of leash from %s to %s",
+            "未能调整%s到%s的拴绳最大距离",
+            "未能調整%s到%s的拴繩最大距離",
+            "%s至%s之拴繩極距未成"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_ALL_BLOCK_LEASHES(
+            LeashDataCommand.REMOVE_ALL_BLOCK_LEASHES, ModPartEnum.COMMAND,
+            "Successfully removed all holders' leash to %s",
+            "已成功移除所有持有者对%s的牵引",
+            "已成功移除所有持有者對%s的牽引",
+            "%s之所有羈絆，今已盡釋"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_REMOVE_ALL_HOLDER_LEASHES(
+            LeashDataCommand.REMOVE_ALL_HOLDER_LEASHES, ModPartEnum.COMMAND,
+            "Successfully removed all holders' leash to %s",
+            "已成功移除所有持有者对%s的牵引",
+            "已成功移除所有持有者對%s的牽引",
+            "%s之所有繫繩，今已盡除"
+    ),
+    MESSAGE_LEASHDATA_TRANSFER_FROM_BLOCK_SUC(
+            LeashDataCommand.TRANSFER_FROM_BLOCK_SUC, ModPartEnum.COMMAND,
+            "Successfully transferred leash from %s to %s",
+            "已成功将牵引从%s转移至%s",
+            "已成功將牽引從%s轉移至%s",
+            "繫繩自%s移至%s，其事已成"
+    ),
+    MESSAGE_LEASHDATA_TRANSFER_FROM_BLOCK_SUC_FAIL(
+            LeashDataCommand.TRANSFER_FROM_BLOCK_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to transfer leash from %s to %s.",
+            "，但未能将牵引从%s转移至%s",
+            "，但未能將牽引從%s轉移至%s",
+            "，然自%s至%s之遷移未竟"
+    ),
+    MESSAGE_LEASHDATA_TRANSFER_FROM_BLOCK_FAIL(
+            LeashDataCommand.TRANSFER_FROM_BLOCK_FAIL, ModPartEnum.COMMAND,
+            "Failed to transfer leash from %s to %s.",
+            "未能将牵引从%s转移至%s",
+            "未能將牽引從%s轉移至%s",
+            "繫繩自%s遷於%s之舉未遂"
+    ),
+    MESSAGE_LEASHDATA_SET_ELASTIC_DISTANCE_SCALE_SUC(
+            LeashDataCommand.SET_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
+            "Successfully adjusted the elastic distance scale of leash from %s to %s",
+            "成功调整%s到%s的拴绳弹性距离比例",
+            "成功調整%s到%s的拴繩彈性距離比例",
+            "%s至%s之拴繩伸縮比例，今已定"
+    ),
+    MESSAGE_LEASHDATA_SET_ELASTIC_DISTANCE_SCALE_SUC_FAIL(
+            LeashDataCommand.SET_ELASTIC_DISTANCE_SCALE_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to adjust it from %s to %s",
+            "，但未能调整%s到%s的拴绳弹性距离比例",
+            "，但未能調整%s到%s的拴繩彈性距離比例",
+            "，然%s至%s之拴繩伸縮比例未定"
+    ),
+    MESSAGE_LEASHDATA_SET_ELASTIC_DISTANCE_SCALE_FAIL(
+            LeashDataCommand.SET_ELASTIC_DISTANCE_SCALE_FAIL, ModPartEnum.COMMAND,
+            "Failed to adjust the elastic distance scale of leash from %s to %s",
+            "未能调整%s到%s的拴绳弹性距离比例",
+            "未能調整%s到%s的拴繩彈性距離比例",
+            "%s至%s之拴繩伸縮比例未成"
+    ),
+    MESSAGE_LEASHDATA_SET_BLOCK_MAX_DISTANCE_SUC(
+            LeashDataCommand.SET_BLOCK_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
+            "Successfully adjusted the max distance of leash from %s to %s",
+            "成功调整%s到%s的拴绳最大距离",
+            "成功調整%s到%s的拴繩最大距離",
+            "%s至%s之拴繩極距，今已定"
+    ),
+    MESSAGE_LEASHDATA_SET_BLOCK_MAX_DISTANCE_SUC_FAIL(
+            LeashDataCommand.SET_BLOCK_MAX_DISTANCE_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to adjust it from %s to %s",
+            "，但未能调整%s到%s的拴绳最大距离",
+            "，但未能調整%s到%s的拴繩最大距離",
+            "，然%s至%s之拴繩極距未定"
+    ),
+    MESSAGE_LEASHDATA_SET_BLOCK_MAX_DISTANCE_FAIL(
+            LeashDataCommand.SET_BLOCK_MAX_DISTANCE_FAIL, ModPartEnum.COMMAND,
+            "Failed to adjust the max distance of leash from %s to %s",
+            "未能调整%s到%s的拴绳最大距离",
+            "未能調整%s到%s的拴繩最大距離",
+            "%s至%s之拴繩極距未成"
+    ),
+    MESSAGE_LEASHDATA_SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC(
+            LeashDataCommand.SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
+            "Successfully adjusted the elastic distance scale of leash from %s to %s",
+            "成功调整%s到%s的拴绳弹性距离比例",
+            "成功調整%s到%s的拴繩彈性距離比例",
+            "%s至%s之拴繩伸縮比例，今已定"
+    ),
+    MESSAGE_LEASHDATA_SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC_FAIL(
+            LeashDataCommand.SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to adjust it from %s to %s",
+            "，但未能调整%s到%s的拴绳弹性距离比例",
+            "，但未能調整%s到%s的拴繩彈性距離比例",
+            "，然%s至%s之拴繩伸縮比例未定"
+    ),
+    MESSAGE_LEASHDATA_SET_BLOCK_ELASTIC_DISTANCE_SCALE_FAIL(
+            LeashDataCommand.SET_BLOCK_ELASTIC_DISTANCE_SCALE_FAIL, ModPartEnum.COMMAND,
+            "Failed to adjust the elastic distance scale of leash from %s to %s",
+            "未能调整%s到%s的拴绳弹性距离比例",
+            "未能%s調整為拴繩彈性距離比例從%s",
+            "繩距伸縮比例自%s易為%s之舉未遂"
+    ),
+    MESSAGE_LEASHDATA_LEASH_DATA_HEAD(
+            LeashDataCommand.LEASH_DATA_HEAD, ModPartEnum.COMMAND,
+            "LeashData:",
+            "拴绳数据:",
+            "拴繩數據:",
+            "繫繩錄:"
+    ),
+    MESSAGE_LEASHDATA_LEASH_DATA_ITEM(
+            LeashDataCommand.LEASH_DATA_ITEM, ModPartEnum.COMMAND,
+            "%s { Holder:%s, BlockPos:%s }",
+            "%s { 持有者: %s, 坐标: %s }",
+            "%s { 持有者: %s, 座標: %s }",
+            "%s { 持者: %s, 位: %s }"
+    ),
     /**
      * Message leashdata get block slp lang key value.
      */
     MESSAGE_LEASHDATA_GET_BLOCK(
             LeashDataCommand.BLOCK, ModPartEnum.COMMAND,
-            "§7Block: §e%s",
-            "§7方块: §e%s",
-            "§7方塊: §e%s",
-            "§7磚石: §e%s"
+            "Block",
+            "方块",
+            "方塊",
+            "磚石"
     ),
     /**
      * Message leashdata get uuid slp lang key value.
      */
     MESSAGE_LEASHDATA_GET_UUID(
             LeashDataCommand.UUID, ModPartEnum.COMMAND,
-            "§7UUID: §b%s",
-            "§7UUID: §b%s",
-            "§7UUID: §b%s",
-            "§7UUID: §b%s"
+            "UUID",
+            "UUID",
+            "UUID",
+            "UUID"
     ),
     /**
      * Message leashdata get max slp lang key value.
      */
     MESSAGE_LEASHDATA_GET_MAX(
             LeashDataCommand.MAX, ModPartEnum.COMMAND,
-            "§7Max: §a%.1f",
-            "§7最大距离: §a%.1f",
-            "§7最大距離: §a%.1f",
-            "§7極距: §a%.1f"
+            "Max Distance",
+            "最大距离",
+            "最大距離",
+            "極距"
     ),
     /**
      * Message leashdata get elastic slp lang key value.
      */
     MESSAGE_LEASHDATA_GET_ELASTIC(
             LeashDataCommand.ELASTIC, ModPartEnum.COMMAND,
-            "§7Elastic: §6%.1f",
-            "§7弹性距离: §6%.1f",
-            "§7彈性距離: §6%.1f",
-            "§7彈距: §6%.1f"
+            "Elastic Scale",
+            "弹性尺度",
+            "彈性尺度",
+            "彈距度"
     ),
     /**
      * Message leashdata get keep slp lang key value.
      */
     MESSAGE_LEASHDATA_GET_KEEP(
             LeashDataCommand.KEEP, ModPartEnum.COMMAND,
-            "§7Keep: §c%d§7/§c%d",
-            "§7保持: §c%d§7/§c%d",
-            "§7保持: §c%d§7/§c%d",
-            "§7持時: §c%d§7/§c%d"
+            "Keep Ticks",
+            "保持刻",
+            "保持刻",
+            "持時"
     ),
     /**
      * Message leashdata get reserved slp lang key value.
      */
     MESSAGE_LEASHDATA_GET_RESERVED(
             LeashDataCommand.RESERVED, ModPartEnum.COMMAND,
-            "§7Reserved: §d%s",
-            "§7保留字段: §d%s",
-            "§7保留字段: §d%s",
-            "§7備註: §d%s"
+            "Reserved",
+            "保留字段",
+            "保留字段",
+            "備註"
     ),
-    /**
-     * The Message leashdata add success.
-     */
-    MESSAGE_LEASHDATA_ADD_SUCCESS(
-            "command.leashdata.add_apply_entity.success", ModPartEnum.COMMAND,
-            "§bAdded leash successfully. §a%s §7→ §e%s",
-            "§b添加拴绳成功. §a%s §7→ §e%s",
-            "§b添加拴繩成功. §a%s §7→ §e%s",
-            "§b繫繩既添. §a%s §7→ §e%s"
+    MESSAGE_LEASHDATA_ENTITY(
+            LeashDataCommand.ENTITY, ModPartEnum.COMMAND,
+            "§7[ §l§fEntity §r§7]",
+            "§7[ §l§f实体 §r§7]",
+            "§7[ §l§f實體 §r§7]",
+            "§7[ §l§f實者 §r§7]"
     ),
-    /**
-     * The Message leashdata remove success.
-     */
-    MESSAGE_LEASHDATA_REMOVE_SUCCESS(
-            "command.leashdata.removeApplyEntity.success", ModPartEnum.COMMAND,
-            "§bRemoved leash successfully. §a%s §7- §e%s",
-            "§b移除拴绳成功. §a%s §7- §e%s",
-            "§b移除拴繩成功. §a%s §7- §e%s",
-            "§b繫繩既除. §a%s §7- §e%s"
+
+    MESSAGE_LEASHDATA_KNOT(
+            LeashDataCommand.KNOT, ModPartEnum.COMMAND,
+            "Knot",
+            "§7[ §l§f绳结 §r§7]",
+            "§7[ §l§f繩結 §r§7]",
+            "§7[ §l§f結 §r§7]"
     ),
-    /**
-     * The Message leashdata transfer success.
-     */
-    MESSAGE_LEASHDATA_TRANSFER_SUCCESS(
-            "command.leashdata.transfer.success", ModPartEnum.COMMAND,
-            "§bTransferred leash successfully. §a%s §7→ §e%s §7→ §6%s",
-            "§b转移拴绳成功. §a%s §7→ §e%s §7→ §6%s",
-            "§b轉移拴繩成功. §a%s §7→ §e%s §7→ §6%s",
-            "§b繫繩既移. §a%s §7→ §e%s §7→ §6%s"
+    MESSAGE_LEASHDATA_LEASH_INFO_HEAD(
+            LeashDataCommand.LEASH_INFO_HEAD, ModPartEnum.COMMAND,
+            "LeashInfo:",
+            "拴绳信息:",
+            "拴繩資訊:",
+            "繫繩訊:"
     ),
-    /**
-     * The Message leashdata set success.
-     */
-    MESSAGE_LEASHDATA_SET_SUCCESS(
-            "command.leashdata.setApplyEntity.success", ModPartEnum.COMMAND,
-            "§bSet leash property successfully. §a%s §7: §e%s §7= §6%.1f",
-            "§b设置拴绳属性成功. §a%s §7: §e%s §7= §6%.1f",
-            "§b設置拴繩屬性成功. §a%s §7: §e%s §7= §6%.1f",
-            "§b繫繩性既定. §a%s §7: §e%s §7= §6%.1f"
-    );
+    MESSAGE_LEASHDATA_LEASH_INFO_ITEM(
+            LeashDataCommand.LEASH_INFO_ITEM, ModPartEnum.COMMAND,
+            "%s { Info: %s }",
+            "%s { 信息: %s }",
+            "%s { 資訊: %s }",
+            "%s { 訊: %s }"
+    ),
+    MESSAGE_LEASHDATA_ADD_HOLDER_LEASHES_SUC(
+            LeashDataCommand.ADD_HOLDER_LEASHES_SUC, ModPartEnum.COMMAND,
+            "Successfully attached %s leash from %s to %s",
+            "成功将%s拴绳从%s连接到%s",
+            "成功將%s拴繩從%s連接到%s",
+            "%s繩自%s繫於%s，其事已成"
+    ),
+    MESSAGE_LEASHDATA_ADD_HOLDER_LEASHES_SUC_FAIL(
+            LeashDataCommand.ADD_HOLDER_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to attached %s leash from %s to %s.",
+            "，但未能将%s拴绳从%s连接到%s",
+            "，但未能將%s拴繩從%s連接到%s",
+            "，然%s繩自%s繫於%s未竟"
+    ),
+    MESSAGE_LEASHDATA_ADD_HOLDER_LEASHES_FAIL(
+            LeashDataCommand.ADD_HOLDER_LEASHES_FAIL, ModPartEnum.COMMAND,
+            "Failed to attached %s leash from %s to %s.",
+            "未能将%s拴绳从%s连接到%s",
+            "未能將%s拴繩從%s連接到%s",
+            "%s繩自%s繫於%s之舉未遂"
+    ),
+    MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_SUC(
+            LeashDataCommand.ADD_BLOCK_LEASHES_SUC, ModPartEnum.COMMAND,
+            "Successfully attached %s leash from %s to %s",
+            "成功将%s拴绳从%s连接到%s",
+            "成功將%s拴繩從%s連接到%s",
+            "%s繩自%s繫於%s，其事已成"
+    ),
+    MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_SUC_FAIL(
+            LeashDataCommand.ADD_BLOCK_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to attached %s leash from %s to %s.",
+            "，但未能将%s拴绳从%s连接到%s",
+            "，但未能將%s拴繩從%s連接到%s",
+            "，然%s繩自%s繫於%s未竟"
+    ),
+    MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_FAIL(
+            LeashDataCommand.ADD_BLOCK_LEASHES_FAIL, ModPartEnum.COMMAND,
+            "Failed to attached %s leash from %s to %s.",
+            "未能将%s拴绳从%s连接到%s",
+            "未能將%s拴繩從%s連接到%s",
+            "%s繩自%s繫於%s之舉未遂"
+    ),
+    MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_FAIL_NO_KNOT_FOUND(
+            LeashDataCommand.ADD_BLOCK_LEASHES_FAIL_NO_KNOT_FOUND, ModPartEnum.COMMAND,
+            "Unable to tie the towing rope to %s as there is no knot in the position.",
+            "无法将拴绳系到%s，因为该位置没有绳结",
+            "無法將拴繩繫到%s，因為該位置沒有繩結",
+            "%s處無結，拴繩難繫"
+    ),
+    MESSAGE_LEASHDATA_DEFAULT(
+            LeashDataCommand.DEFAULT, ModPartEnum.COMMAND,
+            "Default",
+            "默认值",
+            "默認值",
+            "原值"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_HOLDER_LEASHES_SUC(
+            LeashDataCommand.REMOVE_HOLDER_LEASHES_SUC, ModPartEnum.COMMAND,
+            "Successfully detached leash from %s to %s",
+            "成功解除%s到%s的拴绳连接",
+            "成功解除%s到%s的拴繩連接",
+            "%s至%s之拴繩，今已解"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_HOLDER_LEASHES_SUC_FAIL(
+            LeashDataCommand.REMOVE_HOLDER_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to detach leash from %s to %s",
+            "未能解除%s到%s的拴绳连接",
+            "未能解除%s到%s的拴繩連接",
+            "%s至%s之拴繩未除"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_HOLDER_LEASHES_FAIL(
+            LeashDataCommand.REMOVE_HOLDER_LEASHES_FAIL, ModPartEnum.COMMAND,
+            "Failed to detach leash from %s to %s.",
+            "成功解除%s到%s的拴绳连接",
+            "成功解除%s到%s的拴繩連接",
+            "%s至%s之拴繩，今已解"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_BLOCK_LEASHES_SUC(
+            LeashDataCommand.REMOVE_BLOCK_LEASHES_SUC, ModPartEnum.COMMAND,
+            "Successfully detached leash from %s to %s",
+            "，但未能解除%s到%s的拴绳连接",
+            "，但未能解除%s到%s的拴繩連接",
+            "，然%s至%s之拴繩未解"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_BLOCK_LEASHES_SUC_FAIL(
+            LeashDataCommand.REMOVE_BLOCK_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to detach leash from %s to %s",
+            "未能解除%s到%s的拴绳连接",
+            "未能解除%s到%s的拴繩連接",
+            "%s至%s之拴繩未除"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_BLOCK_LEASHES_FAIL(
+            LeashDataCommand.REMOVE_BLOCK_LEASHES_FAIL, ModPartEnum.COMMAND,
+            "Failed to detach leash from %s to %s.",
+            "成功解除%s的所有拴绳连接",
+            "成功解除%s的所有拴繩連接",
+            "%s之諸拴繩，今盡解"
+    ),
+    MESSAGE_LEASHDATA_REMOVE_ALL_LEASHES(
+            LeashDataCommand.REMOVE_ALL_LEASHES, ModPartEnum.COMMAND,
+            "Successfully detached all leash from %s",
+            "成功解除%s的所有拴绳连接",
+            "成功解除%s的所有拴繩連接",
+            "%s之諸拴繩，今盡解"
+    ),
+    MESSAGE_LEASHDATA_TRANSFER_LEASH_SUC(
+            LeashDataCommand.TRANSFER_LEASH_SUC, ModPartEnum.COMMAND,
+            "Successfully transferred leash from %s to %s",
+            "成功将拴绳从%s转移至%s",
+            "成功將拴繩從%s轉移至%s",
+            "拴繩自%s移至%s，其事已成"
+    ),
+    MESSAGE_LEASHDATA_TRANSFER_LEASH_SUC_FAIL(
+            LeashDataCommand.TRANSFER_LEASH_SUC_FAIL, ModPartEnum.COMMAND,
+            ", but failed to transfer leash from %s to %s.",
+            "，但未能将拴绳从%s转移至%s",
+            "，但未能將拴繩從%s轉移至%s",
+            "，然自%s至%s之遷移未竟"
+    ),
+    MESSAGE_LEASHDATA_TRANSFER_LEASH_FAIL(
+            LeashDataCommand.TRANSFER_LEASH_FAIL, ModPartEnum.COMMAND,
+            "Failed to transfer leash from %s to %s.",
+            "未能将拴绳从%s转移至%s",
+            "未能將拴繩從%s轉移至%s",
+            "拴繩自%s遷於%s之舉未遂"
+    ),
+    MESSAGE_LEASHDATA_APPLY_FORCE(
+            LeashDataCommand.APPLY_FORCE, ModPartEnum.COMMAND,
+            "Successfully applied force on %s",
+            "成功触发%s的力",
+            "成功觸發%s的力",
+            "%s之力，今已發"
+    ),
 
     ;
     private final Supplier<?> supplier;

@@ -63,7 +63,10 @@ public class LeashInteractHandler {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);
             }
-
+            if (SuperLeadRopeApi.isLeashHolder(target, player)) {
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+            }
             return;
         }
         if (hand == InteractionHand.OFF_HAND) {

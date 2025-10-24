@@ -30,6 +30,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -44,10 +45,7 @@ import top.r3944realms.superleadrope.content.gamerule.server.CreateSuperLeashKno
 import top.r3944realms.superleadrope.core.register.SLPGameruleRegistry;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static top.r3944realms.superleadrope.content.command.Command.*;
@@ -189,7 +187,7 @@ public class LeashDataCommand {
                         .then(Commands.literal("holders")
                                 .executes(LeashDataCommand::removeAllHolderLeashes)
                         )
-                        .then(Commands.literal("blocks")
+                        .then(Commands.literal("knots")
                                 .executes(LeashDataCommand::removeAllBlockLeashes)
                         )
                 );
@@ -235,10 +233,57 @@ public class LeashDataCommand {
                                                         )
                                                 )
                                         )
+                                        .then(Commands.literal("toBlock")
+                                                .then(Commands.argument("toPos", BlockPosArgument.blockPos())
+                                                        .executes(context -> transferFromBlock(
+                                                                        context,
+                                                                        BlockPosArgument.getBlockPos(context, "fromPos"),
+                                                                        BlockPosArgument.getBlockPos(context, "toPos")
+                                                                )
+                                                        )
+                                                        .then(Commands.argument("reserved", StringArgumentType.string())
+                                                                .executes(context -> transferFromBlock(
+                                                                                context,
+                                                                                BlockPosArgument.getBlockPos(context, "fromPos"),
+                                                                                BlockPosArgument.getBlockPos(context, "toPos"),
+                                                                                StringArgumentType.getString(context, "reserved")
+                                                                        )
+                                                                )
+                                                        )
+                                                )
+                                        )
                                 )
                         )
                 );
-
+        LiteralArgumentBuilder<CommandSourceStack> $$$set$staic = Commands.literal("static")
+                .then(Commands.literal("maxDistance")
+                        .then(Commands.literal("reset").executes(
+                                LeashDataCommand::resetStaticMaxDistance
+                        ))
+                        .then(Commands.argument("value", DoubleArgumentType.doubleArg(LeashConfigManager.MAX_DISTANCE_MIN_VALUE, LeashConfigManager.MAX_DISTANCE_MAX_VALUE))
+                                .executes(
+                                        context -> setStaticMaxDistance(
+                                                context,
+                                                DoubleArgumentType.getDouble(context, "value")
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("elasticDistanceScale")
+                        .then(Commands.literal("reset")
+                                .then(Commands.literal("reset").executes(
+                                        LeashDataCommand::resetStaticElasticDistanceScale
+                                ))
+                        )
+                        .then(Commands.argument("value", DoubleArgumentType.doubleArg(LeashConfigManager.ELASTIC_DISTANCE_MIN_VALUE, LeashConfigManager.ELASTIC_DISTANCE_MAX_VALUE))
+                                .executes(
+                                        context -> setStaticElasticDistanceScale(
+                                                context,
+                                                DoubleArgumentType.getDouble(context, "value")
+                                        )
+                                )
+                        )
+                );
         LiteralArgumentBuilder<CommandSourceStack> $$$set$holder =  Commands.literal("entity")
                 // 设置最大距离
                 .then(Commands.literal("maxDistance")
@@ -403,7 +448,8 @@ public class LeashDataCommand {
                         .then($$$set$holder)
 
                         // 方块拴绳设置
-                        .then($$$set$pos).executes(LeashDataCommand::setBlockMaxDistance)
+                        .then($$$set$pos)
+                        .then($$$set$staic)
                 );
         LiteralArgumentBuilder<CommandSourceStack> $$$applayForces = Commands.literal("applyForces")
                 .then(Commands.argument("targets", EntityArgument.entities())
@@ -443,6 +489,98 @@ public class LeashDataCommand {
                 nodeList.forEach(dispatcher::register);
             }
         }
+    }
+
+    public static final String RESET_STATIC_MAX_DISTANCE_ = SLP_LEASH_MESSAGE_ + "reset.static.max_distance.";
+    public static final String RESET_STATIC_MAX_DISTANCE_SUC = RESET_STATIC_MAX_DISTANCE_ + SUC;
+    private static int resetStaticMaxDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
+        CommandSourceStack source = context.getSource();
+        AtomicInteger success = new AtomicInteger(-1);
+
+        Entity[] sucEntities = new Entity[MAX_SHOW_NUMBER];
+        for (Entity target : targets) {
+            LeashDataInnerAPI.PropertyOperations.setStaticMaxDistance(target, null);
+            if (success.incrementAndGet() <= MAX_SHOW_NUMBER - 1) {
+                sucEntities[success.get()] = target;
+            }
+        }
+        MutableComponent successEntitiesComponent = Component.empty();
+        generateEntityComponent(sucEntities, success.get(), successEntitiesComponent);
+        MutableComponent send = Component.empty();
+        // Successfully reset the static max distance of leash from %s[if more than 4 items, display in abbreviated form]
+        send.append(Component.translatable(RESET_STATIC_MAX_DISTANCE_SUC, successEntitiesComponent));
+        source.sendSuccess(() -> send, true);
+        return 0;
+    }
+
+    public static final String SET_STATIC_MAX_DISTANCE_ = SLP_LEASH_MESSAGE_ + "set.static.max_distance.";
+    public static final String SET_STATIC_MAX_DISTANCE_SUC = SET_STATIC_MAX_DISTANCE_ + SUC;
+    private static int setStaticMaxDistance(CommandContext<CommandSourceStack> context, double value) throws CommandSyntaxException {
+        Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
+        CommandSourceStack source = context.getSource();
+        AtomicInteger success = new AtomicInteger(-1);
+
+        Entity[] sucEntities = new Entity[MAX_SHOW_NUMBER];
+        for (Entity target : targets) {
+            LeashDataInnerAPI.PropertyOperations.setStaticMaxDistance(target, value);
+            if (success.incrementAndGet() <= MAX_SHOW_NUMBER - 1) {
+                sucEntities[success.get()] = target;
+            }
+        }
+        MutableComponent successEntitiesComponent = Component.empty();
+        generateEntityComponent(sucEntities, success.get(), successEntitiesComponent);
+        MutableComponent send = Component.empty();
+        // Successfully set the max distance scale of leash to %.2f from %s[if more than 4 items, display in abbreviated form]
+        send.append(Component.translatable(SET_STATIC_MAX_DISTANCE_SUC, value, successEntitiesComponent));
+        source.sendSuccess(() -> send, true);
+        return 0;
+    }
+
+    public static final String SET_STATIC_ELASTIC_DISTANCE_SCALE_ = SLP_LEASH_MESSAGE_ + "set.static.elastic_distance_scale.";
+    public static final String SET_STATIC_ELASTIC_DISTANCE_SCALE_SUC = SET_STATIC_ELASTIC_DISTANCE_SCALE_ + SUC;
+    private static int setStaticElasticDistanceScale(CommandContext<CommandSourceStack> context, double value) throws CommandSyntaxException {
+        Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
+        CommandSourceStack source = context.getSource();
+        AtomicInteger success = new AtomicInteger(-1);
+
+        Entity[] sucEntities = new Entity[MAX_SHOW_NUMBER];
+        for (Entity target : targets) {
+            LeashDataInnerAPI.PropertyOperations.setStaticMaxDistance(target, value);
+            if (success.incrementAndGet() <= MAX_SHOW_NUMBER - 1) {
+                sucEntities[success.get()] = target;
+            }
+        }
+        MutableComponent successEntitiesComponent = Component.empty();
+        generateEntityComponent(sucEntities, success.get(), successEntitiesComponent);
+        MutableComponent send = Component.empty();
+        // Successfully set the static elastic distance scale of leash to %.2f from %s[if more than 4 items, display in abbreviated form]
+        send.append(Component.translatable(SET_STATIC_ELASTIC_DISTANCE_SCALE_SUC, value, successEntitiesComponent));
+        source.sendSuccess(() -> send, true);
+        return 0;
+    }
+
+    public static final String RESET_STATIC_ELASTIC_DISTANCE_SCALE_ = SLP_LEASH_MESSAGE_ + "reset.static.elastic_distance_scale.";
+    public static final String RESET_STATIC_ELASTIC_DISTANCE_SCALE_SUC = RESET_STATIC_ELASTIC_DISTANCE_SCALE_ + SUC;
+    private static int resetStaticElasticDistanceScale(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
+        CommandSourceStack source = context.getSource();
+        AtomicInteger success = new AtomicInteger(-1);
+
+        Entity[] sucEntities = new Entity[MAX_SHOW_NUMBER];
+        for (Entity target : targets) {
+            LeashDataInnerAPI.PropertyOperations.setStaticMaxDistance(target, null);
+            if (success.incrementAndGet() <= MAX_SHOW_NUMBER - 1) {
+                sucEntities[success.get()] = target;
+            }
+        }
+        MutableComponent successEntitiesComponent = Component.empty();
+        generateEntityComponent(sucEntities, success.get(), successEntitiesComponent);
+        MutableComponent send = Component.empty();
+        // Successfully reset the static elastic distance scale of leash from %s[if more than 4 items, display in abbreviated form]
+        send.append(Component.translatable(RESET_STATIC_ELASTIC_DISTANCE_SCALE_SUC, successEntitiesComponent));
+        source.sendSuccess(() -> send, true);
+        return 0;
     }
 
 
@@ -523,9 +661,9 @@ public class LeashDataCommand {
             send.append(Component.translatable(SET_MAX_DISTANCE_SUC, successEntitiesComponent, holder == null ? Component.translatable(ALL_HOLDERS) : Command.getSLPName(holder)));
             if (failure.get() >= 0) {
                 // , but failed to adjust it from %s[if more than 4 items, display in abbreviated form] to %s
-                send.append(Component.translatable(SET_MAX_DISTANCE_SUC_FAIL, failureEntitiesComponent, holder == null ? Component.translatable(ALL_HOLDERS) : Command.getSLPName(holder)));
+                send.append("\n").append(Component.translatable(SET_MAX_DISTANCE_SUC_FAIL, failureEntitiesComponent, holder == null ? Component.translatable(ALL_HOLDERS) : Command.getSLPName(holder)));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to adjust the max distance of leash from %s[if more than 4 items, display in abbreviated form] to %s
             send.append(Component.translatable(SET_MAX_DISTANCE_FAIL, failureEntitiesComponent, holder == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(holder)));
@@ -585,6 +723,14 @@ public class LeashDataCommand {
         return transferFromBlock(context, fromPos, to, null);
     }
 
+    private static int transferFromBlock(CommandContext<CommandSourceStack> context, BlockPos fromPos, BlockPos toPos) throws CommandSyntaxException {
+        return transferFromBlock(context, fromPos, new SuperLeashKnotEntity(context.getSource().getLevel(), toPos), null);
+    }
+
+    private static int transferFromBlock(CommandContext<CommandSourceStack> context, BlockPos fromPos, BlockPos toPos, @Nullable String reserved) throws CommandSyntaxException {
+        return transferFromBlock(context, fromPos, new SuperLeashKnotEntity(context.getSource().getLevel(), toPos), reserved);
+    }
+
     /**
      * The constant TRANSFER_FROM_BLOCK.
      */
@@ -601,6 +747,7 @@ public class LeashDataCommand {
      * The constant TRANSFER_FROM_BLOCK_FAIL.
      */
     public static final String TRANSFER_FROM_BLOCK_FAIL = TRANSFER_FROM_BLOCK_ + FAIL;
+
     private static int transferFromBlock(CommandContext<CommandSourceStack> context, BlockPos fromPos, Entity to, @Nullable String reserved) throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
         CommandSourceStack source = context.getSource();
@@ -627,9 +774,9 @@ public class LeashDataCommand {
             send.append(Component.translatable(TRANSFER_FROM_BLOCK_SUC, Command.getSLPName(fromPos), Command.getSLPName(to), successEntitiesComponent));
             if (failure >= 0) {
                 // , but failed to transfer leash from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
-                send.append(Component.translatable(TRANSFER_FROM_BLOCK_SUC_FAIL, Command.getSLPName(fromPos), Command.getSLPName(to), failureEntitiesComponent));
+                send.append("\n").append(Component.translatable(TRANSFER_FROM_BLOCK_SUC_FAIL, Command.getSLPName(fromPos), Command.getSLPName(to), failureEntitiesComponent));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to transfer leash from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
             send.append(Component.translatable(TRANSFER_FROM_BLOCK_FAIL, Command.getSLPName(fromPos), Command.getSLPName(to), failureEntitiesComponent));
@@ -717,9 +864,9 @@ public class LeashDataCommand {
             send.append(Component.translatable(SET_ELASTIC_DISTANCE_SCALE_SUC, successEntitiesComponent, holder == null ? Component.translatable(ALL_HOLDERS) : Command.getSLPName(holder)));
             if (failure.get() >= 0) {
                 // , but failed to adjust it from %s[if more than 4 items, display in abbreviated form] to %s
-                send.append(Component.translatable(SET_ELASTIC_DISTANCE_SCALE_SUC_FAIL, failureEntitiesComponent, holder == null ? Component.translatable(ALL_HOLDERS) : Command.getSLPName(holder)));
+                send.append("\n").append(Component.translatable(SET_ELASTIC_DISTANCE_SCALE_SUC_FAIL, failureEntitiesComponent, holder == null ? Component.translatable(ALL_HOLDERS) : Command.getSLPName(holder)));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to adjust the elastic distance scale of leash from %s[if more than 4 items, display in abbreviated form] to %s
             send.append(Component.translatable(SET_ELASTIC_DISTANCE_SCALE_FAIL, failureEntitiesComponent, holder == null ? Component.translatable(ALL_HOLDERS) : Command.getSLPName(holder)));
@@ -806,9 +953,9 @@ public class LeashDataCommand {
             send.append(Component.translatable(SET_BLOCK_MAX_DISTANCE_SUC, successEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
             if (failure.get() >= 0) {
                 // , but failed to adjust it from %s[if more than 4 items, display in abbreviated form] to %s
-                send.append(Component.translatable(SET_BLOCK_MAX_DISTANCE_SUC_FAIL, failureEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
+                send.append("\n").append(Component.translatable(SET_BLOCK_MAX_DISTANCE_SUC_FAIL, failureEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to adjust the max distance of leash from %s[if more than 4 items, display in abbreviated form] to %s
             send.append(Component.translatable(SET_BLOCK_MAX_DISTANCE_FAIL, failureEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
@@ -896,9 +1043,9 @@ public class LeashDataCommand {
             send.append(Component.translatable(SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC, successEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
             if (failure.get() >= 0) {
                 // , but failed to adjust it from %s[if more than 4 items, display in abbreviated form] to %s
-                send.append(Component.translatable(SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC_FAIL, failureEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
+                send.append("\n").append(Component.translatable(SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC_FAIL, failureEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to adjust the elastic distance scale of leash from %s[if more than 4 items, display in abbreviated form] to %s
             send.append(Component.translatable(SET_BLOCK_ELASTIC_DISTANCE_SCALE_FAIL, failureEntitiesComponent, blockPos == null ? Component.translatable(ALL_KNOTS) : Command.getSLPName(blockPos)));
@@ -919,7 +1066,7 @@ public class LeashDataCommand {
     /**
      * The constant LEASH_DATA_GET_.
      */
-    public static final String LEASH_DATA_GET_ = SLP_LEASH_MESSAGE_ + ".get.",
+    public static final String LEASH_DATA_GET_ = SLP_LEASH_MESSAGE_ + "get.",
     /**
      * The Block.
      */
@@ -971,16 +1118,16 @@ public class LeashDataCommand {
             Component[] holders = new Component[4], knots = new Component[4];
             for (LeashInfo leash : leashes) {
                 MutableComponent info;
+                ClickEvent clickEvent;
                 MutableComponent hover = Component.empty();
-                if (leash.holderIdOpt().isPresent()){
-
+                if (leash.holderUUIDOpt().isPresent()){
                     if (entityCount >= MAX_SHOW_NUMBER && knotCount >= MAX_SHOW_NUMBER) {
                         break;
                     } else if (entityCount >= MAX_SHOW_NUMBER) {
                         continue;
                     } else {
                         info = Component.translatable(ENTITY).withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
-                        knots[entityCount] = info;
+                        holders[entityCount] = info;
                         leash.holderUUIDOpt().ifPresent(uuid -> hover
                                 .append(Component.translatable(UUID).withStyle(ChatFormatting.DARK_AQUA))
                                 .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
@@ -988,7 +1135,7 @@ public class LeashDataCommand {
                         );
                         entityCount++; // 在这里增加计数
                     }
-
+                    clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, leash.holderUUIDOpt().map(java.util.UUID::toString).orElse("Unknown UUID"));
                 } else {
                     if (knotCount >= MAX_SHOW_NUMBER && entityCount >= MAX_SHOW_NUMBER) {
                         break;
@@ -996,7 +1143,7 @@ public class LeashDataCommand {
                         continue;
                     } else {
                         info = Component.translatable(KNOT).withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
-                        holders[knotCount] = info;
+                        knots[knotCount] = info;
                         leash.blockPosOpt().ifPresent(pos -> hover
                                 .append(Component.translatable(BLOCK).withStyle(ChatFormatting.DARK_AQUA))
                                 .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
@@ -1004,28 +1151,32 @@ public class LeashDataCommand {
                         );
                         knotCount++; // 在这里增加计数
                     }
+                    clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, leash.blockPosOpt()
+                            .map(p -> String.format("%d %d %d", p.getX(), p.getY(), p.getZ()))
+                            .orElse("Unknown Pos"));
                 }
                 hover.append(Component.translatable(MAX).withStyle(ChatFormatting.DARK_AQUA))
                         .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(String.format("%.2f", leash.maxDistance())).append("\n")
-                );
+                        .append(leash.maxDistance() == null ? Component.translatable(DEFAULT) : Component.literal(String.format("%.2f", leash.maxDistance()))
+                ).append("\n");
                 hover.append(Component.translatable(ELASTIC).withStyle(ChatFormatting.DARK_AQUA))
                         .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(String.format("%.2f", leash.elasticDistanceScale())).append("\n")
-                );
+                        .append(leash.elasticDistanceScale() == null ? Component.translatable(DEFAULT) :Component.literal(String.format("%.2f", leash.elasticDistanceScale()))
+                ).append("\n");
                 hover.append(Component.translatable(KEEP).withStyle(ChatFormatting.DARK_AQUA))
                         .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks())).append("\n")
+                        .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks()))
                 );
                 if (!leash.reserved().isEmpty()) {
-                    hover.append(Component.translatable(KEEP).withStyle(ChatFormatting.DARK_AQUA))
+                    hover.append("\n").append(Component.translatable(RESERVED).withStyle(ChatFormatting.DARK_AQUA))
                             .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                            .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks())).append("\n")
+                            .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks()))
                     );
                 }
+                info.withStyle(s -> s.withClickEvent(clickEvent));
             }
 
-            MutableComponent item = Component.translatable(LEASH_DATA_ITEM, list.get(i).getName(), buildHolderComponent(holders, entityCount), buildHolderComponent(knots, knotCount));
+            MutableComponent item = Component.translatable(LEASH_DATA_ITEM, list.get(i).getDisplayName(), buildHolderComponent(holders, entityCount), buildHolderComponent(knots, knotCount));
             items[i] = item;
         }
         Component component = buildFinalComponent(items, list.size());
@@ -1036,7 +1187,7 @@ public class LeashDataCommand {
     /**
      * The constant LEASH_INFO_HEAD.
      */
-// LeashData: [Entity]{Holder:{[Entity]}, BlockPos{[BlockPos]}} ...
+// LeashInfo: [Entity]{Holder:{[Entity]}, BlockPos{[BlockPos]}} ...
     public static final String LEASH_INFO_HEAD = SLP_LEASH_MESSAGE_ + "leash_info.head";
     /**
      * The constant LEASH_INFO_ITEM.
@@ -1049,58 +1200,66 @@ public class LeashDataCommand {
         MutableComponent head = Component.translatable(LEASH_INFO_HEAD).append("\n");
             // [Entity]%s { Holder: { %s[Entity]{UUID,Max,Elastic,Keep,Reserved} ... 4 }, BlockPos{ %s [BlockPos]{Max,Elastic,Keep,Reserved} ... 4 } } [\n] ... 25 break;
             Collection<LeashInfo> leashes = LeashDataInnerAPI.QueryOperations.getAllLeashes(target);
-            int entityCount = 0, knotCount = 0;
+            int count = 0;
             Component[] items = new Component[leashes.size()];
             for (LeashInfo leash : leashes) {
+                ClickEvent clickEvent;
                 MutableComponent info;
                 MutableComponent hover = Component.empty();
-                if (leash.holderIdOpt().isPresent()){
+                if (leash.holderUUIDOpt().isPresent()){
+
                     info = Component.translatable(ENTITY).withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
-                    items[entityCount] = info;
+                    items[count] = info;
                     leash.holderUUIDOpt().ifPresent(uuid -> hover
                             .append(Component.translatable(UUID).withStyle(ChatFormatting.DARK_AQUA))
                             .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
                             .append(Component.literal(uuid.toString())).append("\n")
                     );
-                    entityCount++; // 在这里增加计数
+                    clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, leash.holderUUIDOpt().map(java.util.UUID::toString).orElse("Unknown UUID"));
                 } else {
                     info = Component.translatable(KNOT).withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
-                    items[knotCount] = info;
+                    items[count] = info;
                     leash.blockPosOpt().ifPresent(pos -> hover
                             .append(Component.translatable(BLOCK).withStyle(ChatFormatting.DARK_AQUA))
                             .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
                             .append(Command.getSLPName(pos)).append("\n")
                     );
-                    knotCount++; // 在这里增加计数
-
+                    clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, leash.blockPosOpt()
+                            .map(p -> String.format("%d %d %d", p.getX(), p.getY(), p.getZ()))
+                            .orElse("Unknown Pos"));
                 }
+                count++; // 在这里增加计数
                 hover.append(Component.translatable(MAX).withStyle(ChatFormatting.DARK_AQUA))
                         .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(String.format("%.2f", leash.maxDistance())).append("\n")
-                        );
+                        .append(leash.maxDistance() == null ? Component.translatable(DEFAULT) : Component.literal(String.format("%.2f", leash.maxDistance()))
+                        ).append("\n");
                 hover.append(Component.translatable(ELASTIC).withStyle(ChatFormatting.DARK_AQUA))
                         .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(String.format("%.2f", leash.elasticDistanceScale())).append("\n")
-                        );
+                        .append(leash.elasticDistanceScale() == null ? Component.translatable(DEFAULT) : Component.literal(String.format("%.2f", leash.elasticDistanceScale()))
+                        ).append("\n");
                 hover.append(Component.translatable(KEEP).withStyle(ChatFormatting.DARK_AQUA))
                         .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks())).append("\n")
+                        .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks()))
                         );
                 if (!leash.reserved().isEmpty()) {
-                    hover.append(Component.translatable(KEEP).withStyle(ChatFormatting.DARK_AQUA))
+                    hover.append("\n").append(Component.translatable(RESERVED).withStyle(ChatFormatting.DARK_AQUA))
                             .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
-                            .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks())).append("\n")
+                            .append(Component.literal(String.valueOf(leash.maxKeepLeashTicks()))
                             );
                 }
+                info.withStyle(s -> s.withClickEvent(clickEvent));
             }
             // LeashInfo: [Entity]{LeashInfo: {B/U, M, E, K, R}  ..，}
-            MutableComponent item = Component.translatable(LEASH_INFO_ITEM, target.getName(), buildHolderInfoComponent(items, entityCount + knotCount));
+            MutableComponent item = Component.translatable(LEASH_INFO_ITEM, target.getDisplayName(), buildHolderInfoComponent(items, count));
             source.sendSuccess(() -> head.append(item), true);
             return 0;
     }
 
     private static @NotNull Component buildFinalComponent(Component @NotNull [] items, int count) {
         MutableComponent result = Component.empty();
+        if(count == 0) {
+            return Component.translatable(NONE);
+        }
         for (int i = 0; i < Math.min(items.length, count); i++) {
             if (items[i] != null) {
                 result.append(items[i]);
@@ -1118,6 +1277,9 @@ public class LeashDataCommand {
     // 辅助方法：构建holder组件
     private static @NotNull Component buildHolderComponent(Component @NotNull [] holders, int count) {
         MutableComponent result = Component.empty();
+        if(count == 0) {
+            return Component.translatable(NONE);
+        }
         for (int i = 0; i < Math.min(holders.length, count); i++) {
             if (holders[i] != null) {
                 result.append(holders[i]);
@@ -1134,6 +1296,9 @@ public class LeashDataCommand {
     }
     private static @NotNull Component buildHolderInfoComponent(Component @NotNull [] holders, int count) {
         MutableComponent result = Component.empty();
+        if(count == 0) {
+            return Component.translatable(NONE);
+        }
         for (int i = 0; i < Math.min(holders.length, count); i++) {
             if (holders[i] != null) {
                 result.append(holders[i]);
@@ -1168,15 +1333,15 @@ public class LeashDataCommand {
     /**
      * The constant ADD_HOLDER_LEASHES_SUC.
      */
-    public static final String ADD_HOLDER_LEASHES_SUC = ADD_HOLDER_LEASHES_ + "suc";
+    public static final String ADD_HOLDER_LEASHES_SUC = ADD_HOLDER_LEASHES_ + SUC;
     /**
      * The constant ADD_HOLDER_LEASHES_SUC_FAIL.
      */
-    public static final String ADD_HOLDER_LEASHES_SUC_FAIL = ADD_HOLDER_LEASHES_ + "suc_fail";
+    public static final String ADD_HOLDER_LEASHES_SUC_FAIL = ADD_HOLDER_LEASHES_ + SUC_FAIL;
     /**
      * The constant ADD_HOLDER_LEASHES_FAIL.
      */
-    public static final String ADD_HOLDER_LEASHES_FAIL = ADD_HOLDER_LEASHES_ + "fail";
+    public static final String ADD_HOLDER_LEASHES_FAIL = ADD_HOLDER_LEASHES_ + FAIL;
     private static int addLeash(CommandContext<CommandSourceStack> context, Entity holder,
                                 double maxDistance, double elasticDistanceScale, int keepTicks, String reserved)
             throws CommandSyntaxException {
@@ -1206,18 +1371,15 @@ public class LeashDataCommand {
             send.append(Component.translatable(ADD_HOLDER_LEASHES_SUC,  showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), successEntitiesComponent, Command.getSLPName(holder)));
             if (failure >= 0) {
                 // , but failed to attached >leash<[Basic Info] from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
-                send.append(Component.translatable(ADD_HOLDER_LEASHES_SUC_FAIL,  showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), failureEntitiesComponent, Command.getSLPName(holder)));
+                send.append("\n").append(Component.translatable(ADD_HOLDER_LEASHES_SUC_FAIL,  showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), failureEntitiesComponent, Command.getSLPName(holder)));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to attached >leash<[Basic Info] from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
             send.append(Component.translatable(ADD_HOLDER_LEASHES_FAIL, showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), failureEntitiesComponent, Command.getSLPName(holder)));
         }
         source.sendSuccess(() -> send, true);
         return 0;
-        //
-        // [if failed then add ", but failed to attached leash from %s[if more than 4 items, display in abbreviated form] to %s", else "."]
-//        todo: source.sendSuccess(() -> Component.translatable(/*成功{}，失败{}*/), true);
     }
     private static int addBlockLeash(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return addBlockLeash(context, -1);
@@ -1242,15 +1404,15 @@ public class LeashDataCommand {
     /**
      * The constant ADD_BLOCK_LEASHES_SUC.
      */
-    public static final String ADD_BLOCK_LEASHES_SUC = ADD_BLOCK_LEASHES_ + "suc";
+    public static final String ADD_BLOCK_LEASHES_SUC = ADD_BLOCK_LEASHES_ + SUC;
     /**
      * The constant ADD_BLOCK_LEASHES_SUC_FAIL.
      */
-    public static final String ADD_BLOCK_LEASHES_SUC_FAIL = ADD_BLOCK_LEASHES_ + "suc_fail";
+    public static final String ADD_BLOCK_LEASHES_SUC_FAIL = ADD_BLOCK_LEASHES_ + SUC_FAIL;
     /**
      * The constant ADD_BLOCK_LEASHES_FAIL.
      */
-    public static final String ADD_BLOCK_LEASHES_FAIL = ADD_BLOCK_LEASHES_ + "fail";
+    public static final String ADD_BLOCK_LEASHES_FAIL = ADD_BLOCK_LEASHES_ + FAIL;
     /**
      * The constant ADD_BLOCK_LEASHES_FAIL_NO_KNOT_FOUND.
      */
@@ -1269,9 +1431,8 @@ public class LeashDataCommand {
                     else return Optional.empty();
                 }).orElse(null);
         if (knotEntity == null) {
-            // Failed to attach leash to %s because there is not existed knot in pos."]
+            // Failed to attach leash to %s because there is not existed knot in pos.
             source.sendFailure(Component.translatable(ADD_BLOCK_LEASHES_FAIL_NO_KNOT_FOUND, Command.getSLPName(pos)));
-//           todo: source.sendFailure(Component.translatable(/*失败，目标上无拴绳结*/));
             return -1;
         }
         int success = -1, failure = -1;
@@ -1297,30 +1458,49 @@ public class LeashDataCommand {
             send.append(Component.translatable(ADD_BLOCK_LEASHES_SUC,  showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), successEntitiesComponent, Command.getSLPName(pos)));
             if (failure >= 0) {
                 // , but failed to attached >leash<[Basic Info] from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
-                send.append(Component.translatable(ADD_BLOCK_LEASHES_SUC_FAIL,  showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), failureEntitiesComponent, Command.getSLPName(pos)));
+                send.append("\n").append(Component.translatable(ADD_BLOCK_LEASHES_SUC_FAIL,  showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), failureEntitiesComponent, Command.getSLPName(pos)));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to attached >leash<[Basic Info] from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
             send.append(Component.translatable(ADD_BLOCK_LEASHES_FAIL, showLeashInfo(maxDistance == -1 ? null : maxDistance, elasticDistanceScale == -1 ? null : elasticDistanceScale, keepTicks, reserved), failureEntitiesComponent, Command.getSLPName(pos)));
         }
         source.sendSuccess(() -> send, true);
         return 0;
-        //
-        // [if failed then add ", but failed to attach leash from %s[if more than 4 items, display in abbreviated form] to %s", else "."]
-//        todo: source.sendSuccess(() -> Component.translatable(/*成功{}，失败{}*/), true);
     }
 
-    /**
-     * The constant LEASH_INFO.
-     */
-    public static final String LEASH_INFO = SLP_LEASH_MESSAGE_ + "leash.info";
     /**
      * The constant DEFAULT.
      */
     public static final String DEFAULT = SLP_LEASH_MESSAGE_ + "default";
-    private static Component showLeashInfo(@Nullable Double maxDistance, @Nullable Double elasticDistanceScale, int keepTicks, String reserved) {
-        return Component.translatable(LEASH_INFO, maxDistance == null ? DEFAULT : maxDistance , elasticDistanceScale == null ? DEFAULT : elasticDistanceScale, keepTicks, reserved);
+    private static Component showLeashInfo(@Nullable Double maxDistance, @Nullable Double elasticDistanceScale, int keepTicks,@Nullable String reserved) {
+        MutableComponent item = Component.literal("[*]");
+        MutableComponent hover = Component.empty();
+        hover.append(Component.translatable(MAX).withStyle(ChatFormatting.DARK_AQUA))
+                .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                .append(maxDistance == null ? Component.translatable(DEFAULT) : Component.literal(String.format("%.2f", maxDistance))
+                ).append("\n");
+        hover.append(Component.translatable(ELASTIC).withStyle(ChatFormatting.DARK_AQUA))
+                .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                .append(elasticDistanceScale == null ? Component.translatable(DEFAULT) : Component.literal(String.format("%.2f", elasticDistanceScale))
+                ).append("\n");
+        hover.append(Component.translatable(KEEP).withStyle(ChatFormatting.DARK_AQUA))
+                .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                .append(String.valueOf(keepTicks));
+        if (reserved != null && !reserved.isEmpty()) {
+            hover.append("\n").append(Component.translatable(RESERVED).withStyle(ChatFormatting.DARK_AQUA))
+                    .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(reserved));
+        }
+        return
+                item.withStyle(
+                        s -> s.withHoverEvent(
+                                new HoverEvent(
+                                        HoverEvent.Action.SHOW_TEXT,
+                                        hover
+                                )
+                        )
+                );
     }
 
     /**
@@ -1330,15 +1510,15 @@ public class LeashDataCommand {
     /**
      * The constant REMOVE_HOLDER_LEASHES_SUC.
      */
-    public static final String REMOVE_HOLDER_LEASHES_SUC = REMOVE_HOLDER_LEASHES_ + "suc";
+    public static final String REMOVE_HOLDER_LEASHES_SUC = REMOVE_HOLDER_LEASHES_ + SUC;
     /**
      * The constant REMOVE_HOLDER_LEASHES_SUC_FAIL.
      */
-    public static final String REMOVE_HOLDER_LEASHES_SUC_FAIL = REMOVE_HOLDER_LEASHES_ + "suc_fail";
+    public static final String REMOVE_HOLDER_LEASHES_SUC_FAIL = REMOVE_HOLDER_LEASHES_ + SUC_FAIL;
     /**
      * The constant REMOVE_HOLDER_LEASHES_FAIL.
      */
-    public static final String REMOVE_HOLDER_LEASHES_FAIL = REMOVE_HOLDER_LEASHES_ + "fail";
+    public static final String REMOVE_HOLDER_LEASHES_FAIL = REMOVE_HOLDER_LEASHES_ + FAIL;
     private static int removeLeash(CommandContext<CommandSourceStack> context, Entity holder) throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
         CommandSourceStack source = context.getSource();
@@ -1365,9 +1545,9 @@ public class LeashDataCommand {
             send.append(Component.translatable(REMOVE_HOLDER_LEASHES_SUC, successEntitiesComponent, Command.getSLPName(holder)));
             if (failure >= 0) {
                 // , but failed to detach leash from %s[if more than 4 items, display in abbreviated form] to %s
-                send.append(Component.translatable(REMOVE_HOLDER_LEASHES_SUC_FAIL, failureEntitiesComponent, Command.getSLPName(holder)));
+                send.append("\n").append(Component.translatable(REMOVE_HOLDER_LEASHES_SUC_FAIL, failureEntitiesComponent, Command.getSLPName(holder)));
             } // .
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to detach leash from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
             send.append(Component.translatable(REMOVE_HOLDER_LEASHES_FAIL, failureEntitiesComponent, Command.getSLPName(holder)));
@@ -1383,15 +1563,15 @@ public class LeashDataCommand {
     /**
      * The constant REMOVE_BLOCK_LEASHES_SUC.
      */
-    public static final String REMOVE_BLOCK_LEASHES_SUC = REMOVE_BLOCK_LEASHES_ + "suc";
+    public static final String REMOVE_BLOCK_LEASHES_SUC = REMOVE_BLOCK_LEASHES_ + SUC;
     /**
      * The constant REMOVE_BLOCK_LEASHES_SUC_FAIL.
      */
-    public static final String REMOVE_BLOCK_LEASHES_SUC_FAIL = REMOVE_BLOCK_LEASHES_ + "suc_fail";
+    public static final String REMOVE_BLOCK_LEASHES_SUC_FAIL = REMOVE_BLOCK_LEASHES_ + SUC_FAIL;
     /**
      * The constant REMOVE_BLOCK_LEASHES_FAIL.
      */
-    public static final String REMOVE_BLOCK_LEASHES_FAIL = REMOVE_BLOCK_LEASHES_ + "fail";
+    public static final String REMOVE_BLOCK_LEASHES_FAIL = REMOVE_BLOCK_LEASHES_ + FAIL;
     private static int removeBlockLeash(CommandContext<CommandSourceStack> context, BlockPos pos) throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
         CommandSourceStack source = context.getSource();
@@ -1418,9 +1598,9 @@ public class LeashDataCommand {
             send.append(Component.translatable(REMOVE_BLOCK_LEASHES_SUC, successEntitiesComponent, Command.getSLPName(pos)));
             if (failure >= 0) {
                 // , but failed to detach leash from %s[if more than 4 items, display in abbreviated form] to %s
-                send.append(Component.translatable(REMOVE_BLOCK_LEASHES_SUC_FAIL, failureEntitiesComponent, Command.getSLPName(pos)));
+                send.append("\n").append(Component.translatable(REMOVE_BLOCK_LEASHES_SUC_FAIL, failureEntitiesComponent, Command.getSLPName(pos)));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to detach leash from %s to %s [Leashed: [if more than 4 items, display in abbreviated form]].
             send.append(Component.translatable(REMOVE_BLOCK_LEASHES_FAIL, failureEntitiesComponent, Command.getSLPName(pos)));
@@ -1461,17 +1641,17 @@ public class LeashDataCommand {
      */
     public static final String TRANSFER_LEASH_  = SLP_LEASH_MESSAGE_ + "transfer_leash.";
     /**
-     * The constant TRANSFER_LEASH_FAIL.
-     */
-    public static final String TRANSFER_LEASH_FAIL = TRANSFER_LEASH_ + "fail";
-    /**
      * The constant TRANSFER_LEASH_SUC.
      */
-    public static final String TRANSFER_LEASH_SUC = TRANSFER_LEASH_ + "suc";
+    public static final String TRANSFER_LEASH_SUC = TRANSFER_LEASH_ + SUC;
+    /**
+     * The constant TRANSFER_LEASH_FAIL.
+     */
+    public static final String TRANSFER_LEASH_FAIL = TRANSFER_LEASH_ + FAIL;
     /**
      * The constant TRANSFER_LEASH_SUC_FAIL.
      */
-    public static final String TRANSFER_LEASH_SUC_FAIL = TRANSFER_LEASH_ + "suc_fail";
+    public static final String TRANSFER_LEASH_SUC_FAIL = TRANSFER_LEASH_ + SUC_FAIL;
     private static int transferLeash(CommandContext<CommandSourceStack> context, Entity from, Entity to, @Nullable String reserved)
             throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
@@ -1479,6 +1659,7 @@ public class LeashDataCommand {
         int success = -1, failure = -1;
         Entity[] sucEntities = new Entity[MAX_SHOW_NUMBER], failEntities = new Entity[MAX_SHOW_NUMBER];
         for (Entity target : targets) {
+            if(target == from) continue;
             boolean isSuccessful = LeashDataInnerAPI.TransferOperations.transfer(target, from, to, reserved);
             if (isSuccessful) {
                 if (++success <= MAX_SHOW_NUMBER - 1) {
@@ -1495,13 +1676,13 @@ public class LeashDataCommand {
         generateEntityComponent(failEntities, failure, failureEntitiesComponent);
         MutableComponent send = Component.empty();
         if (success >= 0) {
-            // Successfully transferred leash from %s[BlockPos/Entity] to %s[BlockPos/Entity] [Leashed ((>1)Entities/Entity): [if more than 4 items, display in abbreviated form]]
+            // Successfully transferred leash from %s[BlockPos/Entity] to %s[BlockPos/Entity] [Leashed: [if more than 4 items, display in abbreviated form]]
             send.append(Component.translatable(TRANSFER_LEASH_SUC, Command.getSLPName(from), Command.getSLPName(to), successEntitiesComponent));
             if (failure >= 0) {
                 // , but failed to transfer leash from %s to %s [Leashed ((>1)Entities/Entity): [if more than 4 items, display in abbreviated form]].
-                send.append(Component.translatable(TRANSFER_LEASH_SUC_FAIL, Command.getSLPName(from), Command.getSLPName(to), failureEntitiesComponent));
+                send.append("\n").append(Component.translatable(TRANSFER_LEASH_SUC_FAIL, Command.getSLPName(from), Command.getSLPName(to), failureEntitiesComponent));
             } //.
-            else send.append(".");
+            else send.append(Component.translatable(END));
         } else {
             // Failed to transfer leash from %s to %s [Leashed ((>1)Entities/Entity): [if more than 4 items, display in abbreviated form]].
             send.append(Component.translatable(TRANSFER_LEASH_FAIL, Command.getSLPName(from), Command.getSLPName(to), failureEntitiesComponent));
@@ -1535,7 +1716,7 @@ public class LeashDataCommand {
     private static void generateEntityComponent(Entity @NotNull [] entities, int successful, MutableComponent entitiesComponent) {
         for (int i = 0; i < entities.length; i++) {
             if (entities[i] == null) break;
-            entitiesComponent.append(entities[i].getName());
+            entitiesComponent.append(entities[i].getDisplayName());
             if (i < entities.length - 1) {
                 entitiesComponent.append(", ");
             }

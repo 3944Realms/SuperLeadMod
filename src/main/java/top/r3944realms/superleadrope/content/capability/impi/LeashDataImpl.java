@@ -289,6 +289,7 @@ public class LeashDataImpl implements ILeashData {
     @Override
     public boolean addLeash(Entity holder, Double maxDistance,
                             Double elasticDistanceScale, int maxKeepLeashTicks, String reserved) {
+        if(holder == entity) return false;
         boolean isSuperKnot = holder instanceof SuperLeashKnotEntity;
         if ((!isSuperKnot && leashHolders.containsKey(holder.getUUID()))
                 || (isSuperKnot && leashKnots.containsKey(((SuperLeashKnotEntity) holder).getPos()))) {

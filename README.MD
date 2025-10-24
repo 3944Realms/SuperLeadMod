@@ -64,6 +64,61 @@ Compared to the original, it is not only more powerful but also supports cross-d
 
 ---
 
+## 💻 开发 / Develop
+
+### Maven 仓库配置
+
+在您的 `build.gradle` 中添加以下仓库配置：
+
+```gradle
+repositories {
+    maven {
+        name = "LTD Maven"
+        url = "https://nexus.bot.leisuretimedock.top/repository/maven-public/"
+    }
+}
+```
+
+### 依赖导入
+
+在 `dependencies` 区块中添加 Super Lead Rope 依赖：
+
+```gradle
+dependencies {
+    compileOnly 'top.r3944realms.superleadrope:superleadrope:版本号:api@jar'
+    runtimeOnly 'top.r3944realms.superleadrope:superleadrope:版本号'
+}
+```
+
+#### 版本号示例：
+```groovy
+compileOnly 'top.r3944realms.superleadrope:superleadrope:1.20.1-0.0.0.7:api@jar'
+runtimeOnly 'top.r3944realms.superleadrope:superleadrope:1.20.1-0.0.0.7'
+```
+
+### 使用说明
+
+1. **构建项目**：配置完成后即可从仓库中下载并使用本 Mod
+2. **源代码文档**：在右侧窗口中点击"下载源代码"即可查看完整的 Javadoc 注解
+3. **API 参考**：详见源代码中的注解文档
+
+### 快速开始
+
+```groovy
+repositories {
+    maven {
+        name = "LTD Maven"
+        url = "https://nexus.bot.leisuretimedock.top/repository/maven-public/"
+    }
+}
+
+dependencies {
+    compileOnly 'top.r3944realms.superleadrope:superleadrope:1.20.1-0.0.0.7:api@jar'
+    runtimeOnly 'top.r3944realms.superleadrope:superleadrope:1.20.1-0.0.0.7'
+}
+```
+
+---
 # 📜 License / 许可证
 
 This project is licensed under the **GNU GPL v3** open source license.  

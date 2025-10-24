@@ -66,9 +66,11 @@ Compared to the original, it is not only more powerful but also supports cross-d
 
 ## 💻 开发 / Develop
 
-### Maven 仓库配置
+### Maven 仓库配置 / Maven Repository Configuration
 
 在您的 `build.gradle` 中添加以下仓库配置：
+
+Add the following repository configuration in your build.gradle:
 
 ```gradle
 repositories {
@@ -79,9 +81,11 @@ repositories {
 }
 ```
 
-### 依赖导入
+### 依赖导入 / Dependency Import
 
 在 `dependencies` 区块中添加 Super Lead Rope 依赖：
+
+Add Super Lead Rope dependency in the dependencies block:
 
 ```gradle
 dependencies {
@@ -90,20 +94,12 @@ dependencies {
 }
 ```
 
-#### 版本号示例：
+#### 版本号示例 / Version Example
 ```groovy
 compileOnly 'top.r3944realms.superleadrope:superleadrope:1.20.1-0.0.0.7:api@jar'
 runtimeOnly 'top.r3944realms.superleadrope:superleadrope:1.20.1-0.0.0.7'
 ```
-
-### 使用说明
-
-1. **构建项目**：配置完成后即可从仓库中下载并使用本 Mod
-2. **源代码文档**：在右侧窗口中点击"下载源代码"即可查看完整的 Javadoc 注解
-3. **API 参考**：详见源代码中的注解文档
-
-### 快速开始
-
+### 快速开始 / Quick Start
 ```groovy
 repositories {
     maven {

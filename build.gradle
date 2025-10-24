@@ -486,30 +486,3 @@ idea {
         downloadJavadoc = true
     }
 }
-afterEvaluate {
-    // 创建清理任务
-    tasks.register('cleanGeneratedJars') {
-        doLast {
-            def jars = [
-                    file("build/libs/${mod_id}-${minecraft_version}-${mod_version}.jar"),
-                    file("build/libs/${mod_id}-${minecraft_version}-${mod_version}-api.jar")
-            ]
-            jars.each { jar ->
-                if (jar.exists()) {
-                    println "Deleting: ${jar.name}"
-                    jar.delete()
-                }
-            }
-        }
-    }
-
-    // 在 public 任务后执行清理
-    tasks.named('publish') {
-        finalizedBy cleanGeneratedJars
-    }
-
-    // 或者如果还有其他发布任务
-    tasks.named('publishToMavenLocal') {
-        finalizedBy cleanGeneratedJars
-    }
-}

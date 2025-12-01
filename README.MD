@@ -15,7 +15,8 @@ Compared to the original, it is not only more powerful but also supports cross-d
 
 
 Super Lead Rope Commands 超级拴绳指令：
-[Leash Data Command](./doc/LeashDataCommandUsage_EN) | [超级拴绳数据指令](./doc/LeashDataCommandUsage_CN)
+
+[Leash Data Command](./doc/LeashDataCommandUsage_EN.MD) | [超级拴绳数据指令](./doc/LeashDataCommandUsage_CN.MD)
 ---
 
 ## ✨ 功能特色 / Features

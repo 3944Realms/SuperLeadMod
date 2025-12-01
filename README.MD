@@ -13,6 +13,9 @@ We recommend testing on backups or a development server before deploying to prod
 **Super Lead Rope** is a mod that enhances the vanilla lead, allowing players to manage and leash entities more flexibly.  
 Compared to the original, it is not only more powerful but also supports cross-dimension and even cross-server features.
 
+
+Super Lead Rope Commands 超级拴绳指令：
+[Leash Data Command](./doc/LeashDataCommandUsage_EN) | [超级拴绳数据指令](./doc/LeashDataCommandUsage_CN)
 ---
 
 ## ✨ 功能特色 / Features

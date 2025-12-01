@@ -13,48 +13,54 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+var ASMAPI = Java.type('net.minecraftforge.coremod.api.ASMAPI');
 var Opcodes = Java.type("org.objectweb.asm.Opcodes");
-var ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
 var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode");
 var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
-var InsnNode = Java.type("org.objectweb.asm.tree.InsnNode");
 
 function initializeCoreMod() {
     return {
-        "leash_render_patch": {
-            "target": {
-                "type": "METHOD",
-                "class": "net.minecraft.client.renderer.entity.MobRenderer",
-                "methodName": "m_5523_",
-                "methodDesc": "(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"
+        'leash_render': {
+            'target': {
+                'type': 'METHOD',
+                'class': 'net.minecraft.client.renderer.entity.MobRenderer',
+                'methodName': ASMAPI.mapMethod('m_5523_'), // shouldRender
+                'methodDesc': '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z'
             },
-            "transformer": function(method) {
+            'transformer': function(method) {
                 var insns = method.instructions;
 
+                // 寻找具体的 ICONST_0 位置
                 for (var i = 0; i < insns.size(); i++) {
                     var insn = insns.get(i);
-                    if (insn.getOpcode && insn.getOpcode() === Opcodes.ICONST_0) {
-                        var next = insns.get(i + 1);
-                        if (next && next.getOpcode() === Opcodes.IRETURN) {
-                            // 插入调试日志和方法调用
-                            insns.insertBefore(insn, ASMAPI.listOf(
-                                new VarInsnNode(Opcodes.ALOAD, 1), // Mob
-                                new VarInsnNode(Opcodes.ALOAD, 2), // Frustum
-                                ASMAPI.buildMethodCall(
+
+                    // 寻找 L4 标签后的 ICONST_0 -> IRETURN 序列
+                    if (insn.getOpcode() === Opcodes.ICONST_0) {
+                        var nextInsn = insns.get(i + 1);
+                        if (nextInsn && nextInsn.getOpcode() === Opcodes.IRETURN) {
+                            // 找到目标位置，插入我们的钩子调用
+                            var newInstructions = ASMAPI.listOf(
+                                new VarInsnNode(Opcodes.ALOAD, 1),  // 加载 Mob 参数 (livingEntity)
+                                new VarInsnNode(Opcodes.ALOAD, 2),  // 加载 Frustum 参数 (camera)
+                                new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
                                     'top/r3944realms/superleadrope/core/hook/LeashRenderHook',
-                                    null,
-                                    ASMAPI.MethodType.STATIC,
                                     'shouldRenderExtra',
                                     '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;)Z',
-                                    ASMAPI.MethodCallMode.STATIC
+                                    false
                                 )
-                            ));
-                            // 移除原来的 ICONST_0
-                            insns.remove(insn);
+                            );
+
+                            // 在 ICONST_0 之前插入新指令，然后移除 ICONST_0
+                            method.instructions.insertBefore(insn, newInstructions);
+                            method.instructions.remove(insn);
+
+                            // 只需要修改这一个地方
                             break;
                         }
                     }
                 }
+
                 return method;
             }
         }

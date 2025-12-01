@@ -22,10 +22,7 @@ import net.minecraftforge.fml.ModList;
 /**
  * The type Curtain compat.
  */
-public class CurtainCompat {
-    /**
-     * The constant isModLoaded.
-     */
+public class CurtainCompat{
     public final static boolean isModLoaded = ModList.get().isLoaded("curtain");
 
     /**

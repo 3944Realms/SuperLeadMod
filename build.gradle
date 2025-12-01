@@ -77,6 +77,10 @@ repositories {
         url = "https://maven.theillusivec4.top/"
     }
     maven {
+        name = "Luck perms"
+        url = "https://repo1.maven.org/maven2/net/luckperms/api/"
+    }
+    maven {
         name = "GeckoLib"
         url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
         content {
@@ -173,13 +177,12 @@ dependencies {
     modRuntimeOnly("curse.maven:spark-361579:4738952")
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
     modImplementation("io.github.llamalad7:mixinextras-forge:0.4.1")
+    compileOnly("net.luckperms:api:5.4")
     compileOnly ('me.lucko:spark-api:0.1-SNAPSHOT')
     implementation 'org.ow2.asm:asm:9.6'
     implementation 'org.ow2.asm:asm-tree:9.6'
     implementation 'org.ow2.asm:asm-commons:9.6'
     implementation 'org.ow2.asm:asm-util:9.6'
-    modCompileOnly("top.r3944realms.lib39:lib39:1.20.1-0.0.15:all@jar")
-
 }
 
 // ===================== 修复 Javadoc 任务 =====================
@@ -445,7 +448,7 @@ publishing {
 
 // ===================== 构建任务依赖 =====================
 tasks.named('build') {
-    dependsOn apiJar, apiJavadocJar
+    dependsOn sourceJar, apiSourceJar, apiJar, apiJavadocJar
 }
 
 tasks.named('clean') {
@@ -484,5 +487,32 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+tasks.register('showTaskTree') {
+    doLast {
+        def showTaskDeps
+        showTaskDeps = { task, prefix = '', isLast = true ->
+            // 当前任务节点
+            def connector = isLast ? '└── ' : '├── '
+            println "${prefix}${connector}${task.name}"
+
+            // 子任务
+            def dependencies = task.getTaskDependencies().getDependencies(task).toList()
+            def newPrefix = prefix + (isLast ? '    ' : '│   ')
+
+            dependencies.eachWithIndex { dep, index ->
+                def lastChild = index == dependencies.size() - 1
+                showTaskDeps(dep, newPrefix, lastChild)
+            }
+        }
+
+        def targetTask = tasks.findByName('build')
+        if (targetTask) {
+            println "构建任务依赖树:"
+            showTaskDeps(targetTask, '', true)
+        } else {
+            println "未找到 build 任务"
+        }
     }
 }

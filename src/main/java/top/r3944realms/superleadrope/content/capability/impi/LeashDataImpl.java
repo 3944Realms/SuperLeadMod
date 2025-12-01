@@ -44,6 +44,7 @@ import top.r3944realms.superleadrope.api.event.SuperLeadRopeEvent;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 import top.r3944realms.superleadrope.compat.CurtainCompat;
+import top.r3944realms.superleadrope.compat.LuckPermsCompat;
 import top.r3944realms.superleadrope.config.LeashConfigManager;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
@@ -1607,7 +1608,7 @@ public class LeashDataImpl implements ILeashData {
     }
 
     public boolean canBeAttachedTo(Entity pEntity) {
-        if (pEntity == entity) {
+        if (pEntity == entity && !LuckPermsCompat.getOrCreateLPC().isLeashedBypass(entity)) {
             return false;
         } else {
             Optional<LeashInfo> leashInfo = getLeashInfo(pEntity);

@@ -24,7 +24,7 @@ out vec4 vertexColor;
 out vec2 lightmapUV;      // Normalized UV for lightmap
 
 // Catenary function (rope sag)
-float cosh(float x) { return (exp(x) + exp(-x)) * 0.5; }
+float cosh_p(float x) { return (exp(x) + exp(-x)) * 0.5; }
 
 void main() {
     float progress = UV0.x;
@@ -33,7 +33,7 @@ void main() {
     // Rope sag
     // ----------------------------
     float a = 0.15;
-    float sag = a * (cosh(progress * 2.0 - 1.0) - 1.0);
+    float sag = a * (cosh_p(progress * 2.0 - 1.0) - 1.0);
 
     // ----------------------------
     // Rope sway (enhanced)

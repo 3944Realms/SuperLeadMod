@@ -15,8 +15,11 @@
 
 var ASMAPI = Java.type('net.minecraftforge.coremod.api.ASMAPI');
 var Opcodes = Java.type("org.objectweb.asm.Opcodes");
+var InsnNode = Java.type("org.objectweb.asm.tree.InsnNode");
 var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode");
 var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
+var JumpInsnNode = Java.type("org.objectweb.asm.tree.JumpInsnNode");
+var LabelNode = Java.type("org.objectweb.asm.tree.LabelNode");
 
 function initializeCoreMod() {
     return {
@@ -28,37 +31,99 @@ function initializeCoreMod() {
                 'methodDesc': '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z'
             },
             'transformer': function(method) {
-                var insns = method.instructions;
+                var instructions = method.instructions;
+                var found = false;
 
-                // 寻找具体的 ICONST_0 位置
-                for (var i = 0; i < insns.size(); i++) {
-                    var insn = insns.get(i);
+                // 查找所有 return 语句
+                var returnInstructions = [];
+                for (var i = 0; i < instructions.size(); i++) {
+                    var insn = instructions.get(i);
+                    if (insn.getOpcode() === Opcodes.IRETURN) {
+                        returnInstructions.push({
+                            index: i,
+                            insn: insn
+                        });
+                    }
+                }
 
-                    // 寻找 L4 标签后的 ICONST_0 -> IRETURN 序列
-                    if (insn.getOpcode() === Opcodes.ICONST_0) {
-                        var nextInsn = insns.get(i + 1);
-                        if (nextInsn && nextInsn.getOpcode() === Opcodes.IRETURN) {
-                            // 找到目标位置，插入我们的钩子调用
-                            var newInstructions = ASMAPI.listOf(
-                                new VarInsnNode(Opcodes.ALOAD, 1),  // 加载 Mob 参数 (livingEntity)
-                                new VarInsnNode(Opcodes.ALOAD, 2),  // 加载 Frustum 参数 (camera)
-                                new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    'top/r3944realms/superleadrope/core/hook/LeashRenderHook',
-                                    'shouldRenderExtra',
-                                    '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;)Z',
-                                    false
-                                )
-                            );
+                if (returnInstructions.length > 0) {
+                    // 在最后一个 return 语句前插入检查（通常这是返回 false 的地方）
+                    var lastReturn = returnInstructions[returnInstructions.length - 1];
 
-                            // 在 ICONST_0 之前插入新指令，然后移除 ICONST_0
-                            method.instructions.insertBefore(insn, newInstructions);
-                            method.instructions.remove(insn);
+                    // 在 return 前插入我们的检查
+                    var hookLabel = new LabelNode();
+                    var returnLabel = new LabelNode();
 
-                            // 只需要修改这一个地方
-                            break;
+                    var checkInstructions = ASMAPI.listOf(
+                        // 检查我们的钩子
+                        new VarInsnNode(Opcodes.ALOAD, 1),  // 加载 Mob 参数
+                        new VarInsnNode(Opcodes.ALOAD, 2),  // 加载 Frustum 参数
+                        new MethodInsnNode(
+                            Opcodes.INVOKESTATIC,
+                            'top/r3944realms/superleadrope/core/hook/LeashRenderHook',
+                            'shouldRenderExtra',
+                            '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;)Z',
+                            false
+                        ),
+                        // 如果钩子返回 true，跳转到返回 true
+                        new JumpInsnNode(Opcodes.IFNE, hookLabel),
+                        // 否则执行原有的 return（可能是 false）
+                        new JumpInsnNode(Opcodes.GOTO, returnLabel),
+
+                        // 钩子返回 true 的情况
+                        hookLabel,
+                        new InsnNode(Opcodes.ICONST_1),
+                        new InsnNode(Opcodes.IRETURN),
+
+                        // 原有 return 的标签
+                        returnLabel
+                    );
+
+                    instructions.insertBefore(lastReturn.insn, checkInstructions);
+                    found = true;
+                    ASMAPI.log("INFO", "成功在 return 前插入钩子检查");
+                }
+
+                if (!found) {
+                    // 更简单的方案：直接在方法末尾添加
+                    var hookLabel = new LabelNode();
+                    var endLabel = new LabelNode();
+
+                    // 在方法开始处添加跳转到检查的标签
+                    var startInstructions = ASMAPI.listOf(
+                        new JumpInsnNode(Opcodes.GOTO, endLabel),
+
+                        // 钩子检查部分
+                        hookLabel,
+                        new VarInsnNode(Opcodes.ALOAD, 1),
+                        new VarInsnNode(Opcodes.ALOAD, 2),
+                        new MethodInsnNode(
+                            Opcodes.INVOKESTATIC,
+                            'top/r3944realms/superleadrope/core/hook/LeashRenderHook',
+                            'shouldRenderExtra',
+                            '(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/culling/Frustum;)Z',
+                            false
+                        ),
+                        new InsnNode(Opcodes.IRETURN),
+
+                        endLabel
+                    );
+
+                    instructions.insert(instructions.getFirst(), startInstructions);
+
+                    // 在所有 return false 前跳转到钩子检查
+                    for (var i = 0; i < instructions.size(); i++) {
+                        var insn = instructions.get(i);
+                        if (insn.getOpcode() === Opcodes.ICONST_0) {
+                            var next = instructions.get(i + 1);
+                            if (next && next.getOpcode() === Opcodes.IRETURN) {
+                                // 将 return false 改为跳转到钩子检查
+                                instructions.set(insn, new JumpInsnNode(Opcodes.GOTO, hookLabel));
+                            }
                         }
                     }
+
+                    ASMAPI.log("INFO", "使用备用方案修改方法");
                 }
 
                 return method;

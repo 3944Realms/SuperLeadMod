@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -35,6 +35,7 @@ public record PacketEternalPotatoRemovePacket(UUID itemUUID) {
     public static void encode(PacketEternalPotatoRemovePacket msg, FriendlyByteBuf buf) {
         buf.writeUUID(msg.itemUUID());
     }
+
 
     /**
      * Decode packet eternal potato remove packet.

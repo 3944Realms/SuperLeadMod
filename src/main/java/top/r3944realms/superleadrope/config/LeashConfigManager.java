@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -16,6 +16,7 @@
 package top.r3944realms.superleadrope.config;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
@@ -24,6 +25,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.network.NetworkHandler;
+import top.r3944realms.superleadrope.network.toClient.CommonConfigHashInformPacket;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +65,9 @@ public class LeashConfigManager {
      * The constant ELASTIC_DISTANCE_CHECK.
      */
     public static final Predicate<Double> ELASTIC_DISTANCE_CHECK = distance -> distance == null || (distance >= ELASTIC_DISTANCE_MIN_VALUE && distance <= ELASTIC_DISTANCE_MAX_VALUE);
+    // ========= 缓存 ========
+    public volatile static CompoundTag cacheTag = null;
+    public volatile static int cacheHash = -1;
     // ========== 偏移映射 ==========
     private final Map<String, double[]> entityHolderMap = new ConcurrentHashMap<>();
     private final Map<String, double[]> tagHolderMap = new ConcurrentHashMap<>();
@@ -385,25 +391,33 @@ public class LeashConfigManager {
      */
 // ================== 管理 ==================
     public void reloadAll() {
-        parseOffsetConfig();
+        try {
+            parseOffsetConfig();
 
-        teleportWhitelistCache = new ArrayList<>(LeashCommonConfig.COMMON.teleportWhitelist.get());
-        commandPrefixCache = LeashCommonConfig.COMMON.SLPModCommandPrefix.get();
-        commandPrefixEnabledCache = LeashCommonConfig.COMMON.enableSLPModCommandPrefix.get();
+            teleportWhitelistCache = new ArrayList<>(LeashCommonConfig.COMMON.teleportWhitelist.get());
+            commandPrefixCache = LeashCommonConfig.COMMON.SLPModCommandPrefix.get();
+            commandPrefixEnabledCache = LeashCommonConfig.COMMON.enableSLPModCommandPrefix.get();
 
-        maxLeashLength = LeashCommonConfig.COMMON.maxLeashLength.get();
-        elasticDistanceScale = LeashCommonConfig.COMMON.elasticDistanceScale.get();
-        extremeSnapFactor = LeashCommonConfig.COMMON.extremeSnapFactor.get();
-        springDampening = LeashCommonConfig.COMMON.springDampening.get();
-        axisElasticity = new ArrayList<>(LeashCommonConfig.COMMON.axisSpecificElasticity.get());
-        maxLeashesPerEntity = LeashCommonConfig.COMMON.maxLeashesPerEntity.get();
+            maxLeashLength = LeashCommonConfig.COMMON.maxLeashLength.get();
+            elasticDistanceScale = LeashCommonConfig.COMMON.elasticDistanceScale.get();
+            extremeSnapFactor = LeashCommonConfig.COMMON.extremeSnapFactor.get();
+            springDampening = LeashCommonConfig.COMMON.springDampening.get();
+            axisElasticity = new ArrayList<>(LeashCommonConfig.COMMON.axisSpecificElasticity.get());
+            maxLeashesPerEntity = LeashCommonConfig.COMMON.maxLeashesPerEntity.get();
 
-        enableTrueDamping = LeashCommonConfig.COMMON.enableTrueDamping.get();
-        maxForce = LeashCommonConfig.COMMON.maxForce.get();
-        playerSpringFactor = LeashCommonConfig.COMMON.playerSpringFactor.get();
-        mobSpringFactor = LeashCommonConfig.COMMON.mobSpringFactor.get();
+            enableTrueDamping = LeashCommonConfig.COMMON.enableTrueDamping.get();
+            maxForce = LeashCommonConfig.COMMON.maxForce.get();
+            playerSpringFactor = LeashCommonConfig.COMMON.playerSpringFactor.get();
+            mobSpringFactor = LeashCommonConfig.COMMON.mobSpringFactor.get();
+            cacheHash = calculateConfigHash();
+            cacheTag = serializeToNBT();
+            SuperLeadRope.logger.debug("Configs reloaded: {}", getStats());
+        } catch (Exception e) {
+            SuperLeadRope.logger.error("Failed to reload configs", e);
+            cacheHash = -1;
+            cacheTag = null;
+        }
 
-        SuperLeadRope.logger.debug("Configs reloaded: {}", getStats());
     }
 
     /**
@@ -441,7 +455,334 @@ public class LeashConfigManager {
     public static void unloading(LeashConfigManager manager) {
         if(manager != null) manager.clear();
     }
+    /**
+     * 将配置管理器状态序列化为NBT
+     */
+    public synchronized CompoundTag serializeToNBT() {
+        if (cacheHash == calculateConfigHash() && cacheTag != null) return cacheTag;
+        CompoundTag tag = new CompoundTag();
 
+        // 序列化偏移映射
+        CompoundTag offsets = new CompoundTag();
+        serializeOffsetMap(offsets, "holder_entity", entityHolderMap);
+        serializeOffsetMap(offsets, "holder_tag", tagHolderMap);
+        serializeOffsetMap(offsets, "holder_mod", modHolderMap);
+        serializeOffsetMap(offsets, "leash_entity", entityLeashMap);
+        serializeOffsetMap(offsets, "leash_tag", tagLeashMap);
+        serializeOffsetMap(offsets, "leash_mod", modLeashMap);
+        tag.put("offsets", offsets);
+
+        // 序列化缓存配置
+        ListTag whitelistTag = new ListTag();
+        for (String entry : teleportWhitelistCache) {
+            whitelistTag.add(StringTag.valueOf(entry));
+        }
+        tag.put("teleport_whitelist", whitelistTag);
+
+        tag.putString("command_prefix", commandPrefixCache);
+        tag.putBoolean("command_prefix_enabled", commandPrefixEnabledCache);
+
+        // 序列化物理参数
+        tag.putBoolean("enable_true_damping", enableTrueDamping);
+        tag.putDouble("max_force", maxForce);
+        tag.putDouble("player_spring_factor", playerSpringFactor);
+        tag.putDouble("mob_spring_factor", mobSpringFactor);
+
+        tag.putDouble("max_leash_length", maxLeashLength);
+        tag.putDouble("elastic_distance_scale", elasticDistanceScale);
+        tag.putDouble("extreme_snap_factor", extremeSnapFactor);
+        tag.putDouble("spring_dampening", springDampening);
+
+        ListTag elasticityTag = new ListTag();
+        for (double value : axisElasticity) {
+            elasticityTag.add(DoubleTag.valueOf(value));
+        }
+        tag.put("axis_elasticity", elasticityTag);
+
+        tag.putInt("max_leashes_per_entity", maxLeashesPerEntity);
+        cacheHash = calculateConfigHash();
+        cacheTag = tag;
+
+        return tag;
+    }
+    private void update() {
+        // ========== 更新偏移配置 ==========
+        // 将holder偏移写回配置
+        List<String> holderOffsetConfigs = convertMapsToOffsetList(entityHolderMap, tagHolderMap, modHolderMap);
+        LeashCommonConfig.COMMON.defaultHolderLocationOffset.set(holderOffsetConfigs);
+
+        // 将leash偏移写回配置
+        List<String> leashOffsetConfigs = convertMapsToOffsetList(entityLeashMap, tagLeashMap, modLeashMap);
+        LeashCommonConfig.COMMON.defaultApplyEntityLocationOffset.set(leashOffsetConfigs);
+
+        // ========== 更新白名单 ==========
+        LeashCommonConfig.COMMON.teleportWhitelist.set(new ArrayList<>(teleportWhitelistCache));
+
+        // ========== 更新命令配置 ==========
+        LeashCommonConfig.COMMON.SLPModCommandPrefix.set(commandPrefixCache);
+        LeashCommonConfig.COMMON.enableSLPModCommandPrefix.set(commandPrefixEnabledCache);
+
+        // ========== 更新物理参数 ==========
+        LeashCommonConfig.COMMON.maxLeashLength.set(maxLeashLength);
+        LeashCommonConfig.COMMON.elasticDistanceScale.set(elasticDistanceScale);
+        LeashCommonConfig.COMMON.extremeSnapFactor.set(extremeSnapFactor);
+        LeashCommonConfig.COMMON.springDampening.set(springDampening);
+        LeashCommonConfig.COMMON.axisSpecificElasticity.set(new ArrayList<>(axisElasticity));
+        LeashCommonConfig.COMMON.maxLeashesPerEntity.set(maxLeashesPerEntity);
+
+        // ========== 更新阻尼参数 ==========
+        LeashCommonConfig.COMMON.enableTrueDamping.set(enableTrueDamping);
+        LeashCommonConfig.COMMON.maxForce.set(maxForce);
+        LeashCommonConfig.COMMON.playerSpringFactor.set(playerSpringFactor);
+        LeashCommonConfig.COMMON.mobSpringFactor.set(mobSpringFactor);
+
+    }
+
+    /**
+     * 将偏移映射转换为配置列表格式
+     */
+    private List<String> convertMapsToOffsetList(
+            Map<String, double[]> entityMap,
+            Map<String, double[]> tagMap,
+            Map<String, double[]> modMap) {
+
+        Map<double[], Set<String>> offsetToTargets = new HashMap<>();
+
+        // 收集entity映射
+        for (Map.Entry<String, double[]> entry : entityMap.entrySet()) {
+            offsetToTargets.computeIfAbsent(entry.getValue(), k -> new LinkedHashSet<>())
+                    .add(entry.getKey());
+        }
+
+        // 收集tag映射
+        for (Map.Entry<String, double[]> entry : tagMap.entrySet()) {
+            offsetToTargets.computeIfAbsent(entry.getValue(), k -> new LinkedHashSet<>())
+                    .add("#" + entry.getKey());
+        }
+
+        // 收集mod映射
+        for (Map.Entry<String, double[]> entry : modMap.entrySet()) {
+            if (entry.getKey().equals("*")) {
+                offsetToTargets.computeIfAbsent(entry.getValue(), k -> new LinkedHashSet<>())
+                        .add("*");
+            } else {
+                offsetToTargets.computeIfAbsent(entry.getValue(), k -> new LinkedHashSet<>())
+                        .add("#" + entry.getKey());
+            }
+        }
+
+        // 转换为配置字符串列表
+        List<String> configs = new ArrayList<>();
+        for (Map.Entry<double[], Set<String>> entry : offsetToTargets.entrySet()) {
+            double[] offset = entry.getKey();
+            Set<String> targets = entry.getValue();
+
+            if (targets.isEmpty() || offset.length != 3) continue;
+
+            String config = String.format(Locale.ROOT,
+                    "%.2f,%.2f,%.2f=%s",
+                    offset[0], offset[1], offset[2],
+                    String.join(",", targets)
+            );
+            configs.add(config);
+        }
+
+        return configs;
+    }
+
+    /**
+     * 从NBT反序列化配置管理器状态
+     */
+    public void deserializeFromNBT(CompoundTag tag) {
+        if (tag == null || tag.isEmpty()) return;
+
+        // 反序列化偏移映射
+        if (tag.contains("offsets", Tag.TAG_COMPOUND)) {
+            CompoundTag offsets = tag.getCompound("offsets");
+            deserializeOffsetMap(offsets, "holder_entity", entityHolderMap);
+            deserializeOffsetMap(offsets, "holder_tag", tagHolderMap);
+            deserializeOffsetMap(offsets, "holder_mod", modHolderMap);
+            deserializeOffsetMap(offsets, "leash_entity", entityLeashMap);
+            deserializeOffsetMap(offsets, "leash_tag", tagLeashMap);
+            deserializeOffsetMap(offsets, "leash_mod", modLeashMap);
+        }
+
+        // 反序列化缓存配置
+        if (tag.contains("teleport_whitelist", Tag.TAG_LIST)) {
+            ListTag whitelistTag = tag.getList("teleport_whitelist", Tag.TAG_STRING);
+            List<String> whitelist = new ArrayList<>();
+            for (int i = 0; i < whitelistTag.size(); i++) {
+                whitelist.add(whitelistTag.getString(i));
+            }
+            teleportWhitelistCache = Collections.unmodifiableList(whitelist);
+        }
+
+        if (tag.contains("command_prefix", Tag.TAG_STRING)) {
+            commandPrefixCache = tag.getString("command_prefix");
+        }
+        if (tag.contains("command_prefix_enabled", Tag.TAG_BYTE)) {
+            commandPrefixEnabledCache = tag.getBoolean("command_prefix_enabled");
+        }
+
+        // 反序列化物理参数
+        if (tag.contains("enable_true_damping", Tag.TAG_BYTE)) {
+            enableTrueDamping = tag.getBoolean("enable_true_damping");
+        }
+        if (tag.contains("max_force", Tag.TAG_DOUBLE)) {
+            maxForce = tag.getDouble("max_force");
+        }
+        if (tag.contains("player_spring_factor", Tag.TAG_DOUBLE)) {
+            playerSpringFactor = tag.getDouble("player_spring_factor");
+        }
+        if (tag.contains("mob_spring_factor", Tag.TAG_DOUBLE)) {
+            mobSpringFactor = tag.getDouble("mob_spring_factor");
+        }
+
+        if (tag.contains("max_leash_length", Tag.TAG_DOUBLE)) {
+            maxLeashLength = tag.getDouble("max_leash_length");
+        }
+        if (tag.contains("elastic_distance_scale", Tag.TAG_DOUBLE)) {
+            elasticDistanceScale = tag.getDouble("elastic_distance_scale");
+        }
+        if (tag.contains("extreme_snap_factor", Tag.TAG_DOUBLE)) {
+            extremeSnapFactor = tag.getDouble("extreme_snap_factor");
+        }
+        if (tag.contains("spring_dampening", Tag.TAG_DOUBLE)) {
+            springDampening = tag.getDouble("spring_dampening");
+        }
+
+        if (tag.contains("axis_elasticity", Tag.TAG_LIST)) {
+            ListTag elasticityTag = tag.getList("axis_elasticity", Tag.TAG_DOUBLE);
+            List<Double> elasticity = new ArrayList<>();
+            for (int i = 0; i < elasticityTag.size(); i++) {
+                elasticity.add(elasticityTag.getDouble(i));
+            }
+            axisElasticity = Collections.unmodifiableList(elasticity);
+        }
+
+        if (tag.contains("max_leashes_per_entity", Tag.TAG_INT)) {
+            maxLeashesPerEntity = tag.getInt("max_leashes_per_entity");
+        }
+        update();
+    }
+
+    /**
+     * 计算配置哈希值（用于快速比较配置是否变化）
+     */
+    public int calculateConfigHash() {
+        // 使用FNV-1a哈希算法
+        int hash = 0x811c9dc5; // FNV偏移基础值
+
+        // 哈希偏移映射
+        hash = fnv1aHashMap(hash, entityHolderMap);
+        hash = fnv1aHashMap(hash, tagHolderMap);
+        hash = fnv1aHashMap(hash, modHolderMap);
+        hash = fnv1aHashMap(hash, entityLeashMap);
+        hash = fnv1aHashMap(hash, tagLeashMap);
+        hash = fnv1aHashMap(hash, modLeashMap);
+
+        // 哈希白名单
+        for (String entry : teleportWhitelistCache) {
+            hash = fnv1aHashString(hash, entry);
+        }
+
+        // 哈希字符串参数
+        hash = fnv1aHashString(hash, commandPrefixCache);
+        hash ^= commandPrefixEnabledCache ? 0x55555555 : 0xAAAAAAAA;
+
+        // 哈希双精度参数（转换为长整型位表示进行哈希）
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(enableTrueDamping ? 1.0 : 0.0));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(maxForce));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(playerSpringFactor));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(mobSpringFactor));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(maxLeashLength));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(elasticDistanceScale));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(extremeSnapFactor));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(springDampening));
+
+        // 哈希轴弹性列表
+        for (double value : axisElasticity) {
+            hash = fnv1aHashLong(hash, Double.doubleToLongBits(value));
+        }
+
+        // 哈希整数参数
+        hash = fnv1aHashInt(hash, maxLeashesPerEntity);
+
+        return hash;
+    }
+
+    // ================== 辅助方法 ==================
+
+    private void serializeOffsetMap(CompoundTag parent, String key, @NotNull Map<String, double[]> map) {
+        CompoundTag mapTag = new CompoundTag();
+        for (Map.Entry<String, double[]> entry : map.entrySet()) {
+            String entryKey = entry.getKey().replace(':', '_'); // 避免NBT键中的冒号问题
+            ListTag offsetList = new ListTag();
+            for (double value : entry.getValue()) {
+                offsetList.add(DoubleTag.valueOf(value));
+            }
+            mapTag.put(entryKey, offsetList);
+        }
+        parent.put(key, mapTag);
+    }
+
+    private void deserializeOffsetMap(@NotNull CompoundTag parent, String key, Map<String, double[]> map) {
+        if (parent.contains(key, Tag.TAG_COMPOUND)) {
+            map.clear();
+            CompoundTag mapTag = parent.getCompound(key);
+            for (String entryKey : mapTag.getAllKeys()) {
+                if (mapTag.contains(entryKey, Tag.TAG_LIST)) {
+                    ListTag offsetList = mapTag.getList(entryKey, Tag.TAG_DOUBLE);
+                    double[] offset = new double[offsetList.size()];
+                    for (int i = 0; i < offsetList.size(); i++) {
+                        offset[i] = offsetList.getDouble(i);
+                    }
+                    map.put(entryKey.replace('_', ':'), offset); // 恢复原始键名
+                }
+            }
+        }
+    }
+
+    // FNV-1a哈希辅助方法
+    private int fnv1aHashInt(int hash, int value) {
+        hash ^= (value & 0xFF);
+        hash *= 0x01000193;
+        hash ^= ((value >> 8) & 0xFF);
+        hash *= 0x01000193;
+        hash ^= ((value >> 16) & 0xFF);
+        hash *= 0x01000193;
+        hash ^= ((value >> 24) & 0xFF);
+        hash *= 0x01000193;
+        return hash;
+    }
+
+    private int fnv1aHashLong(int hash, long value) {
+        hash = fnv1aHashInt(hash, (int)(value & 0xFFFFFFFFL));
+        return fnv1aHashInt(hash, (int)(value >> 32));
+    }
+
+    private int fnv1aHashString(int hash, @NotNull String str) {
+        for (int i = 0; i < str.length(); i++) {
+            hash ^= str.charAt(i);
+            hash *= 0x01000193;
+        }
+        return hash;
+    }
+
+    private int fnv1aHashMap(int hash, @NotNull Map<String, double[]> map) {
+        for (Map.Entry<String, double[]> entry : map.entrySet()) {
+            hash = fnv1aHashString(hash, entry.getKey());
+            for (double value : entry.getValue()) {
+                hash = fnv1aHashLong(hash, Double.doubleToLongBits(value));
+            }
+        }
+        return hash;
+    }
+    public void broadHashPacket() {
+        if (cacheHash != -1){
+            NetworkHandler.sendToAllPlayer(new CommonConfigHashInformPacket(cacheHash));
+        }
+    }
     /**
      * Gets stats.
      *

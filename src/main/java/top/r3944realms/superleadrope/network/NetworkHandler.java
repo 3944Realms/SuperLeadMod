@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -23,6 +23,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.network.toClient.*;
+import top.r3944realms.superleadrope.network.toServer.SyncCommonConfigRequestPacket;
 
 
 /**
@@ -69,6 +70,21 @@ public class NetworkHandler {
                 .encoder(LeashStateSyncPacket::encode)
                 .consumerNetworkThread(LeashStateSyncPacket::handle)
                 .add();
+        INSTANCE.messageBuilder(SyncCommonConfigPacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(SyncCommonConfigPacket::decode)
+                .encoder(SyncCommonConfigPacket::encode)
+                .consumerNetworkThread(SyncCommonConfigPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(SyncCommonConfigRequestPacket.class, cid++, NetworkDirection.PLAY_TO_SERVER)
+                .decoder(SyncCommonConfigRequestPacket::decode)
+                .encoder(SyncCommonConfigRequestPacket::encode)
+                .consumerNetworkThread(SyncCommonConfigRequestPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(CommonConfigHashInformPacket.class, cid++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(CommonConfigHashInformPacket::decode)
+                .encoder(CommonConfigHashInformPacket::encode)
+                .consumerNetworkThread(CommonConfigHashInformPacket::handle)
+                .add();
     }
 
     /**
@@ -80,6 +96,16 @@ public class NetworkHandler {
      */
     public static <MSG> void sendToPlayer(MSG message, ServerPlayer player){
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
+    }
+
+    /**
+     * Send to all player.
+     *
+     * @param <MSG>   the type parameter
+     * @param message the message
+     */
+    public static <MSG> void sendToAllPlayer(MSG message){
+        INSTANCE.send(PacketDistributor.ALL.noArg(), message);
     }
 
     /**

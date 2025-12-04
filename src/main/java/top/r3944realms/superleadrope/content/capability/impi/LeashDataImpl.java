@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -15,6 +15,7 @@
 
 package top.r3944realms.superleadrope.content.capability.impi;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -50,6 +51,7 @@ import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
+import top.r3944realms.superleadrope.network.toClient.UpdatePlayerMovementPacket;
 import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 import top.r3944realms.superleadrope.util.riding.RindingLeash;
 
@@ -772,6 +774,39 @@ public class LeashDataImpl implements ILeashData {
                 newMaxKeepLeashTicks
         ));
     }
+    @Override
+    public void applyLeashForcesClientPlayer() {
+        if (entity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player)) return;
+        Vec3 combinedForce = Vec3.ZERO;
+        Vec3 combinedDirection = Vec3.ZERO;
+        Map<Integer, LeashInfo> result = leashHolders.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> entry.getValue().holderIdOpt().orElseThrow(),
+                        Map.Entry::getValue,
+                        (existing, replacement) -> existing
+                ));
+        // 计算所有拴绳的合力和平均方向
+        for (Map.Entry<Integer, LeashInfo> entry : result.entrySet()) {
+            Vec3 force = calculateLeashForceForID(entry);
+            if (force != null) {
+                combinedForce = combinedForce.add(force);
+                combinedDirection = combinedDirection.add(force.normalize());
+            }
+        }
+
+        for (Map.Entry<BlockPos, LeashInfo> entry : leashKnots.entrySet()) {
+            Vec3 force = calculateLeashForceForBlockPos(entry);
+            if (force != null) {
+                combinedForce = combinedForce.add(force);
+                combinedDirection = combinedDirection.add(force.normalize());
+            }
+        }
+        boolean hasForce = !combinedForce.equals(Vec3.ZERO);
+        Entity targetEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
+        if(targetEntity instanceof LocalPlayer && hasForce){
+            entity.addDeltaMovement(combinedForce);
+        }
+    }
 
     /**
      * 计算拴绳拉力（防抖动逻辑）
@@ -811,14 +846,13 @@ public class LeashDataImpl implements ILeashData {
             if (MinecraftForge.EVENT_BUS.post(hasFocus)) return;
             combinedForce = hasFocus.getCombinedForce();
             // 玩家与普通实体统一力应用
-            if (targetEntity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player)) {
-                RindingLeash.applyForceToPlayer(
-                        player,
-                        combinedForce,
-                        CommonEventHandler.leashConfigManager.getPlayerSpringFactor(),
-                        0.0, // 阻力取消
-                        CommonEventHandler.leashConfigManager.getMaxForce()
-                );
+            if (targetEntity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player) ) {
+                // 是真实玩家则交给客户端自行处理拴绳逻辑
+                // DO NOTHING
+                if(targetEntity != entity){
+                    NetworkHandler.sendToPlayer(new UpdatePlayerMovementPacket(UpdatePlayerMovementPacket.Operation.ADD, combinedForce), player);
+                }
+                return;
             } else {
                 applyForceToNonPlayerEntity(targetEntity, combinedForce, validLeashes, combinedDirection);
             }
@@ -936,7 +970,14 @@ public class LeashDataImpl implements ILeashData {
 
         return baseSpeed * (1.0 + forceFactor);
     }
-
+    private @Nullable Vec3 calculateLeashForceForID(Map.@NotNull Entry<Integer, LeashInfo> entry) {
+        Integer id = entry.getKey();
+        Entity idHolder = entity.level().getEntity(id);
+        if (idHolder != null) {
+            return calculateLeashForce(idHolder, entry);
+        }
+        return null;
+    }
 
     /**
      * 为UUID拴绳计算力

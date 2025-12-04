@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -36,7 +36,7 @@ public class LeashRenderHook {
      * @return the boolean
      */
     public static boolean shouldRenderExtra(Mob mob, Frustum camera) {
-        SuperLeadRope.logger.debug("[SuperLeash] Checking entity: {} at position: {}, {}, {}", mob.getName().getString(), mob.getX(), mob.getY(), mob.getZ());
+//        SuperLeadRope.logger.debug("[SuperLeash] Checking entity: {} at position: {}, {}, {}", mob.getName().getString(), mob.getX(), mob.getY(), mob.getZ());
         AtomicBoolean flag = new AtomicBoolean(false);
         LeashDataInnerAPI.getLeashData(mob).ifPresent(i -> {
             i.getAllLeashes().forEach(j -> {

@@ -75,6 +75,34 @@
 -dontshrink
 -dontoptimize
 # -dontpreverify
+#---------------------------------------
+# 忽略缺少的库依赖警告
+#---------------------------------------
+-dontwarn net.luckperms.**
+-dontwarn org.jetbrains.annotations.**
+-dontwarn org.slf4j.**
+-dontwarn javax.annotation.**
+-dontwarn com.google.common.**
+-dontwarn com.google.gson.**
+
+# Minecraft 渲染相关
+-dontwarn com.mojang.blaze3d.**
+-dontwarn org.joml.**
+-dontwarn com.mojang.math.**
+-dontwarn com.mojang.brigadier.**
+
+# 其他第三方库
+-dontwarn mezz.jei.**
+-dontwarn top.theillusivec4.curios.**
+-dontwarn dev.dubhe.curtain.**
+
+# JDK 内部类
+-dontwarn jdk.internal.**
+-dontwarn module-info
+
+-dontwarn **
+-dontnote **
+
 
 #---------------------------------------
 # 输出映射文件

@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -54,19 +54,6 @@ import static top.r3944realms.superleadrope.content.command.Command.*;
  * The type Leash data command.
  */
 public class LeashDataCommand {
-    /**
-     * The constant SLP_LEASH_MESSAGE_.
-     */
-    public static final String SLP_LEASH_MESSAGE_ = Command.BASE_ + "leash.message.";
-
-    /**
-     * The constant ALL_KNOTS.
-     */
-    public static final String ALL_KNOTS = SLP_LEASH_MESSAGE_ + "all_knots";
-    /**
-     * The constant ALL_HOLDERS.
-     */
-    public static final String ALL_HOLDERS = SLP_LEASH_MESSAGE_ + "all_holders";
 
     /**
      * Register.
@@ -1473,7 +1460,7 @@ public class LeashDataCommand {
      * The constant DEFAULT.
      */
     public static final String DEFAULT = SLP_LEASH_MESSAGE_ + "default";
-    private static Component showLeashInfo(@Nullable Double maxDistance, @Nullable Double elasticDistanceScale, int keepTicks,@Nullable String reserved) {
+    private static @NotNull Component showLeashInfo(@Nullable Double maxDistance, @Nullable Double elasticDistanceScale, int keepTicks, @Nullable String reserved) {
         MutableComponent item = Component.literal("[*]");
         MutableComponent hover = Component.empty();
         hover.append(Component.translatable(MAX).withStyle(ChatFormatting.DARK_AQUA))

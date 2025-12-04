@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -63,6 +63,7 @@ import top.r3944realms.superleadrope.content.capability.CapabilityRemainder;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.capability.inter.IEternalPotato;
 import top.r3944realms.superleadrope.content.command.LeashDataCommand;
+import top.r3944realms.superleadrope.content.command.LeashStateCommand;
 import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
@@ -428,6 +429,7 @@ public class CommonEventHandler {
                 if (tickCounter % 10 == 0) {
                     LeashSyncManager.Data.forEach(ILeashData::markForSync);
                     LeashSyncManager.State.forEach(ILeashState::markForSync);
+                    leashConfigManager.broadHashPacket();
                 }
 
                 // 定期同步检查
@@ -479,6 +481,7 @@ public class CommonEventHandler {
             CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
             MotionCommand.register(dispatcher);
             LeashDataCommand.register(dispatcher);
+            LeashStateCommand.register(dispatcher);
         }
     }
 
@@ -495,7 +498,7 @@ public class CommonEventHandler {
         @SubscribeEvent
         public static void onFMLCommonInit(FMLCommonSetupEvent event) {
             event.enqueueWork(Mod::checkAndSet);
-            event.enqueueWork(SLPGameruleRegistry::register);//规则注册
+            event.enqueueWork(SLPGameruleRegistry::register);
         }
 
         /**
@@ -526,9 +529,10 @@ public class CommonEventHandler {
          * @param event the event
          */
         @SubscribeEvent
-        public void onConfigReloading(ModConfigEvent.Reloading event) {
-            if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
+        public static void onConfigReloading(final ModConfigEvent.Reloading event) {
+            if (event.getConfig().getModId().equals(SuperLeadRope.MOD_ID)) {
                 SuperLeadRope.logger.debug("Config reloading detected...");
+                Optional.ofNullable(leashConfigManager).ifPresent(LeashConfigManager::reloadAll);
             }
         }
         private static void checkAndSet() {
@@ -547,7 +551,7 @@ public class CommonEventHandler {
          * @param event the event
          */
         @SubscribeEvent
-        public void onConfigLoaded(ModConfigEvent.Loading event) {
+        public static void onConfigLoaded(ModConfigEvent.Loading event) {
             if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
                 checkAndSet();
                 LeashConfigManager.loading(leashConfigManager);
@@ -560,20 +564,20 @@ public class CommonEventHandler {
          * @param event the event
          */
         @SubscribeEvent
-        public void onConfigReloaded(ModConfigEvent.Reloading event) {
+        public static void onConfigReloaded(ModConfigEvent.Reloading event) {
             if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
                 checkAndSet();
                 LeashConfigManager.reloading(leashConfigManager);
             }
         }
-
+        // 忘记订阅事件是静态方法了xwx
         /**
          * On config unloaded.
          *
          * @param event the event
          */
         @SubscribeEvent
-        public void onConfigUnloaded(ModConfigEvent.Unloading event) {
+        public static void onConfigUnloaded(ModConfigEvent.Unloading event) {
             if (event.getConfig().getSpec() == LeashCommonConfig.SPEC) {
                 LeashConfigManager.unloading(leashConfigManager);
             }

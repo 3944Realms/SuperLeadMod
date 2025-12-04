@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -16,31 +16,40 @@
 package top.r3944realms.superleadrope.content.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.r3944realms.superleadrope.util.capability.LeashStateInnerAPI;
 
-import static top.r3944realms.superleadrope.content.command.Command.*;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * The type Leash state command.
- */
-//TODO: 未来扩展，启用
+import static top.r3944realms.superleadrope.content.command.Command.*;
+import static top.r3944realms.superleadrope.content.command.LeashDataCommand.*;
+
+
 public class LeashStateCommand {
 
     /**
      * The constant SLP_LEASH_STATE_MESSAGE_.
      */
     public static final String SLP_LEASH_STATE_MESSAGE_ = Command.BASE_ + "leash_state.message.";
-
+    public static final String DEFAULT_OFFSET = SLP_LEASH_STATE_MESSAGE_ + "default_offset";
+    public static final String APPLY_OFFSET = SLP_LEASH_STATE_MESSAGE_ + "apply_offset";
     // ==================== 重置操作消息键 ====================
     public static final String RESET_ALL_HOLDER_ = SLP_LEASH_STATE_MESSAGE_ + "reset_all_holder.";
     public static final String RESET_ALL_HOLDER_SUC = RESET_ALL_HOLDER_ + SUC;
@@ -57,57 +66,12 @@ public class LeashStateCommand {
     // ==================== 设置操作消息键 ====================
     public static final String SET_HOLDER_FOR_ = SLP_LEASH_STATE_MESSAGE_ + "set_holder_for.";
     public static final String SET_HOLDER_FOR_SUC = SET_HOLDER_FOR_ + SUC;
-    public static final String SET_HOLDER_FOR_SUC_FAIL = SET_HOLDER_FOR_ + SUC_FAIL;
-    public static final String SET_HOLDER_FOR_FAIL = SET_HOLDER_FOR_ + FAIL;
 
     public static final String SET_HOLDER_FOR_BLOCK_POS_ = SLP_LEASH_STATE_MESSAGE_ + "set_holder_for_block_pos.";
     public static final String SET_HOLDER_FOR_BLOCK_POS_SUC = SET_HOLDER_FOR_BLOCK_POS_ + SUC;
-    public static final String SET_HOLDER_FOR_BLOCK_POS_SUC_FAIL = SET_HOLDER_FOR_BLOCK_POS_ + SUC_FAIL;
-    public static final String SET_HOLDER_FOR_BLOCK_POS_FAIL = SET_HOLDER_FOR_BLOCK_POS_ + FAIL;
 
     public static final String SET_APPLY_ENTITY_ = SLP_LEASH_STATE_MESSAGE_ + "set_apply_entity.";
     public static final String SET_APPLY_ENTITY_SUC = SET_APPLY_ENTITY_ + SUC;
-    public static final String SET_APPLY_ENTITY_SUC_FAIL = SET_APPLY_ENTITY_ + SUC_FAIL;
-    public static final String SET_APPLY_ENTITY_FAIL = SET_APPLY_ENTITY_ + FAIL;
-
-    // ==================== 添加操作消息键 ====================
-    public static final String ADD_HOLDER_TO_ = SLP_LEASH_STATE_MESSAGE_ + "add_holder_to.";
-    public static final String ADD_HOLDER_TO_SUC = ADD_HOLDER_TO_ + SUC;
-    public static final String ADD_HOLDER_TO_SUC_FAIL = ADD_HOLDER_TO_ + SUC_FAIL;
-    public static final String ADD_HOLDER_TO_FAIL = ADD_HOLDER_TO_ + FAIL;
-
-    public static final String ADD_HOLDER_TO_BLOCK_POS_ = SLP_LEASH_STATE_MESSAGE_ + "add_holder_to_block_pos.";
-    public static final String ADD_HOLDER_TO_BLOCK_POS_SUC = ADD_HOLDER_TO_BLOCK_POS_ + SUC;
-    public static final String ADD_HOLDER_TO_BLOCK_POS_SUC_FAIL = ADD_HOLDER_TO_BLOCK_POS_ + SUC_FAIL;
-    public static final String ADD_HOLDER_TO_BLOCK_POS_FAIL = ADD_HOLDER_TO_BLOCK_POS_ + FAIL;
-
-    public static final String ADD_APPLY_ENTITY_ = SLP_LEASH_STATE_MESSAGE_ + "add_apply_entity.";
-    public static final String ADD_APPLY_ENTITY_SUC = ADD_APPLY_ENTITY_ + SUC;
-    public static final String ADD_APPLY_ENTITY_SUC_FAIL = ADD_APPLY_ENTITY_ + SUC_FAIL;
-    public static final String ADD_APPLY_ENTITY_FAIL = ADD_APPLY_ENTITY_ + FAIL;
-
-    // ==================== 移除操作消息键 ====================
-    public static final String REMOVE_HOLDER_FOR_ = SLP_LEASH_STATE_MESSAGE_ + "remove_holder_for.";
-    public static final String REMOVE_HOLDER_FOR_SUC = REMOVE_HOLDER_FOR_ + SUC;
-    public static final String REMOVE_HOLDER_FOR_SUC_FAIL = REMOVE_HOLDER_FOR_ + SUC_FAIL;
-    public static final String REMOVE_HOLDER_FOR_FAIL = REMOVE_HOLDER_FOR_ + FAIL;
-
-    public static final String REMOVE_HOLDER_FOR_BLOCK_POS_ = SLP_LEASH_STATE_MESSAGE_ + "remove_holder_for_block_pos.";
-    public static final String REMOVE_HOLDER_FOR_BLOCK_POS_SUC = REMOVE_HOLDER_FOR_BLOCK_POS_ + SUC;
-    public static final String REMOVE_HOLDER_FOR_BLOCK_POS_SUC_FAIL = REMOVE_HOLDER_FOR_BLOCK_POS_ + SUC_FAIL;
-    public static final String REMOVE_HOLDER_FOR_BLOCK_POS_FAIL = REMOVE_HOLDER_FOR_BLOCK_POS_ + FAIL;
-
-    public static final String REMOVE_HOLDER_ALL_ = SLP_LEASH_STATE_MESSAGE_ + "remove_holder_all.";
-    public static final String REMOVE_HOLDER_ALL_SUC = REMOVE_HOLDER_ALL_ + SUC;
-
-    public static final String REMOVE_ALL_HOLDER_UUIDS_ = SLP_LEASH_STATE_MESSAGE_ + "remove_all_holder_uuids.";
-    public static final String REMOVE_ALL_HOLDER_UUIDS_SUC = REMOVE_ALL_HOLDER_UUIDS_ + SUC;
-
-    public static final String REMOVE_ALL_HOLDER_BLOCK_POSES_ = SLP_LEASH_STATE_MESSAGE_ + "remove_all_holder_block_poses.";
-    public static final String REMOVE_ALL_HOLDER_BLOCK_POSES_SUC = REMOVE_ALL_HOLDER_BLOCK_POSES_ + SUC;
-
-    public static final String REMOVE_APPLY_ENTITY_ = SLP_LEASH_STATE_MESSAGE_ + "remove_apply_entity.";
-    public static final String REMOVE_APPLY_ENTITY_SUC = REMOVE_APPLY_ENTITY_ + SUC;
 
     // ==================== 查询操作消息键 ====================
     public static final String QUERY_HAS_STATE_ = SLP_LEASH_STATE_MESSAGE_ + "query.has_state.";
@@ -126,216 +90,156 @@ public class LeashStateCommand {
     public static final String GET_DEFAULT_APPLY_ENTITY_OFFSET_ = SLP_LEASH_STATE_MESSAGE_ + "get_default_apply_entity_offset.";
     public static final String GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC = GET_DEFAULT_APPLY_ENTITY_OFFSET_ + SUC;
 
+
     /**
      * Register.
      *
      * @param dispatcher the dispatcher
      */
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("leashstate")
-                .requires(source -> source.hasPermission(2)) // 需要权限等级2
+        @Nullable List<LiteralArgumentBuilder<CommandSourceStack>> nodeList = SHOULD_USE_PREFIX ? null : new ArrayList<>();
+        LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal(PREFIX);
+        LiteralArgumentBuilder<CommandSourceStack> $$leashStateRoot = getLiterArgumentBuilderOfCSS("leashstate", !SHOULD_USE_PREFIX, nodeList);
 
-                // ==================== 重置操作 ====================
-                .then(Commands.literal("resetAllHolder")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .executes(context -> resetAllHolder(context, EntityArgument.getEntity(context, "entity")))
-                        )
-                )
-                .then(Commands.literal("resetHolderFor")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("holder", EntityArgument.entity())
-                                        .executes(context -> resetHolderFor(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                EntityArgument.getEntity(context, "holder")))
-                                )
-                        )
-                )
-                .then(Commands.literal("resetHolderForBlockPos")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                                        .executes(context -> resetHolderForBlockPos(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                BlockPosArgument.getLoadedBlockPos(context, "pos")))
-                                )
-                        )
-                )
-                .then(Commands.literal("resetApplyEntityAll")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .executes(context -> resetApplyEntityAll(context, EntityArgument.getEntity(context, "entity")))
-                        )
-                )
+        $$leashStateRoot.then(
+            // ==================== 重置操作 ====================
+            Commands.literal("resetAllHolder")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                            .executes(context -> resetAllHolder(context, EntityArgument.getEntity(context, "entity")))
+                    )
+            )
+            .then(Commands.literal("resetHolderFor")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                            .then(Commands.argument("holder", EntityArgument.entity())
+                                    .executes(context -> resetHolderFor(context,
+                                            EntityArgument.getEntity(context, "entity"),
+                                            EntityArgument.getEntity(context, "holder")))
+                            )
+                    )
+            )
+            .then(Commands.literal("resetHolderForBlockPos")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                            .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                    .executes(context -> resetHolderForBlockPos(context,
+                                            EntityArgument.getEntity(context, "entity"),
+                                            BlockPosArgument.getLoadedBlockPos(context, "pos")))
+                            )
+                    )
+            )
+            .then(Commands.literal("resetApplyEntityAll")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                            .executes(context -> resetApplyEntityAll(context, EntityArgument.getEntity(context, "entity")))
+                    )
+            )
 
-                // ==================== 设置操作 ====================
-                .then(Commands.literal("setHolderFor")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("holder", EntityArgument.entity())
-                                        .executes(context -> setHolderFor(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                EntityArgument.getEntity(context, "holder")))
-                                        .then(Commands.argument("offset", Vec3Argument.vec3())
-                                                .executes(context -> setHolderForWithOffset(context,
-                                                        EntityArgument.getEntity(context, "entity"),
-                                                        EntityArgument.getEntity(context, "holder"),
-                                                        Vec3Argument.getVec3(context, "offset")))
-                                        )
-                                )
-                        )
-                )
-                .then(Commands.literal("setHolderForBlockPos")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                                        .executes(context -> setHolderForBlockPos(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                BlockPosArgument.getLoadedBlockPos(context, "pos")))
-                                        .then(Commands.argument("offset", Vec3Argument.vec3())
-                                                .executes(context -> setHolderForBlockPosWithOffset(context,
-                                                        EntityArgument.getEntity(context, "entity"),
-                                                        BlockPosArgument.getLoadedBlockPos(context, "pos"),
-                                                        Vec3Argument.getVec3(context, "offset")))
-                                        )
-                                )
-                        )
-                )
-                .then(Commands.literal("setApplyEntity")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("offset", Vec3Argument.vec3())
-                                        .executes(context -> setApplyEntity(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                Vec3Argument.getVec3(context, "offset")))
-                                )
-                        )
-                )
+            // ==================== 设置操作 ====================
+            .then(Commands.literal("setHolderFor")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                            .then(Commands.argument("holder", EntityArgument.entity())
+                                    .executes(context -> setHolderFor(context,
+                                            EntityArgument.getEntity(context, "entity"),
+                                            EntityArgument.getEntity(context, "holder")))
+                                    .then(Commands.argument("offset", Vec3Argument.vec3())
+                                            .executes(context -> setHolderForWithOffset(context,
+                                                    EntityArgument.getEntity(context, "entity"),
+                                                    EntityArgument.getEntity(context, "holder"),
+                                                    Vec3Argument.getVec3(context, "offset")))
+                                    )
+                            )
+                    )
+            )
+            .then(Commands.literal("setHolderForBlockPos")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                            .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                    .executes(context -> setHolderForBlockPos(context,
+                                            EntityArgument.getEntity(context, "entity"),
+                                            BlockPosArgument.getLoadedBlockPos(context, "pos")))
+                                    .then(Commands.argument("offset", Vec3Argument.vec3())
+                                            .executes(context -> setHolderForBlockPosWithOffset(context,
+                                                    EntityArgument.getEntity(context, "entity"),
+                                                    BlockPosArgument.getLoadedBlockPos(context, "pos"),
+                                                    Vec3Argument.getVec3(context, "offset")))
+                                    )
+                            )
+                    )
+            )
+            .then(Commands.literal("setApplyEntity")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                            .then(Commands.argument("offset", Vec3Argument.vec3())
+                                    .executes(context -> setApplyEntity(context,
+                                            EntityArgument.getEntity(context, "entity"),
+                                            Vec3Argument.getVec3(context, "offset")))
+                            )
+                    )
+            )
+            // ==================== 查询操作 ====================
+            .then(Commands.literal("query")
+                    .then(Commands.literal("hasState")
+                            .then(Commands.argument("entity", EntityArgument.entity())
+                                    .executes(context -> queryHasState(context, EntityArgument.getEntity(context, "entity")))
+                            )
+                    )
+                    .then(Commands.literal("getAllUUIDStates")
+                            .then(Commands.argument("entity", EntityArgument.entity())
+                                    .executes(context -> getAllUUIDStates(context, EntityArgument.getEntity(context, "entity")))
+                            )
+                    )
+                    .then(Commands.literal("getAllBlockPosStates")
+                            .then(Commands.argument("entity", EntityArgument.entity())
+                                    .executes(context -> getAllBlockPosStates(context, EntityArgument.getEntity(context, "entity")))
+                            )
+                    )
+                    .then(Commands.literal("getApplyEntityOffset")
+                            .then(Commands.argument("entity", EntityArgument.entity())
+                                    .executes(context -> getApplyEntityOffset(context, EntityArgument.getEntity(context, "entity")))
+                            )
+                    )
+                    .then(Commands.literal("getDefaultApplyEntityOffset")
+                            .then(Commands.argument("entity", EntityArgument.entity())
+                                    .executes(context -> getDefaultApplyEntityOffset(context, EntityArgument.getEntity(context, "entity")))
+                            )
+                    )
+                     .then(Commands.literal("getAllStates")
+                             .then(Commands.argument("entity", EntityArgument.entity())
+                                     .executes(context -> getAllStates(context, EntityArgument.getEntity(context, "entity")))
+                             )
+                     )
 
-                // ==================== 添加操作 ====================
-                .then(Commands.literal("addHolderTo")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("holder", EntityArgument.entity())
-                                        .then(Commands.argument("offset", Vec3Argument.vec3())
-                                                .executes(context -> addHolderTo(context,
-                                                        EntityArgument.getEntity(context, "entity"),
-                                                        EntityArgument.getEntity(context, "holder"),
-                                                        Vec3Argument.getVec3(context, "offset")))
-                                        )
-                                )
-                        )
-                )
-                .then(Commands.literal("addHolderToBlockPos")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                                        .then(Commands.argument("offset", Vec3Argument.vec3())
-                                                .executes(context -> addHolderToBlockPos(context,
-                                                        EntityArgument.getEntity(context, "entity"),
-                                                        BlockPosArgument.getLoadedBlockPos(context, "pos"),
-                                                        Vec3Argument.getVec3(context, "offset")))
-                                        )
-                                )
-                        )
-                )
-                .then(Commands.literal("addApplyEntity")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("offset", Vec3Argument.vec3())
-                                        .executes(context -> addApplyEntity(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                Vec3Argument.getVec3(context, "offset")))
-                                )
-                        )
-                )
-
-                // ==================== 移除操作 ====================
-                .then(Commands.literal("removeHolderFor")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("holder", EntityArgument.entity())
-                                        .executes(context -> removeHolderFor(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                EntityArgument.getEntity(context, "holder")))
-                                )
-                        )
-                )
-                .then(Commands.literal("removeHolderForBlockPos")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                                        .executes(context -> removeHolderForBlockPos(context,
-                                                EntityArgument.getEntity(context, "entity"),
-                                                BlockPosArgument.getLoadedBlockPos(context, "pos")))
-                                )
-                        )
-                )
-                .then(Commands.literal("removeHolderAll")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .executes(context -> removeHolderAll(context, EntityArgument.getEntity(context, "entity")))
-                        )
-                )
-                .then(Commands.literal("removeAllHolderUUIDs")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .executes(context -> removeAllHolderUUIDs(context, EntityArgument.getEntity(context, "entity")))
-                        )
-                )
-                .then(Commands.literal("removeAllHolderBlockPoses")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .executes(context -> removeAllHolderBlockPoses(context, EntityArgument.getEntity(context, "entity")))
-                        )
-                )
-                .then(Commands.literal("removeApplyEntity")
-                        .then(Commands.argument("entity", EntityArgument.entity())
-                                .executes(context -> removeApplyEntity(context, EntityArgument.getEntity(context, "entity")))
-                        )
-                )
-
-                // ==================== 查询操作 ====================
-                .then(Commands.literal("query")
-                        .then(Commands.literal("hasState")
-                                .then(Commands.argument("entity", EntityArgument.entity())
-                                        .executes(context -> queryHasState(context, EntityArgument.getEntity(context, "entity")))
-                                )
-                        )
-                        .then(Commands.literal("getAllUUIDStates")
-                                .then(Commands.argument("entity", EntityArgument.entity())
-                                        .executes(context -> getAllUUIDStates(context, EntityArgument.getEntity(context, "entity")))
-                                )
-                        )
-                        .then(Commands.literal("getAllBlockPosStates")
-                                .then(Commands.argument("entity", EntityArgument.entity())
-                                        .executes(context -> getAllBlockPosStates(context, EntityArgument.getEntity(context, "entity")))
-                                )
-                        )
-                        .then(Commands.literal("getApplyEntityOffset")
-                                .then(Commands.argument("entity", EntityArgument.entity())
-                                        .executes(context -> getApplyEntityOffset(context, EntityArgument.getEntity(context, "entity")))
-                                )
-                        )
-                        .then(Commands.literal("getDefaultApplyEntityOffset")
-                                .then(Commands.argument("entity", EntityArgument.entity())
-                                        .executes(context -> getDefaultApplyEntityOffset(context, EntityArgument.getEntity(context, "entity")))
-                                )
-                        )
-                )
-        );
+        ).requires(source -> source.hasPermission(2));
+        if(SHOULD_USE_PREFIX){
+            literalArgumentBuilder.then($$leashStateRoot);
+            dispatcher.register(literalArgumentBuilder);
+        } else {
+            if (nodeList != null) {
+                nodeList.forEach(dispatcher::register);
+            }
+        }
     }
 
     // ==================== 重置操作实现 ====================
 
-    private static int resetAllHolder(CommandContext<CommandSourceStack> context, Entity entity) {
+    private static int resetAllHolder(@NotNull CommandContext<CommandSourceStack> context, Entity entity) {
         LeashStateInnerAPI.Offset.resetAllHolder(entity);
         context.getSource().sendSuccess(() ->
                 Component.translatable(RESET_ALL_HOLDER_SUC, getSLPName(entity)), false);
         return 1;
     }
 
-    private static int resetHolderFor(CommandContext<CommandSourceStack> context, Entity entity, Entity holder) {
+    private static int resetHolderFor(@NotNull CommandContext<CommandSourceStack> context, Entity entity, Entity holder) {
         LeashStateInnerAPI.Offset.resetHolderFor(entity, holder);
         context.getSource().sendSuccess(() ->
                 Component.translatable(RESET_HOLDER_FOR_SUC, getSLPName(entity), getSLPName(holder)), false);
         return 1;
     }
 
-    private static int resetHolderForBlockPos(CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos) {
+    private static int resetHolderForBlockPos(@NotNull CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos) {
         LeashStateInnerAPI.Offset.resetHolderFor(entity, pos);
         context.getSource().sendSuccess(() ->
                 Component.translatable(RESET_HOLDER_FOR_BLOCK_POS_SUC, getSLPName(entity), getSLPName(pos)), false);
         return 1;
     }
 
-    private static int resetApplyEntityAll(CommandContext<CommandSourceStack> context, Entity entity) {
+    private static int resetApplyEntityAll(@NotNull CommandContext<CommandSourceStack> context, Entity entity) {
         LeashStateInnerAPI.Offset.resetApplyEntityAll(entity);
         context.getSource().sendSuccess(() ->
                 Component.translatable(RESET_APPLY_ENTITY_ALL_SUC, getSLPName(entity)), false);
@@ -344,153 +248,253 @@ public class LeashStateCommand {
 
     // ==================== 设置操作实现 ====================
 
-    private static int setHolderFor(CommandContext<CommandSourceStack> context, Entity entity, Entity holder) {
+    private static int setHolderFor(@NotNull CommandContext<CommandSourceStack> context, Entity entity, Entity holder) {
         LeashStateInnerAPI.Offset.setHolderFor(entity, holder);
         context.getSource().sendSuccess(() ->
                 Component.translatable(SET_HOLDER_FOR_SUC, getSLPName(entity), getSLPName(holder)), false);
         return 1;
     }
 
-    private static int setHolderForWithOffset(CommandContext<CommandSourceStack> context, Entity entity, Entity holder, Vec3 offset) {
+    private static int setHolderForWithOffset(@NotNull CommandContext<CommandSourceStack> context, Entity entity, Entity holder, Vec3 offset) {
         LeashStateInnerAPI.Offset.setHolderFor(entity, holder, offset);
         context.getSource().sendSuccess(() ->
                 Component.translatable(SET_HOLDER_FOR_SUC, getSLPName(entity), getSLPName(holder), offset), false);
         return 1;
     }
 
-    private static int setHolderForBlockPos(CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos) {
+    private static int setHolderForBlockPos(@NotNull CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos) {
         LeashStateInnerAPI.Offset.setHolderFor(entity, pos);
         context.getSource().sendSuccess(() ->
                 Component.translatable(SET_HOLDER_FOR_BLOCK_POS_SUC, getSLPName(entity), getSLPName(pos)), false);
         return 1;
     }
 
-    private static int setHolderForBlockPosWithOffset(CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos, Vec3 offset) {
+    private static int setHolderForBlockPosWithOffset(@NotNull CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos, Vec3 offset) {
         LeashStateInnerAPI.Offset.setHolderFor(entity, pos, offset);
         context.getSource().sendSuccess(() ->
                 Component.translatable(SET_HOLDER_FOR_BLOCK_POS_SUC, getSLPName(entity), getSLPName(pos), offset), false);
         return 1;
     }
 
-    private static int setApplyEntity(CommandContext<CommandSourceStack> context, Entity entity, Vec3 offset) {
+    private static int setApplyEntity(@NotNull CommandContext<CommandSourceStack> context, Entity entity, Vec3 offset) {
         LeashStateInnerAPI.Offset.setApplyEntity(entity, offset);
         context.getSource().sendSuccess(() ->
                 Component.translatable(SET_APPLY_ENTITY_SUC, getSLPName(entity), offset), false);
         return 1;
     }
 
-    // ==================== 添加操作实现 ====================
-
-    private static int addHolderTo(CommandContext<CommandSourceStack> context, Entity entity, Entity holder, Vec3 offset) {
-        LeashStateInnerAPI.Offset.addHolderTo(entity, holder, offset);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(ADD_HOLDER_TO_SUC, getSLPName(entity), getSLPName(holder), offset), false);
-        return 1;
-    }
-
-    private static int addHolderToBlockPos(CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos, Vec3 offset) {
-        LeashStateInnerAPI.Offset.addHolderTo(entity, pos, offset);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(ADD_HOLDER_TO_BLOCK_POS_SUC, getSLPName(entity), getSLPName(pos), offset), false);
-        return 1;
-    }
-
-    private static int addApplyEntity(CommandContext<CommandSourceStack> context, Entity entity, Vec3 offset) {
-        LeashStateInnerAPI.Offset.addApplyEntity(entity, offset);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(ADD_APPLY_ENTITY_SUC, getSLPName(entity), offset), false);
-        return 1;
-    }
-
-    // ==================== 移除操作实现 ====================
-
-    private static int removeHolderFor(CommandContext<CommandSourceStack> context, Entity entity, Entity holder) {
-        LeashStateInnerAPI.Offset.removeHolderFor(entity, holder);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(REMOVE_HOLDER_FOR_SUC, getSLPName(entity), getSLPName(holder)), false);
-        return 1;
-    }
-
-    private static int removeHolderForBlockPos(CommandContext<CommandSourceStack> context, Entity entity, BlockPos pos) {
-        LeashStateInnerAPI.Offset.removeHolderFor(entity, pos);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(REMOVE_HOLDER_FOR_BLOCK_POS_SUC, getSLPName(entity), getSLPName(pos)), false);
-        return 1;
-    }
-
-    private static int removeHolderAll(CommandContext<CommandSourceStack> context, Entity entity) {
-        LeashStateInnerAPI.Offset.removeHolderAll(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(REMOVE_HOLDER_ALL_SUC, getSLPName(entity)), false);
-        return 1;
-    }
-
-    private static int removeAllHolderUUIDs(CommandContext<CommandSourceStack> context, Entity entity) {
-        LeashStateInnerAPI.Offset.removeAllHolderUUIDs(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(REMOVE_ALL_HOLDER_UUIDS_SUC, getSLPName(entity)), false);
-        return 1;
-    }
-
-    private static int removeAllHolderBlockPoses(CommandContext<CommandSourceStack> context, Entity entity) {
-        LeashStateInnerAPI.Offset.removeAllHolderBlockPoses(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(REMOVE_ALL_HOLDER_BLOCK_POSES_SUC, getSLPName(entity)), false);
-        return 1;
-    }
-
-    private static int removeApplyEntity(CommandContext<CommandSourceStack> context, Entity entity) {
-        LeashStateInnerAPI.Offset.removeApplyEntity(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(REMOVE_APPLY_ENTITY_SUC, getSLPName(entity)), false);
-        return 1;
-    }
-
     // ==================== 查询操作实现 ====================
 
-    private static int queryHasState(CommandContext<CommandSourceStack> context, Entity entity) {
+    private static int queryHasState(@NotNull CommandContext<CommandSourceStack> context, Entity entity) {
         boolean hasState = LeashStateInnerAPI.Query.hasState(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(QUERY_HAS_STATE_SUC, getSLPName(entity), hasState), false);
+        MutableComponent send = Component.empty();
+        send.append(Component.translatable(QUERY_HAS_STATE_SUC, getSLPName(entity), hasState));
+        context.getSource().sendSuccess(() -> send, false);
         return 1;
     }
 
     private static int getAllUUIDStates(CommandContext<CommandSourceStack> context, Entity entity) {
         var states = LeashStateInnerAPI.Query.getAllUUIDStates(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(GET_ALL_UUID_STATES_SUC, getSLPName(entity), states.size()), false);
-        states.forEach((uuid, state) -> {
-            context.getSource().sendSuccess(() ->
-                    Component.literal("  UUID: " + uuid + ", 状态: " + state), false);
-        });
+        MutableComponent head = Component.translatable(GET_ALL_UUID_STATES_SUC, getSLPName(entity), states.size()).append("\n");
+
+        MutableComponent content = Component.empty();
+        if (states.isEmpty()) {
+            content.append(Component.translatable(NONE));
+        } else {
+            int count = 0;
+            for (var entry : states.entrySet()) {
+                if (count >= MAX_SHOW_NUMBER) {
+                    content.append(Component.translatable(ABBREVIATION));
+                    break;
+                }
+
+                // UUID: xxx, 状态: xxx
+                MutableComponent stateInfo = Component.literal("  UUID: " + entry.getKey() + ", 状态: " + entry.getValue());
+
+                // 添加悬停信息
+                MutableComponent hover = Component.empty();
+                hover.append(Component.translatable(UUID).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(entry.getKey().toString())).append("\n");
+                hover.append(Component.translatable(STATE).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(entry.getValue().toString()));
+
+                stateInfo.withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
+
+                content.append(stateInfo);
+                if (count < Math.min(states.size(), MAX_SHOW_NUMBER) - 1) {
+                    content.append("\n");
+                }
+                count++;
+            }
+        }
+
+        context.getSource().sendSuccess(() -> head.append(content), false);
         return 1;
     }
 
     private static int getAllBlockPosStates(CommandContext<CommandSourceStack> context, Entity entity) {
         var states = LeashStateInnerAPI.Query.getAllBlockPosStates(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(GET_ALL_BLOCK_POS_STATES_SUC, getSLPName(entity), states.size()), false);
-        states.forEach((pos, state) -> {
-            context.getSource().sendSuccess(() ->
-                    Component.literal("  位置: " + pos + ", 状态: " + state), false);
-        });
+        MutableComponent head = Component.translatable(GET_ALL_BLOCK_POS_STATES_SUC, getSLPName(entity), states.size()).append("\n");
+
+        MutableComponent content = Component.empty();
+        if (states.isEmpty()) {
+            content.append(Component.translatable(NONE));
+        } else {
+            int count = 0;
+            for (var entry : states.entrySet()) {
+                if (count >= MAX_SHOW_NUMBER) {
+                    content.append(Component.translatable(ABBREVIATION));
+                    break;
+                }
+
+                BlockPos pos = entry.getKey();
+                // 位置: (x,y,z), 状态: xxx
+                MutableComponent stateInfo = Component.literal(Component.translatable(BLOCK_POS, pos.getX(), pos.getY(), pos.getZ())  +"," + Component.translatable(STATE) + Component.translatable(COLON)  + entry.getValue());
+
+                // 添加悬停信息
+                MutableComponent hover = Component.empty();
+                hover.append(Component.translatable(BLOCK).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(pos.toShortString())).append("\n");
+                hover.append(Component.translatable(STATE).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(entry.getValue().toString()));
+
+                // 添加点击事件（建议传送到该位置）
+                ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                        String.format("/tp @s %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
+
+                stateInfo.withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover))
+                        .withClickEvent(clickEvent));
+
+                content.append(stateInfo);
+                if (count < Math.min(states.size(), MAX_SHOW_NUMBER) - 1) {
+                    content.append("\n");
+                }
+                count++;
+            }
+        }
+
+        context.getSource().sendSuccess(() -> head.append(content), false);
         return 1;
     }
 
     private static int getApplyEntityOffset(CommandContext<CommandSourceStack> context, Entity entity) {
         LeashStateInnerAPI.Offset.getApplyEntityOffset(entity).ifPresentOrElse(
-                offset -> context.getSource().sendSuccess(() ->
-                        Component.translatable(GET_APPLY_ENTITY_OFFSET_SUC, getSLPName(entity), offset), false),
-                () -> context.getSource().sendSuccess(() ->
-                        Component.translatable(GET_APPLY_ENTITY_OFFSET_NONE, getSLPName(entity)), false)
+                offset -> {
+                    MutableComponent send = Component.empty();
+                    send.append(Component.translatable(GET_APPLY_ENTITY_OFFSET_SUC, getSLPName(entity), offset));
+                    context.getSource().sendSuccess(() -> send, false);
+                },
+                () -> {
+                    MutableComponent send = Component.empty();
+                    send.append(Component.translatable(GET_APPLY_ENTITY_OFFSET_NONE, getSLPName(entity)));
+                    context.getSource().sendSuccess(() -> send, false);
+                }
         );
         return 1;
     }
 
-    private static int getDefaultApplyEntityOffset(CommandContext<CommandSourceStack> context, Entity entity) {
+    private static int getDefaultApplyEntityOffset(@NotNull CommandContext<CommandSourceStack> context, Entity entity) {
         Vec3 offset = LeashStateInnerAPI.Offset.getDefaultApplyEntityOffset(entity);
-        context.getSource().sendSuccess(() ->
-                Component.translatable(GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC, getSLPName(entity), offset), false);
+        MutableComponent send = Component.empty();
+        send.append(Component.translatable(GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC, getSLPName(entity), offset));
+        context.getSource().sendSuccess(() -> send, false);
+        return 1;
+    }
+
+    public static final String GET_ALL_STATES_HEAD = SLP_LEASH_STATE_MESSAGE_ + "get_all_states.head";
+
+    private static int getAllStates(CommandContext<CommandSourceStack> context, @NotNull Entity entity) {
+        MutableComponent head = Component.translatable(GET_ALL_STATES_HEAD, entity.getDisplayName()).append("\n");
+
+        // 获取所有状态信息
+        var uuidStates = LeashStateInnerAPI.Query.getAllUUIDStates(entity);
+        var blockPosStates = LeashStateInnerAPI.Query.getAllBlockPosStates(entity);
+        var applyOffset = LeashStateInnerAPI.Offset.getApplyEntityOffset(entity);
+        var defaultOffset = LeashStateInnerAPI.Offset.getDefaultApplyEntityOffset(entity);
+
+        MutableComponent content = Component.empty();
+
+        // UUID 状态
+        content.append(Component.translatable(UUID).withStyle(ChatFormatting.YELLOW)).append(": ");
+        if (uuidStates.isEmpty()) {
+            content.append(Component.translatable(NONE));
+        } else {
+            int count = 0;
+            for (var entry : uuidStates.entrySet()) {
+                if (count >= 4) { // 限制显示数量
+                    content.append(Component.translatable(ABBREVIATION));
+                    break;
+                }
+
+                MutableComponent stateComp = Component.literal("[U]").withStyle(ChatFormatting.GREEN);
+                MutableComponent hover = Component.empty();
+                hover.append(Component.translatable(UUID).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(entry.getKey().toString())).append("\n");
+                hover.append(Component.translatable(STATE).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(entry.getValue().toString()));
+
+                stateComp.withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
+                content.append(stateComp);
+
+                if (count < Math.min(uuidStates.size(), 4) - 1) {
+                    content.append(", ");
+                }
+                count++;
+            }
+        }
+        content.append("\n");
+
+        // 方块位置状态
+        content.append(Component.translatable(BLOCK).withStyle(ChatFormatting.YELLOW)).append(": ");
+        if (blockPosStates.isEmpty()) {
+            content.append(Component.translatable(NONE));
+        } else {
+            int count = 0;
+            for (var entry : blockPosStates.entrySet()) {
+                if (count >= 4) { // 限制显示数量
+                    content.append(Component.translatable(ABBREVIATION));
+                    break;
+                }
+
+                MutableComponent stateComp = Component.literal("[B]").withStyle(ChatFormatting.BLUE);
+                MutableComponent hover = Component.empty();
+                hover.append(Component.translatable(BLOCK).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(entry.getKey().toShortString())).append("\n");
+                hover.append(Component.translatable(STATE).withStyle(ChatFormatting.DARK_AQUA))
+                        .append(Component.translatable(COLON).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(entry.getValue().toString()));
+
+                stateComp.withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
+                content.append(stateComp);
+
+                if (count < Math.min(blockPosStates.size(), 4) - 1) {
+                    content.append(", ");
+                }
+                count++;
+            }
+        }
+        content.append("\n");
+
+        // 应用偏移量
+        content.append(Component.translatable(APPLY_OFFSET).withStyle(ChatFormatting.YELLOW)).append(": ");
+        applyOffset.ifPresentOrElse(
+                offset -> content.append(Component.literal(String.format("(%.2f, %.2f, %.2f)", offset.x, offset.y, offset.z))),
+                () -> content.append(Component.translatable(NONE))
+        );
+        content.append("\n");
+
+        // 默认偏移量
+        content.append(Component.translatable(DEFAULT_OFFSET).withStyle(ChatFormatting.YELLOW)).append(": ");
+        content.append(Component.literal(String.format("(%.2f, %.2f, %.2f)", defaultOffset.x, defaultOffset.y, defaultOffset.z)));
+
+        context.getSource().sendSuccess(() -> head.append(content), false);
         return 1;
     }
 }

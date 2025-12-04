@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -51,7 +51,7 @@ public class Command {
     /**
      * The constant BLOCK_POS.
      */
-    public static final String BLOCK_POS = BASE_ + ".block_pos";
+    public static final String BLOCK_POS = BASE_ + "block_pos";
     /**
      * The constant SUC.
      */
@@ -75,6 +75,20 @@ public class Command {
     public static final int MAX_SHOW_NUMBER = 4;
     public static final String END = BASE_ + "end";
     public static final String NONE = BASE_ + "none";
+    public static final String STATE = BASE_ + "state";
+    /**
+     * The constant SLP_LEASH_MESSAGE_.
+     */
+    public static final String SLP_LEASH_MESSAGE_ = Command.BASE_ + "leash.message.";
+
+    /**
+     * The constant ALL_KNOTS.
+     */
+    public static final String ALL_KNOTS = SLP_LEASH_MESSAGE_ + "all_knots";
+    /**
+     * The constant ALL_HOLDERS.
+     */
+    public static final String ALL_HOLDERS = SLP_LEASH_MESSAGE_ + "all_holders";
     /**
      * Gets slp name.
      *

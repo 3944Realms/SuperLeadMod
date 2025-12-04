@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.content.command.Command;
 import top.r3944realms.superleadrope.content.command.LeashDataCommand;
+import top.r3944realms.superleadrope.content.command.LeashStateCommand;
 import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.gamerule.server.CreateSuperLeashKnotEntityIfAbsent;
 import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
@@ -349,6 +350,120 @@ public enum SLPLangKeyValue {
             "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
             "§b倍乘既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
+    // ==================== 重置操作消息 ====================
+    MESSAGE_STATE_RESET_ALL_HOLDER_SUC(
+            LeashStateCommand.RESET_ALL_HOLDER_SUC, ModPartEnum.COMMAND,
+            "Successfully reset all holders for %s",
+            "已成功重置%s的所有持有者状态",
+            "已成功重置%s的所有持有者狀態",
+            "%s之諸持者狀態，今已盡復"
+    ),
+
+    MESSAGE_STATE_RESET_HOLDER_FOR_SUC(
+            LeashStateCommand.RESET_HOLDER_FOR_SUC, ModPartEnum.COMMAND,
+            "Successfully reset holder %s for %s",
+            "已成功重置%s的持有者%s状态",
+            "已成功重置%s的持有者%s狀態",
+            "%s之持者%s狀態，今已復"
+    ),
+
+    MESSAGE_STATE_RESET_HOLDER_FOR_BLOCK_POS_SUC(
+            LeashStateCommand.RESET_HOLDER_FOR_BLOCK_POS_SUC, ModPartEnum.COMMAND,
+            "Successfully reset block position %s for %s",
+            "已成功重置%s的方块位置%s状态",
+            "已成功重置%s的方塊位置%s狀態",
+            "%s之位%s狀態，今已復"
+    ),
+
+    MESSAGE_STATE_RESET_APPLY_ENTITY_ALL_SUC(
+            LeashStateCommand.RESET_APPLY_ENTITY_ALL_SUC, ModPartEnum.COMMAND,
+            "Successfully reset all apply entity offsets for %s",
+            "已成功重置%s的所有应用实体偏移",
+            "已成功重置%s的所有應用實體偏移",
+            "%s之諸用體偏移，今已盡復"
+    ),
+
+    // ==================== 设置操作消息 ====================
+    MESSAGE_STATE_SET_HOLDER_FOR_SUC(
+            LeashStateCommand.SET_HOLDER_FOR_SUC, ModPartEnum.COMMAND,
+            "Successfully set holder %s for %s",
+            "已成功为%s设置持有者%s",
+            "已成功為%s設置持有者%s",
+            "為%s設持者%s，其事已成"
+    ),
+
+    MESSAGE_STATE_SET_HOLDER_FOR_BLOCK_POS_SUC(
+            LeashStateCommand.SET_HOLDER_FOR_BLOCK_POS_SUC, ModPartEnum.COMMAND,
+            "Successfully set block position %s for %s",
+            "已成功为%s设置方块位置%s",
+            "已成功為%s設置方塊位置%s",
+            "為%s設位%s，其事已成"
+    ),
+
+    MESSAGE_STATE_SET_APPLY_ENTITY_SUC(
+            LeashStateCommand.SET_APPLY_ENTITY_SUC, ModPartEnum.COMMAND,
+            "Successfully set apply entity offset %s for %s",
+            "已成功为%s设置应用实体偏移%s",
+            "已成功為%s設置應用實體偏移%s",
+            "為%s設用體偏移%s，其事已成"
+    ),
+
+    // ==================== 查询操作消息 ====================
+    MESSAGE_STATE_QUERY_HAS_STATE_SUC(
+            LeashStateCommand.QUERY_HAS_STATE_SUC, ModPartEnum.COMMAND,
+            "%s has state: %s",
+            "%s 拥有状态: %s",
+            "%s 擁有狀態: %s",
+            "%s 有狀否: %s"
+    ),
+
+    MESSAGE_STATE_GET_ALL_UUID_STATES_SUC(
+            LeashStateCommand.GET_ALL_UUID_STATES_SUC, ModPartEnum.COMMAND,
+            "Found %d UUID states for %s:",
+            "找到%s的%d个UUID状态:",
+            "找到%s的%d個UUID狀態:",
+            "%s之UUID狀有%d:"
+    ),
+
+    MESSAGE_STATE_GET_ALL_BLOCK_POS_STATES_SUC(
+            LeashStateCommand.GET_ALL_BLOCK_POS_STATES_SUC, ModPartEnum.COMMAND,
+            "Found %d block position states for %s:",
+            "找到%s的%d个方块位置状态:",
+            "找到%s的%d個方塊位置狀態:",
+            "%s之位狀有%d:"
+    ),
+
+    MESSAGE_STATE_GET_APPLY_ENTITY_OFFSET_SUC(
+            LeashStateCommand.GET_APPLY_ENTITY_OFFSET_SUC, ModPartEnum.COMMAND,
+            "%s apply entity offset: %s",
+            "%s 应用实体偏移: %s",
+            "%s 應用實體偏移: %s",
+            "%s 用體偏移: %s"
+    ),
+
+    MESSAGE_STATE_GET_APPLY_ENTITY_OFFSET_NONE(
+            LeashStateCommand.GET_APPLY_ENTITY_OFFSET_NONE, ModPartEnum.COMMAND,
+            "%s has no apply entity offset",
+            "%s 没有应用实体偏移",
+            "%s 沒有應用實體偏移",
+            "%s 無用體偏移"
+    ),
+
+    MESSAGE_STATE_GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC(
+            LeashStateCommand.GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC, ModPartEnum.COMMAND,
+            "%s default apply entity offset: %s",
+            "%s 默认应用实体偏移: %s",
+            "%s 默認應用實體偏移: %s",
+            "%s 常用體偏移: %s"
+    ),
+
+    MESSAGE_STATE_GET_ALL_STATES_HEAD(
+            LeashStateCommand.GET_ALL_STATES_HEAD, ModPartEnum.COMMAND,
+            "All states for %s:",
+            "%s 的所有状态:",
+            "%s 的所有狀態:",
+            "%s 之諸狀:"
+    ),
     MESSAGE_ABBREVIATION(
             Command.ABBREVIATION, ModPartEnum.COMMAND,
             "...",
@@ -384,15 +499,36 @@ public enum SLPLangKeyValue {
             "無",
             "無"
     ),
+    MESSAGE_STATE(
+            Command.STATE, ModPartEnum.COMMAND,
+            "State",
+            "状态",
+            "狀態",
+            "狀"
+    ),
+    MESSAGE_APPLY_OFFSET(
+            LeashStateCommand.APPLY_OFFSET, ModPartEnum.COMMAND,
+            "Apply Offset",
+            "应用偏移状态",
+            "應用偏移狀態",
+            "偏狀"
+    ),
+    MESSAGE_DEFAULT_OFFSET(
+            LeashStateCommand.DEFAULT_OFFSET, ModPartEnum.COMMAND,
+            "Default Offset",
+            "默认偏移状态",
+            "預設偏移狀態",
+            "常偏狀"
+    ),
     MESSAGE_LEASHDATA_ALL_KNOTS(
-            LeashDataCommand.ALL_KNOTS, ModPartEnum.COMMAND,
+            Command.ALL_KNOTS, ModPartEnum.COMMAND,
             "All Knots",
             "所有绳结",
             "所有繩結",
             "諸結"
     ),
     MESSAGE_LEASHDATA_ALL_HOLDERS(
-            LeashDataCommand.ALL_HOLDERS, ModPartEnum.COMMAND,
+            Command.ALL_HOLDERS, ModPartEnum.COMMAND,
             "All Holders",
             "所有持有者",
             "所有持有者",

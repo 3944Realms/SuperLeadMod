@@ -7,7 +7,7 @@
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -16,6 +16,8 @@
 package top.r3944realms.superleadrope.client;
 
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,18 +26,22 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.client.model.SuperLeashKnotModel;
 import top.r3944realms.superleadrope.client.model.geom.SLPModelLayers;
 import top.r3944realms.superleadrope.client.renderer.LeashRenderHandler;
 import top.r3944realms.superleadrope.client.renderer.SLPShaderRegistry;
 import top.r3944realms.superleadrope.client.renderer.entity.SuperLeashKnotRenderer;
+import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.util.PotatoMode;
+import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.io.IOException;
 
@@ -62,6 +68,14 @@ public class ClientEventHandler {
                 return;
             }
             LeashRenderHandler.onRenderLevelStage(event.getPoseStack(), event.getPartialTick());
+        }
+        @SubscribeEvent
+        public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+            if (event.player instanceof LocalPlayer player && player.equals(Minecraft.getInstance().player)) {
+                LeashDataInnerAPI
+                        .getLeashData(player)
+                        .ifPresent(ILeashData::applyLeashForcesClientPlayer);
+            }
         }
 
         /**
@@ -133,5 +147,6 @@ public class ClientEventHandler {
         public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
             SLPShaderRegistry.registerShaders(event);
         }
+
     }
 }

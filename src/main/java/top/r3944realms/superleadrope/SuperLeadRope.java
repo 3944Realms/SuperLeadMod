@@ -23,6 +23,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.r3944realms.superleadrope.compat.WayStoneCompat;
 import top.r3944realms.superleadrope.config.LeashCommonConfig;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
@@ -68,6 +69,7 @@ public class SuperLeadRope {
         ConfigUtil.createFile(new String[]{c});
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         ConfigUtil.registerConfig(modLoadingContext, ModConfig.Type.COMMON, LeashCommonConfig.SPEC, c, "leash");
+        WayStoneCompat.init();
     }
 
     /**

@@ -20,7 +20,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -31,6 +33,7 @@ import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
+import top.r3944realms.superleadrope.core.register.SLPEffects;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
@@ -53,7 +56,6 @@ public class LeashInteractHandler {
 //只有玩家可以互动触发（其它的暂不支持（考虑到0 Mixin)
     public static void onEntityRightInteract(Level level, InteractionHand hand, Entity target , Player player, PlayerInteractEvent.EntityInteract event) {
         //WARNING: 主手和副手都会触发一次该事件
-
         // ===== 卫语句 =====
         if (level.isClientSide) {
             if (hand == InteractionHand.MAIN_HAND &&
@@ -62,6 +64,12 @@ public class LeashInteractHandler {
             ) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);
+            }
+            if (target instanceof LivingEntity livingEntity) { //禁止拴绳效果存在则取消下面的逻辑
+                MobEffectInstance effect = livingEntity.getEffect(SLPEffects.NO_SUPER_LEASH_EFFECT.get());
+                if (effect != null && effect.getDuration() >= 1) {
+                    return;
+                }
             }
             if (SuperLeadRopeApi.isLeashHolder(target, player)) {
                 event.setCanceled(true);
@@ -97,6 +105,12 @@ public class LeashInteractHandler {
                 event.setCancellationResult(InteractionResult.SUCCESS);
             }
         } else {
+            if (target instanceof LivingEntity livingEntity) { //禁止拴绳效果存在则取消下面的逻辑
+                MobEffectInstance effect = livingEntity.getEffect(SLPEffects.NO_SUPER_LEASH_EFFECT.get());
+                if (effect != null && effect.getDuration() >= 1) {
+                    return;
+                }
+            }
             if (SuperLeadRopeApi.isLeashHolder(target, player)) {
                 LeashCap.ifPresent(
                         iLeashDataCapability -> iLeashDataCapability.removeLeash(player.getUUID())

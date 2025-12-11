@@ -55,6 +55,7 @@ public class LeashCommonConfig {
          */
 // Leash settings
         public final ForgeConfigSpec.DoubleValue maxLeashLength;
+        public final ForgeConfigSpec.DoubleValue maxMovement;
         /**
          * The Elastic distance scale.
          */
@@ -155,7 +156,9 @@ public class LeashCommonConfig {
             maxLeashLength = builder
                     .comment("Maximum leash distance (in blocks) for any entity")
                     .defineInRange("maxLeashLength", 6.0, LeashConfigManager.MAX_DISTANCE_MIN_VALUE, LeashConfigManager.MAX_DISTANCE_MAX_VALUE);
-
+            maxMovement = builder
+                    .comment("Defines the maximum acceleration in standard coordinate directions (X/Y/Z axes)")
+                    .defineInRange("maxMovement", 100.0, 10.0, Double.MAX_VALUE);
             elasticDistanceScale = builder
                     .comment("Default elastic distance for the Super Lead rope")
                     .defineInRange("elasticDistanceScale", 1.0, LeashConfigManager.ELASTIC_DISTANCE_MIN_VALUE, LeashConfigManager.ELASTIC_DISTANCE_MAX_VALUE);
@@ -199,6 +202,8 @@ public class LeashCommonConfig {
                     .comment("Spring stiffness multiplier for mobs")
                     .defineInRange("mobSpringFactor", 0.5, 0.05, 2.0);
             builder.pop();
+
+
 
             // ===== Leash State Offsets =====
             builder.push("LeashStateSettings");

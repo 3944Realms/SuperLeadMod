@@ -25,9 +25,7 @@ import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.gamerule.server.CreateSuperLeashKnotEntityIfAbsent;
 import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
-import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
-import top.r3944realms.superleadrope.core.register.SLPItems;
-import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
+import top.r3944realms.superleadrope.core.register.*;
 import top.r3944realms.superleadrope.util.lang.LanguageEnum;
 import top.r3944realms.superleadrope.util.lang.ModPartEnum;
 
@@ -917,6 +915,47 @@ public enum SLPLangKeyValue {
             "成功觸發%s的力",
             "%s之力，今已發"
     ),
+    NO_LEASH_EFFECT(
+            SLPEffects.getEffectKey(SLPEffects.NO_SUPER_LEASH_EFFECT.get()), ModPartEnum.NAME,
+            "No Super Leash",
+            "禁拴",
+            "禁拴",
+            "禁系之效"
+    ),
+    NO_LEASH_POTION(
+            SLPPotions.getPotionNameKey("no_super_leash", (char) 0), ModPartEnum.NAME,
+            "No Super Leash Potion",
+            "禁拴药水",
+            "禁拴藥水",
+            "禁系汤剂"
+    ),
+    NO_LEASH_POTION_SPLASH(
+            SLPPotions.getPotionNameKey("no_super_leash", (char) 2), ModPartEnum.NAME,
+            "Splash No Super Leash Potion",
+            "喷溅型禁拴药水",
+            "噴濺型禁拴藥水",
+            "飞溅禁系汤"
+    ),
+    NO_LEASH_POTION_LINGERING(
+            SLPPotions.getPotionNameKey("no_super_leash", (char) 1), ModPartEnum.NAME,
+            "Splash No Super Leash Potion",
+            "滞留型禁拴药水",
+            "滯留型禁拴藥水",
+            "缠绵禁系汤"
+    ),
+    DOLL_BLOCK(
+            SLPBlocks.DOLL, ModPartEnum.BLOCK,
+            "Doll", "玩偶", "玩偶", "戲像"
+    ),
+    DOLL_ITEM(
+            SLPItems.DOLL, ModPartEnum.ITEM,
+            "Doll", "玩偶", "玩偶", "戲像"
+    ),
+    AUTHOR_TOOLTIP(
+            "tooltip.superleadrope.author", ModPartEnum.DESCRIPTION,
+            "Author : R3944Realms", "作者 : R3944Realms",
+            "作者 : R3944Realms", "作者 : R3944Realms"
+    )
 
     ;
     private final Supplier<?> supplier;

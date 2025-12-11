@@ -25,9 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.r3944realms.superleadrope.compat.WayStoneCompat;
 import top.r3944realms.superleadrope.config.LeashCommonConfig;
-import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
-import top.r3944realms.superleadrope.core.register.SLPItems;
-import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
+import top.r3944realms.superleadrope.core.register.*;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.util.file.ConfigUtil;
 
@@ -53,8 +51,11 @@ public class SuperLeadRope {
     public SuperLeadRope() {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         SLPItems.register(eventBus);
+        SLPBlocks.register(eventBus);
         SLPEntityTypes.register(eventBus);
         SLPSoundEvents.register(eventBus);
+        SLPEffects.register(eventBus);
+        SLPPotions.register(eventBus);
         NetworkHandler.register();
         initialize();
 

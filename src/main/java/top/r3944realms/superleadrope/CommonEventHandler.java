@@ -74,6 +74,7 @@ import top.r3944realms.superleadrope.core.leash.LeashSyncManager;
 import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
 import top.r3944realms.superleadrope.core.register.SLPGameruleRegistry;
 import top.r3944realms.superleadrope.core.register.SLPItems;
+import top.r3944realms.superleadrope.core.register.SLPPotionRecipeRegistry;
 import top.r3944realms.superleadrope.core.util.PotatoMode;
 import top.r3944realms.superleadrope.core.util.PotatoModeHelper;
 import top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue;
@@ -499,6 +500,7 @@ public class CommonEventHandler {
         public static void onFMLCommonInit(FMLCommonSetupEvent event) {
             event.enqueueWork(Mod::checkAndSet);
             event.enqueueWork(SLPGameruleRegistry::register);
+            event.enqueueWork(SLPPotionRecipeRegistry::init);
         }
 
         /**

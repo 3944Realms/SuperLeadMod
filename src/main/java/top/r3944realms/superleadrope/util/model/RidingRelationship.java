@@ -15,6 +15,8 @@
 
 package top.r3944realms.superleadrope.util.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 /**
@@ -137,6 +139,121 @@ public class RidingRelationship {
             }
         }
         return false;
+    }
+    /**
+     * 查找并替换所有匹配的UUID
+     *
+     * @param oldUuid 要查找的旧UUID
+     * @param newUuid 要替换的新UUID
+     * @return 替换的数量
+     */
+    public int findAndReplaceAll(UUID oldUuid, UUID newUuid) {
+        int replacedCount = 0;
+
+        // 替换当前节点的entityId
+        if (Objects.equals(this.entityId, oldUuid)) {
+            this.entityId = newUuid;
+            replacedCount++;
+        }
+
+        // 替换当前节点的vehicleId
+        if (Objects.equals(this.vehicleId, oldUuid)) {
+            this.vehicleId = newUuid;
+            replacedCount++;
+        }
+
+        // 递归替换所有乘客
+        for (RidingRelationship passenger : passengers) {
+            replacedCount += passenger.findAndReplaceAll(oldUuid, newUuid);
+        }
+
+        return replacedCount;
+    }
+
+    /**
+     * 查找所有出现的UUID位置
+     *
+     * @param targetUuid 要查找的UUID
+     * @return 包含位置的列表，格式为"角色(实体/载具)-索引"
+     */
+    public List<String> findAllOccurrences(UUID targetUuid) {
+        List<String> occurrences = new ArrayList<>();
+        findAllOccurrencesRecursive(targetUuid, this, occurrences, "");
+        return occurrences;
+    }
+
+    private void findAllOccurrencesRecursive(UUID targetUuid, @NotNull RidingRelationship node,
+                                             List<String> occurrences, String path) {
+        // 检查当前节点的entityId
+        if (Objects.equals(node.entityId, targetUuid)) {
+            String fullPath = path.isEmpty() ? "根实体" : path + "->乘客";
+            occurrences.add(fullPath + "(实体ID)");
+        }
+
+        // 检查当前节点的vehicleId
+        if (Objects.equals(node.vehicleId, targetUuid)) {
+            String fullPath = path.isEmpty() ? "根实体" : path;
+            occurrences.add(fullPath + "(载具ID)");
+        }
+
+        // 递归检查乘客
+        for (int i = 0; i < node.passengers.size(); i++) {
+            String newPath = path.isEmpty() ? "乘客[" + i + "]" : path + "->乘客[" + i + "]";
+            findAllOccurrencesRecursive(targetUuid, node.passengers.get(i), occurrences, newPath);
+        }
+    }
+
+    /**
+     * 查找并替换所有UUID（支持批量替换）
+     *
+     * @param replacements 替换映射表，key为旧UUID，value为新UUID
+     * @return 总替换数量
+     */
+    public int batchFindAndReplace(Map<UUID, UUID> replacements) {
+        int totalReplaced = 0;
+
+        // 替换当前节点的entityId
+        if (this.entityId != null && replacements.containsKey(this.entityId)) {
+            this.entityId = replacements.get(this.entityId);
+            totalReplaced++;
+        }
+
+        // 替换当前节点的vehicleId
+        if (this.vehicleId != null && replacements.containsKey(this.vehicleId)) {
+            this.vehicleId = replacements.get(this.vehicleId);
+            totalReplaced++;
+        }
+
+        // 递归批量替换所有乘客
+        for (RidingRelationship passenger : passengers) {
+            totalReplaced += passenger.batchFindAndReplace(replacements);
+        }
+
+        return totalReplaced;
+    }
+
+    /**
+     * 获取树中所有唯一的UUID集合
+     *
+     * @return 包含所有UUID的集合
+     */
+    public Set<UUID> getAllUniqueUUIDs() {
+        Set<UUID> uuids = new HashSet<>();
+        getAllUniqueUUIDsRecursive(this, uuids);
+        return uuids;
+    }
+
+    private void getAllUniqueUUIDsRecursive(RidingRelationship node, Set<UUID> uuids) {
+        if (node.entityId != null) {
+            uuids.add(node.entityId);
+        }
+        if (node.vehicleId != null) {
+            uuids.add(node.vehicleId);
+        }
+
+        for (RidingRelationship passenger : node.passengers) {
+            getAllUniqueUUIDsRecursive(passenger, uuids);
+        }
     }
 
     @Override

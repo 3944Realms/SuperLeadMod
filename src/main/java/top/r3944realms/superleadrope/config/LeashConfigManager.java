@@ -88,6 +88,7 @@ public class LeashConfigManager {
     private volatile double mobSpringFactor = 0.5;
 
     private volatile double maxLeashLength = 12.0;
+    private volatile double maxMovement = 100.0;
     private volatile double elasticDistanceScale = 1.0;
     private volatile double extremeSnapFactor = 2.0;
     private volatile double springDampening = 0.7;
@@ -318,6 +319,7 @@ public class LeashConfigManager {
      * @return the max leash length
      */
     public double getMaxLeashLength() { return maxLeashLength; }
+    public double getMaxMovement() { return maxMovement; }
 
     /**
      * Gets elastic distance scale.
@@ -399,6 +401,7 @@ public class LeashConfigManager {
             commandPrefixEnabledCache = LeashCommonConfig.COMMON.enableSLPModCommandPrefix.get();
 
             maxLeashLength = LeashCommonConfig.COMMON.maxLeashLength.get();
+            maxMovement = LeashCommonConfig.COMMON.maxMovement.get();
             elasticDistanceScale = LeashCommonConfig.COMMON.elasticDistanceScale.get();
             extremeSnapFactor = LeashCommonConfig.COMMON.extremeSnapFactor.get();
             springDampening = LeashCommonConfig.COMMON.springDampening.get();
@@ -489,6 +492,7 @@ public class LeashConfigManager {
         tag.putDouble("mob_spring_factor", mobSpringFactor);
 
         tag.putDouble("max_leash_length", maxLeashLength);
+        tag.putDouble("max_movement", maxMovement);
         tag.putDouble("elastic_distance_scale", elasticDistanceScale);
         tag.putDouble("extreme_snap_factor", extremeSnapFactor);
         tag.putDouble("spring_dampening", springDampening);
@@ -524,6 +528,7 @@ public class LeashConfigManager {
 
         // ========== 更新物理参数 ==========
         LeashCommonConfig.COMMON.maxLeashLength.set(maxLeashLength);
+        LeashCommonConfig.COMMON.maxMovement.set(maxMovement);
         LeashCommonConfig.COMMON.elasticDistanceScale.set(elasticDistanceScale);
         LeashCommonConfig.COMMON.extremeSnapFactor.set(extremeSnapFactor);
         LeashCommonConfig.COMMON.springDampening.set(springDampening);
@@ -641,6 +646,9 @@ public class LeashConfigManager {
         if (tag.contains("max_leash_length", Tag.TAG_DOUBLE)) {
             maxLeashLength = tag.getDouble("max_leash_length");
         }
+        if (tag.contains("max_movement", Tag.TAG_DOUBLE)) {
+            maxLeashLength = tag.getDouble("max_movement");
+        }
         if (tag.contains("elastic_distance_scale", Tag.TAG_DOUBLE)) {
             elasticDistanceScale = tag.getDouble("elastic_distance_scale");
         }
@@ -696,6 +704,7 @@ public class LeashConfigManager {
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(playerSpringFactor));
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(mobSpringFactor));
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(maxLeashLength));
+        hash = fnv1aHashLong(hash, Double.doubleToLongBits(maxMovement));
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(elasticDistanceScale));
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(extremeSnapFactor));
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(springDampening));

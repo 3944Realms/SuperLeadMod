@@ -1,6 +1,8 @@
 {
+  "block.superleadrope.doll": "Doll",
   "death.attack.eternal_potato_not_complete": "§c%1$s was not the rightful owner, struck by lightning!",
   "death.attack.eternal_potato_not_owner": "§c%1$s was not the rightful owner, struck by lightning!",
+  "effect.superleadrope.no_super_leash": "No Super Leash",
   "entity.superleadrope.super_lead_knot": "Super Lead Knot",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent": "Create Leash Fence Knot Entity if absent",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent.description": "Create LeashKnot Entity if it's absent on fence or other supported positions",
@@ -22,6 +24,9 @@
   "item.eternal_potato.tooltip.punish": "§cOverdue punishments: §4%d §7(will be applied), grace exceeded: §4%d",
   "item.eternal_potato.tooltip.title": "§6Mythical Item §7- §6Eternal Potato",
   "item.eternal_potato.tooltip.unbound": "§cUnbound",
+  "item.minecraft.lingering_potion.effect.no_super_leash": "Splash No Super Leash Potion",
+  "item.minecraft.potion.effect.no_super_leash": "No Super Leash Potion",
+  "item.minecraft.splash_potion.effect.no_super_leash": "Splash No Super Leash Potion",
   "item.superleadrope.eternal_potato": "Eternal Potato",
   "item.superleadrope.super_lead_rope": "Super Lead Rope",
   "sound.superleadrope.subtitle.lead_break": "Lead Break",
@@ -105,5 +110,6 @@
   "superleadrope.command.motion.message.multiply.successful": "§bMultiply Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
   "superleadrope.command.motion.message.setter.successful": "§bSet Successfully.§a%s§7:§f[§eVec§7:§a(§f%.2f§7,§f%.2f§7,§f%.2f§7)§f]§r",
   "superleadrope.command.none": "<None>",
-  "superleadrope.command.state": "State"
+  "superleadrope.command.state": "State",
+  "tooltip.superleadrope.author": "Author : R3944Realms"
 }

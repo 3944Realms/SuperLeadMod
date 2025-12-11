@@ -17,7 +17,10 @@ package top.r3944realms.superleadrope.util.riding;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.CommonEventHandler;
+import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.core.exception.RidingCycleException;
 import top.r3944realms.superleadrope.core.util.ImmutablePair;
 import top.r3944realms.superleadrope.util.model.RidingRelationship;
@@ -36,7 +39,8 @@ public class RidingSaver {
      * @param entity the entity
      * @return the riding relationship
      */
-    public static RidingRelationship save(@Nullable Entity entity) {
+    @Contract("null -> new")
+    public static @NotNull RidingRelationship save(@Nullable Entity entity) {
         return save(entity, true);
     }
 
@@ -47,7 +51,8 @@ public class RidingSaver {
      * @param findRoot the find root
      * @return the riding relationship
      */
-    public static RidingRelationship save(@Nullable Entity entity, boolean findRoot) {
+    @Contract("null, _ -> new")
+    public static @NotNull RidingRelationship save(@Nullable Entity entity, boolean findRoot) {
         if (entity == null) {
             return new RidingRelationship(Collections.emptyList(), null, null);
         }
@@ -118,33 +123,37 @@ public class RidingSaver {
      */
     public static RidingRelationship filterByWhitelistRoot(RidingRelationship relationship) {
         if (relationship == null) return null;
-
-        // 如果当前根节点在白名单，则直接处理子节点
-        if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(Objects.requireNonNull(getEntityType(relationship.getEntityId())))) {
-            RidingRelationship filtered = new RidingRelationship();
-            filtered.setEntityId(relationship.getEntityId());
-            filtered.setVehicleId(relationship.getVehicleId());
-            filtered.setPassengers(filterPassengers(relationship.getPassengers()));
-            return filtered;
-        } else {
-            // 根节点不在白名单，尝试找到合法的子节点作为新的根
-            for (RidingRelationship child : relationship.getPassengers()) {
-                if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(Objects.requireNonNull(getEntityType(child.getEntityId())))) {
-                    // 设置父节点为当前节点的父（倒二叉逻辑）
-                    RidingRelationship newRoot = new RidingRelationship();
-                    newRoot.setEntityId(child.getEntityId());
-                    newRoot.setVehicleId(relationship.getVehicleId());
-                    newRoot.setPassengers(filterPassengers(child.getPassengers()));
-                    return newRoot;
+        try {
+            // 如果当前根节点在白名单，则直接处理子节点
+            if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(Objects.requireNonNull(getEntityType(relationship.getEntityId())))) {
+                RidingRelationship filtered = new RidingRelationship();
+                filtered.setEntityId(relationship.getEntityId());
+                filtered.setVehicleId(relationship.getVehicleId());
+                filtered.setPassengers(filterPassengers(relationship.getPassengers()));
+                return filtered;
+            } else {
+                // 根节点不在白名单，尝试找到合法的子节点作为新的根
+                for (RidingRelationship child : relationship.getPassengers()) {
+                    if (CommonEventHandler.leashConfigManager.isEntityTeleportAllowed(Objects.requireNonNull(getEntityType(child.getEntityId())))) {
+                        // 设置父节点为当前节点的父（倒二叉逻辑）
+                        RidingRelationship newRoot = new RidingRelationship();
+                        newRoot.setEntityId(child.getEntityId());
+                        newRoot.setVehicleId(relationship.getVehicleId());
+                        newRoot.setPassengers(filterPassengers(child.getPassengers()));
+                        return newRoot;
+                    }
                 }
             }
+        } catch (NullPointerException e) {
+            SuperLeadRope.logger.error("Catch null", e);
         }
 
         // 如果整个子树都不在白名单，返回空关系
         return new RidingRelationship(new ArrayList<>(), null, null);
     }
 
-    private static List<RidingRelationship> filterPassengers(List<RidingRelationship> passengers) {
+    @Contract("null -> new")
+    private static @NotNull List<RidingRelationship> filterPassengers(List<RidingRelationship> passengers) {
         if (passengers == null || passengers.isEmpty()) return new ArrayList<>();
         List<RidingRelationship> filtered = new ArrayList<>();
         for (RidingRelationship passenger : passengers) {

@@ -1,6 +1,8 @@
 {
+  "block.superleadrope.doll": "玩偶",
   "death.attack.eternal_potato_not_complete": "§c%1$s 因使用非自己绑定物品，受到闪电惩罚！",
   "death.attack.eternal_potato_not_owner": "§c%1$s 因使用非自己绑定物品，受到闪电惩罚！",
+  "effect.superleadrope.no_super_leash": "禁拴",
   "entity.superleadrope.super_lead_knot": "超级拴绳结",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent": "如果缺失则创建超级拴绳结",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent.description": "如果在栅栏等支持处缺失超级拴绳结，则创建它",
@@ -22,6 +24,9 @@
   "item.eternal_potato.tooltip.punish": "§c逾期未完成责务: §4%d §7(将会受罚)，超出宽限数: §4%d",
   "item.eternal_potato.tooltip.title": "§6神话物品 §7- §6永恒土豆",
   "item.eternal_potato.tooltip.unbound": "§c未绑定主人",
+  "item.minecraft.lingering_potion.effect.no_super_leash": "滞留型禁拴药水",
+  "item.minecraft.potion.effect.no_super_leash": "禁拴药水",
+  "item.minecraft.splash_potion.effect.no_super_leash": "喷溅型禁拴药水",
   "item.superleadrope.eternal_potato": "永恒土豆",
   "item.superleadrope.super_lead_rope": "超级拴绳",
   "sound.superleadrope.subtitle.lead_break": "拴绳断裂",
@@ -105,5 +110,6 @@
   "superleadrope.command.motion.message.multiply.successful": "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
   "superleadrope.command.motion.message.setter.successful": "§b设置成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
   "superleadrope.command.none": "无",
-  "superleadrope.command.state": "状态"
+  "superleadrope.command.state": "状态",
+  "tooltip.superleadrope.author": "作者 : R3944Realms"
 }

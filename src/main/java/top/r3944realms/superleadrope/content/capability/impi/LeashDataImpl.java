@@ -64,6 +64,7 @@ import java.util.stream.Stream;
 
 /**
  * 预期行为
+ * <pre>
  * <table border="1">
  *     <thead>
  *      <tr>
@@ -90,6 +91,7 @@ import java.util.stream.Stream;
  *         </tr>
  *     </tbody>
  * </table>
+ * </pre>
  */
 @SuppressWarnings("DuplicatedCode")
 public class LeashDataImpl implements ILeashData {
@@ -804,7 +806,24 @@ public class LeashDataImpl implements ILeashData {
         boolean hasForce = !combinedForce.equals(Vec3.ZERO);
         Entity targetEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
         if(targetEntity instanceof LocalPlayer && hasForce){
-            entity.addDeltaMovement(combinedForce);
+            entity.addDeltaMovement(limitMovement(combinedForce));
+        }
+    }
+
+    public Vec3 limitMovement(@NotNull Vec3 movement) {
+        double maxMovement = CommonEventHandler.leashConfigManager.getMaxMovement();
+        return new Vec3(
+                clamp(movement.x, maxMovement),
+                clamp(movement.y, maxMovement),
+                clamp(movement.z, maxMovement)
+        );
+    }
+
+    private double clamp(double value, double max) {
+        if (value > 0) {
+            return Math.min(value, max);
+        } else {
+            return Math.max(value, -max);
         }
     }
 
@@ -842,6 +861,7 @@ public class LeashDataImpl implements ILeashData {
         boolean hasForce = !combinedForce.equals(Vec3.ZERO);
         Entity targetEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
         if (targetEntity != null && hasForce) {
+            combinedForce = limitMovement(combinedForce);
             SuperLeadRopeEvent.hasFocus hasFocus = new SuperLeadRopeEvent.hasFocus(this.entity, targetEntity, combinedForce, vaildLeashHolders, vaildLeashKnots);
             if (MinecraftForge.EVENT_BUS.post(hasFocus)) return;
             combinedForce = hasFocus.getCombinedForce();
@@ -850,11 +870,11 @@ public class LeashDataImpl implements ILeashData {
                 // 是真实玩家则交给客户端自行处理拴绳逻辑
                 // DO NOTHING
                 if(targetEntity != entity){
-                    NetworkHandler.sendToPlayer(new UpdatePlayerMovementPacket(UpdatePlayerMovementPacket.Operation.ADD, combinedForce), player);
+                    NetworkHandler.sendToPlayer(new UpdatePlayerMovementPacket(UpdatePlayerMovementPacket.Operation.ADD, limitMovement(combinedForce)), player);
                 }
                 return;
             } else {
-                applyForceToNonPlayerEntity(targetEntity, combinedForce, validLeashes, combinedDirection);
+                applyForceToNonPlayerEntity(targetEntity, limitMovement(combinedForce), validLeashes, combinedDirection);
             }
         }
 

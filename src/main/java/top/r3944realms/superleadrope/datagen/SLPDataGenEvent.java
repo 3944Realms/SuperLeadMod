@@ -54,7 +54,9 @@ public class SLPDataGenEvent {
         LanguageGenerator(event, LanguageEnum.LiteraryChinese);
         RecipeGenerator(event);
         ModelDataGenerate(event);
+        BlockStateGenerate(event);
         TagsProvider(event, lookupProvider);
+        LootTableGenerate(event);
         SoundProvider(event);
     }
     private static void LanguageGenerator(GatherDataEvent event, LanguageEnum language) {
@@ -95,6 +97,18 @@ public class SLPDataGenEvent {
         event.getGenerator().addProvider(
                 event.includeClient(),
                 (DataProvider.Factory<SLPItemModelProvider>) pOutput -> new SLPItemModelProvider(pOutput, event.getExistingFileHelper())
+        );
+    }
+    private static void LootTableGenerate(GatherDataEvent event) {
+        event.getGenerator().addProvider(
+                event.includeClient(),
+                (DataProvider.Factory<SLPLootTableProvider>) SLPLootTableProvider::new
+        );
+    }
+    private static void BlockStateGenerate(GatherDataEvent event) {
+        event.getGenerator().addProvider(
+                event.includeClient(),
+                (DataProvider.Factory<SLPBlockStateGenerator>) pOutput -> new SLPBlockStateGenerator(pOutput, event.getExistingFileHelper())
         );
     }
 }

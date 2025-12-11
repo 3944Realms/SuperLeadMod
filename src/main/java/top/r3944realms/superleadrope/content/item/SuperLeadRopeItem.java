@@ -20,6 +20,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -34,6 +35,7 @@ import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.content.SLPToolTier;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.core.register.SLPEffects;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
@@ -195,6 +197,10 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
 
         // 情况一：拴自己到新 knot
         if (shouldBindSelf && list.isEmpty()) {
+            MobEffectInstance effect = player.getEffect(SLPEffects.NO_SUPER_LEASH_EFFECT.get());
+            if (effect != null && effect.getDuration() >= 1) {
+                return false;
+            }
             if (leashStack.isEmpty() || !canUse(leashStack)) {
                 return false;
             }

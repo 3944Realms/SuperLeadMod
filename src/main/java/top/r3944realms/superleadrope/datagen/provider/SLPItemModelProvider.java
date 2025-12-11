@@ -24,6 +24,7 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.Objects;
  */
 public class SLPItemModelProvider extends ItemModelProvider {
     private static List<Item> objectList;
+    public static final ResourceLocation DOLL = new ResourceLocation(SuperLeadRope.MOD_ID, "block/doll");
     /**
      * The constant GENERATED.
      */
@@ -60,6 +62,7 @@ public class SLPItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         DefaultModItemModelRegister();
         superLeadRopeModel();
+        generateDollItemModel();
     }
     private void init() {
         for(SLPLangKeyValue obj : SLPLangKeyValue.values()) {
@@ -92,6 +95,10 @@ public class SLPItemModelProvider extends ItemModelProvider {
      */
     public void itemHandHeldModel(Item item, ResourceLocation location){
         withExistingParent(itemName(item), HANDHELD).texture("layer0", location);
+    }
+    private void generateDollItemModel() {
+        withExistingParent(itemName(SLPItems.DOLL.get()), DOLL);
+
     }
 
     /**

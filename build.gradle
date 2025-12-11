@@ -167,6 +167,7 @@ dependencies {
     modImplementation("curse.maven:bendy-lib-623373:4550371")
     modImplementation("curse.maven:waystones-245755:6856603")
     modImplementation("curse.maven:balm-531761:7087245")
+//    modImplementation("curse.maven:kaleidoscope-doll-1233277:7201584")
 //    modRuntimeOnly("curse.maven:luckperms-431733:4738950")
     modImplementation("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
     implementation("com.eliotlash.mclib:mclib:20")

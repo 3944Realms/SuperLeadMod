@@ -16,11 +16,13 @@
 package top.r3944realms.superleadrope.core.register;
 
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import top.r3944realms.superleadrope.SuperLeadRope;
+import top.r3944realms.superleadrope.content.item.DollItem;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 
@@ -49,6 +51,15 @@ public class SLPItems {
                                     .stacksTo(1) // 只能有一颗
                                     .fireResistant() // 防火
                     ));
+    public static final RegistryObject<Item> DOLL =
+            ITEMS.register("doll",
+                    () -> new DollItem(
+                            new Item.Properties()
+                                    .stacksTo(1)
+                                    .fireResistant()
+                                    .rarity(Rarity.EPIC)
+                            )
+                    );
 
     /**
      * Register.

@@ -55,7 +55,7 @@ function initializeCoreMod() {
                     var returnLabel = new LabelNode();
 
                     var checkInstructions = ASMAPI.listOf(
-                        // 检查我们的钩子
+                        // 检查钩子
                         new VarInsnNode(Opcodes.ALOAD, 1),  // 加载 Mob 参数
                         new VarInsnNode(Opcodes.ALOAD, 2),  // 加载 Frustum 参数
                         new MethodInsnNode(
@@ -122,8 +122,6 @@ function initializeCoreMod() {
                             }
                         }
                     }
-
-                    ASMAPI.log("INFO", "使用备用方案修改方法");
                 }
 
                 return method;

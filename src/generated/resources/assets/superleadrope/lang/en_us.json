@@ -1,9 +1,11 @@
 {
-  "block.superleadrope.doll": "Doll",
   "death.attack.eternal_potato_not_complete": "§c%1$s was not the rightful owner, struck by lightning!",
   "death.attack.eternal_potato_not_owner": "§c%1$s was not the rightful owner, struck by lightning!",
   "effect.superleadrope.no_super_leash": "No Super Leash",
+  "enchantment.superleadrope.prisoner": "Self Prisoner",
+  "enchantment.superleadrope.ring_toss": "Ring Toss",
   "entity.superleadrope.super_lead_knot": "Super Lead Knot",
+  "entity.superleadrope.super_leash_rope": "Super Lead Rope",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent": "Create Leash Fence Knot Entity if absent",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent.description": "Create LeashKnot Entity if it's absent on fence or other supported positions",
   "gamerule.SLP.TeleportWithLeashedEntities": "Teleport leashed player with holder",

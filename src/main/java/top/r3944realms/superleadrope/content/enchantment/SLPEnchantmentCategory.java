@@ -13,28 +13,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package top.r3944realms.superleadrope.datagen.provider;
+package top.r3944realms.superleadrope.content.enchantment;
 
-import net.minecraft.data.PackOutput;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import top.r3944realms.superleadrope.SuperLeadRope;
+import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 
 /**
- * The type Slp block state generator.
+ * The type Slp enchantment category.
  */
-public class SLPBlockStateGenerator extends BlockStateProvider {
+public class SLPEnchantmentCategory {
     /**
-     * Instantiates a new Slp block state generator.
-     *
-     * @param output       the output
-     * @param exFileHelper the ex file helper
+     * The constant SUPER_LEAD.
      */
-    public SLPBlockStateGenerator(PackOutput output, ExistingFileHelper exFileHelper) {
-        super(output, SuperLeadRope.MOD_ID, exFileHelper);
-    }
-
-    @Override
-    protected void registerStatesAndModels() {
-    }
+    public static final EnchantmentCategory SUPER_LEAD = EnchantmentCategory.create("super_lead", item -> item instanceof SuperLeadRopeItem);
 }

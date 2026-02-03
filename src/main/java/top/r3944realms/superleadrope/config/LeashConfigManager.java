@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -65,8 +65,14 @@ public class LeashConfigManager {
      * The constant ELASTIC_DISTANCE_CHECK.
      */
     public static final Predicate<Double> ELASTIC_DISTANCE_CHECK = distance -> distance == null || (distance >= ELASTIC_DISTANCE_MIN_VALUE && distance <= ELASTIC_DISTANCE_MAX_VALUE);
-    // ========= 缓存 ========
+    /**
+     * The constant cacheTag.
+     */
+// ========= 缓存 ========
     public volatile static CompoundTag cacheTag = null;
+    /**
+     * The constant cacheHash.
+     */
     public volatile static int cacheHash = -1;
     // ========== 偏移映射 ==========
     private final Map<String, double[]> entityHolderMap = new ConcurrentHashMap<>();
@@ -319,6 +325,12 @@ public class LeashConfigManager {
      * @return the max leash length
      */
     public double getMaxLeashLength() { return maxLeashLength; }
+
+    /**
+     * Gets max movement.
+     *
+     * @return the max movement
+     */
     public double getMaxMovement() { return maxMovement; }
 
     /**
@@ -458,8 +470,11 @@ public class LeashConfigManager {
     public static void unloading(LeashConfigManager manager) {
         if(manager != null) manager.clear();
     }
+
     /**
      * 将配置管理器状态序列化为NBT
+     *
+     * @return the compound tag
      */
     public synchronized CompoundTag serializeToNBT() {
         if (cacheHash == calculateConfigHash() && cacheTag != null) return cacheTag;
@@ -597,6 +612,8 @@ public class LeashConfigManager {
 
     /**
      * 从NBT反序列化配置管理器状态
+     *
+     * @param tag the tag
      */
     public void deserializeFromNBT(CompoundTag tag) {
         if (tag == null || tag.isEmpty()) return;
@@ -676,6 +693,8 @@ public class LeashConfigManager {
 
     /**
      * 计算配置哈希值（用于快速比较配置是否变化）
+     *
+     * @return the int
      */
     public int calculateConfigHash() {
         // 使用FNV-1a哈希算法
@@ -787,11 +806,16 @@ public class LeashConfigManager {
         }
         return hash;
     }
+
+    /**
+     * Broad hash packet.
+     */
     public void broadHashPacket() {
         if (cacheHash != -1){
             NetworkHandler.sendToAllPlayer(new CommonConfigHashInformPacket(cacheHash));
         }
     }
+
     /**
      * Gets stats.
      *

@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -39,55 +39,140 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static top.r3944realms.superleadrope.content.command.Command.*;
-import static top.r3944realms.superleadrope.content.command.LeashDataCommand.*;
+import static top.r3944realms.superleadrope.content.command.LeashDataCommand.BLOCK;
+import static top.r3944realms.superleadrope.content.command.LeashDataCommand.UUID;
 
 
+/**
+ * The type Leash state command.
+ */
 public class LeashStateCommand {
 
     /**
      * The constant SLP_LEASH_STATE_MESSAGE_.
      */
     public static final String SLP_LEASH_STATE_MESSAGE_ = Command.BASE_ + "leash_state.message.";
+    /**
+     * The constant DEFAULT_OFFSET.
+     */
     public static final String DEFAULT_OFFSET = SLP_LEASH_STATE_MESSAGE_ + "default_offset";
+    /**
+     * The constant APPLY_OFFSET.
+     */
     public static final String APPLY_OFFSET = SLP_LEASH_STATE_MESSAGE_ + "apply_offset";
-    // ==================== 重置操作消息键 ====================
+    /**
+     * The constant RESET_ALL_HOLDER_.
+     */
+// ==================== 重置操作消息键 ====================
     public static final String RESET_ALL_HOLDER_ = SLP_LEASH_STATE_MESSAGE_ + "reset_all_holder.";
+    /**
+     * The constant RESET_ALL_HOLDER_SUC.
+     */
     public static final String RESET_ALL_HOLDER_SUC = RESET_ALL_HOLDER_ + SUC;
 
+    /**
+     * The constant RESET_HOLDER_FOR_.
+     */
     public static final String RESET_HOLDER_FOR_ = SLP_LEASH_STATE_MESSAGE_ + "reset_holder_for.";
+    /**
+     * The constant RESET_HOLDER_FOR_SUC.
+     */
     public static final String RESET_HOLDER_FOR_SUC = RESET_HOLDER_FOR_ + SUC;
 
+    /**
+     * The constant RESET_HOLDER_FOR_BLOCK_POS_.
+     */
     public static final String RESET_HOLDER_FOR_BLOCK_POS_ = SLP_LEASH_STATE_MESSAGE_ + "reset_holder_for_block_pos.";
+    /**
+     * The constant RESET_HOLDER_FOR_BLOCK_POS_SUC.
+     */
     public static final String RESET_HOLDER_FOR_BLOCK_POS_SUC = RESET_HOLDER_FOR_BLOCK_POS_ + SUC;
 
+    /**
+     * The constant RESET_APPLY_ENTITY_ALL_.
+     */
     public static final String RESET_APPLY_ENTITY_ALL_ = SLP_LEASH_STATE_MESSAGE_ + "reset_apply_entity_all.";
+    /**
+     * The constant RESET_APPLY_ENTITY_ALL_SUC.
+     */
     public static final String RESET_APPLY_ENTITY_ALL_SUC = RESET_APPLY_ENTITY_ALL_ + SUC;
 
-    // ==================== 设置操作消息键 ====================
+    /**
+     * The constant SET_HOLDER_FOR_.
+     */
+// ==================== 设置操作消息键 ====================
     public static final String SET_HOLDER_FOR_ = SLP_LEASH_STATE_MESSAGE_ + "set_holder_for.";
+    /**
+     * The constant SET_HOLDER_FOR_SUC.
+     */
     public static final String SET_HOLDER_FOR_SUC = SET_HOLDER_FOR_ + SUC;
 
+    /**
+     * The constant SET_HOLDER_FOR_BLOCK_POS_.
+     */
     public static final String SET_HOLDER_FOR_BLOCK_POS_ = SLP_LEASH_STATE_MESSAGE_ + "set_holder_for_block_pos.";
+    /**
+     * The constant SET_HOLDER_FOR_BLOCK_POS_SUC.
+     */
     public static final String SET_HOLDER_FOR_BLOCK_POS_SUC = SET_HOLDER_FOR_BLOCK_POS_ + SUC;
 
+    /**
+     * The constant SET_APPLY_ENTITY_.
+     */
     public static final String SET_APPLY_ENTITY_ = SLP_LEASH_STATE_MESSAGE_ + "set_apply_entity.";
+    /**
+     * The constant SET_APPLY_ENTITY_SUC.
+     */
     public static final String SET_APPLY_ENTITY_SUC = SET_APPLY_ENTITY_ + SUC;
 
-    // ==================== 查询操作消息键 ====================
+    /**
+     * The constant QUERY_HAS_STATE_.
+     */
+// ==================== 查询操作消息键 ====================
     public static final String QUERY_HAS_STATE_ = SLP_LEASH_STATE_MESSAGE_ + "query.has_state.";
+    /**
+     * The constant QUERY_HAS_STATE_SUC.
+     */
     public static final String QUERY_HAS_STATE_SUC = QUERY_HAS_STATE_ + SUC;
 
+    /**
+     * The constant GET_ALL_UUID_STATES_.
+     */
     public static final String GET_ALL_UUID_STATES_ = SLP_LEASH_STATE_MESSAGE_ + "get_all_uuid_states.";
+    /**
+     * The constant GET_ALL_UUID_STATES_SUC.
+     */
     public static final String GET_ALL_UUID_STATES_SUC = GET_ALL_UUID_STATES_ + SUC;
 
+    /**
+     * The constant GET_ALL_BLOCK_POS_STATES_.
+     */
     public static final String GET_ALL_BLOCK_POS_STATES_ = SLP_LEASH_STATE_MESSAGE_ + "get_all_block_pos_states.";
+    /**
+     * The constant GET_ALL_BLOCK_POS_STATES_SUC.
+     */
     public static final String GET_ALL_BLOCK_POS_STATES_SUC = GET_ALL_BLOCK_POS_STATES_ + SUC;
 
+    /**
+     * The constant GET_APPLY_ENTITY_OFFSET_.
+     */
     public static final String GET_APPLY_ENTITY_OFFSET_ = SLP_LEASH_STATE_MESSAGE_ + "get_apply_entity_offset.";
+    /**
+     * The constant GET_APPLY_ENTITY_OFFSET_SUC.
+     */
     public static final String GET_APPLY_ENTITY_OFFSET_SUC = GET_APPLY_ENTITY_OFFSET_ + SUC;
+    /**
+     * The constant GET_APPLY_ENTITY_OFFSET_NONE.
+     */
     public static final String GET_APPLY_ENTITY_OFFSET_NONE = GET_APPLY_ENTITY_OFFSET_ + "none";
 
+    /**
+     * The constant GET_DEFAULT_APPLY_ENTITY_OFFSET_.
+     */
     public static final String GET_DEFAULT_APPLY_ENTITY_OFFSET_ = SLP_LEASH_STATE_MESSAGE_ + "get_default_apply_entity_offset.";
+    /**
+     * The constant GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC.
+     */
     public static final String GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC = GET_DEFAULT_APPLY_ENTITY_OFFSET_ + SUC;
 
 
@@ -405,6 +490,9 @@ public class LeashStateCommand {
         return 1;
     }
 
+    /**
+     * The constant GET_ALL_STATES_HEAD.
+     */
     public static final String GET_ALL_STATES_HEAD = SLP_LEASH_STATE_MESSAGE_ + "get_all_states.head";
 
     private static int getAllStates(CommandContext<CommandSourceStack> context, @NotNull Entity entity) {

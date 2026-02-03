@@ -1,8 +1,26 @@
+/*
+ *  Super Lead rope mod
+ *  Copyright (C)  2026  R3944Realms
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package top.r3944realms.superleadrope.compat;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.context.*;
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -14,14 +32,42 @@ import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.Objects;
 
+/**
+ * The type Luck perms compat.
+ */
 public class LuckPermsCompat {
+    /**
+     * The constant isModLoaded.
+     */
     public final static boolean isModLoaded = ModList.get().isLoaded("luckperms");
+    /**
+     * The constant instance.
+     */
     public static volatile ILPC instance;
+
+    /**
+     * The interface Ilpc.
+     */
     public interface ILPC {
+        /**
+         * Init.
+         */
         void init();
+
+        /**
+         * Is leashed bypass boolean.
+         *
+         * @param player the player
+         * @return the boolean
+         */
         default boolean isLeashedBypass(Entity player) { return false; }
     }
 
+    /**
+     * Gets or create lpc.
+     *
+     * @return the or create lpc
+     */
     @Contract(" -> new")
     public static @NotNull ILPC getOrCreateLPC() {
 
@@ -48,6 +94,10 @@ public class LuckPermsCompat {
         private boolean isInitialized;
         private LuckPerms luckPerms ;
         private final Node LeashBypass = Node.builder(SuperLeadRope.MOD_ID + ".leash.bypass").build();
+
+        /**
+         * Instantiates a new Real lpc.
+         */
         public RealLPC() {
             isInitialized = false;
             init();
@@ -77,6 +127,9 @@ public class LuckPermsCompat {
                             .orElse(false);
         }
 
+        /**
+         * The type Leash calculator.
+         */
         public static class LeashCalculator implements ContextCalculator<Player> {
             @Override
             public void calculate(@NotNull Player target, ContextConsumer contextConsumer) {

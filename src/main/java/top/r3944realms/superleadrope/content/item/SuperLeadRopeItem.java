@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -16,16 +16,21 @@
 package top.r3944realms.superleadrope.content.item;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -34,12 +39,15 @@ import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.content.SLPToolTier;
+import top.r3944realms.superleadrope.content.enchantment.RingTossEnchantment;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.core.register.SLPEffects;
+import top.r3944realms.superleadrope.core.register.SLPEnchantments;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,7 +56,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * The type Super lead rope item.
  */
 //TODO:
-// 1. 可抛掷使用 ***（下个版本实现）
+// 1. 可抛掷使用
 // - 可转移拴绳
 // 2. 多绑定（一个生物可以被多个加强拴绳绑定，产生共同作用效果）
 // 3. 支持更多支撑方块
@@ -59,10 +67,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 // （尝试0 mixin 实现 加强拴绳逻辑）
 public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
     // 配置常量
-    // 【手动调节,可以通过附魔获取更远抛掷和抛掷距离 - x1.3】//TODO:将可抛掷实现留到下次编写
+    // 【手动调节,可以通过附魔获取更远抛掷和抛掷距离 - x1.3】
     // 可以做个大于一定距离时远距离使用时抛出拴绳的实体，击中生物才栓中的
-    private static final double SHORT_RANGE = 5.0D;
-    private static final float THROW_SPEED = 1.5F;
+
+
+    // 蓄力相关常量
+    private static final int MAX_CHARGE_TIME = 20; // 最大蓄力时间（20 ticks = 1秒）
+    private static final float MIN_CHARGE_POWER = 0.5F; // 最小蓄力功率
+    private static final float MAX_CHARGE_POWER = 2.0F; // 最大蓄力功率
 
 
     /**
@@ -78,16 +90,161 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         );
     }
 
-    //通过按键 可抛掷启用/关闭实现（不会影响use逻辑）
+
+    @Override
+    public int getUseDuration(@NotNull ItemStack stack) {
+        return getRingTossEnchantmentLevel(stack) > 0 ? 40 : 0;
+    }
+
+    @Override
+    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {
+        return UseAnim.SPEAR; // 使用矛的动画
+    }
+
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level pLevel, @NotNull Player pPlayer, @NotNull InteractionHand pUsedHand) {
         ItemStack lead = pPlayer.getItemInHand(pUsedHand);
-        if(!pLevel.isClientSide) {
-            if (canUse(lead)) return InteractionResultHolder.pass(lead);
+        int enLp = getRingTossEnchantmentLevel(lead);
+        if (enLp > 0) {
+            if (!pLevel.isClientSide) {
+                if (canUse(lead)) {
+                        // 检查是否有抛掷附魔
+                        pPlayer.startUsingItem(pUsedHand);
+                        return InteractionResultHolder.consume(lead);
+                }
+                return InteractionResultHolder.pass(lead);
+            }
+            // 客户端也返回consume以开始蓄力
+            if (canUse(lead)) {
+                pPlayer.startUsingItem(pUsedHand);
+                return InteractionResultHolder.consume(lead);
+            }
             return super.use(pLevel, pPlayer, pUsedHand);
-
         }
         return InteractionResultHolder.success(lead);
+    }
+
+    /**
+     * Gets ring toss enchantment level.
+     *
+     * @param stack the stack
+     * @return the ring toss enchantment level
+     */
+    public static int getRingTossEnchantmentLevel(ItemStack stack) {
+        Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
+        if (enchantments.isEmpty()) return -1;
+        Integer i = enchantments.get(SLPEnchantments.RING_TOSS.get());
+        return i != null ? i : -1;
+    }
+
+    /**
+     * Has prisoner curse boolean.
+     *
+     * @param stack the stack
+     * @return the boolean
+     */
+    public static boolean hasPrisonerCurse(ItemStack stack) {
+        Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
+        if (enchantments.isEmpty()) return false;
+        Integer i = enchantments.get(SLPEnchantments.SELF_PRISONER.get());
+        return i != null && i > 0;
+    }
+
+    @Override
+    public void onUseTick(@NotNull Level level, @NotNull LivingEntity livingEntity, @NotNull ItemStack stack, int remainingUseDuration) {
+        if (level.isClientSide && livingEntity instanceof Player player) {
+            // 客户端：播放蓄力音效
+            int useTime = this.getUseDuration(stack) - remainingUseDuration;
+
+            // 2ticks播放一次蓄力音效
+            if (useTime == 2) {
+                float pitch = 0.8F ;
+                level.playLocalSound(
+                        player.getX(), player.getY(), player.getZ(),
+                        net.minecraft.sounds.SoundEvents.CROSSBOW_LOADING_MIDDLE,
+                        SoundSource.PLAYERS, 0.5F, pitch, false
+                );
+            }
+
+
+        }
+    }
+
+    @Override
+    public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
+        if (livingEntity instanceof Player player) {
+
+            int ringTossLevel = getRingTossEnchantmentLevel(stack);
+            if (ringTossLevel > 0) {
+                if (!level.isClientSide()) {
+                    // 计算蓄力时间和功率
+                    float chargePower = MAX_CHARGE_POWER;
+                    // 消耗耐久
+                    if (!player.isCreative()) {
+                        stack.hurtAndBreak((int) chargePower * 10, player, (p) -> {
+                            p.broadcastBreakEvent(player.getUsedItemHand());
+                        });
+                    }
+                    RingTossEnchantment.work(level, livingEntity, stack, chargePower, ringTossLevel);
+                } else {
+                    level.playLocalSound(
+                            livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(),
+                            SoundEvents.CROSSBOW_SHOOT,
+                            SoundSource.PLAYERS, 0.5F, 0.8F, false
+                    );
+                }
+            }
+        }
+        return stack;
+    }
+
+    @Override
+    public void releaseUsing(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity, int timeCharged) {
+        if (livingEntity instanceof Player player) {
+            // 计算实际蓄力时间
+            int useTime = this.getUseDuration(stack) - timeCharged;
+            // 如果蓄力时间超过最小阈值，抛出拴绳
+            if (useTime >= 10) { // 至少0.5秒蓄力
+                int ringTossLevel = getRingTossEnchantmentLevel(stack);
+                if (ringTossLevel > 0) {
+                    if(!level.isClientSide()){
+                        float chargePower = Math.max(useTime / (float)MAX_CHARGE_TIME, MIN_CHARGE_POWER);
+                        chargePower = Math.min(chargePower, MAX_CHARGE_POWER);
+                        // 消耗耐久
+                        if (!player.isCreative()) {
+                            stack.hurtAndBreak((int) chargePower * 10, player, (p) -> {
+                                p.broadcastBreakEvent(player.getUsedItemHand());
+                            });
+                        }
+                        RingTossEnchantment.work(level, livingEntity, stack, chargePower, ringTossLevel);
+                    } else {
+                        level.playLocalSound(
+                                livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(),
+                                SoundEvents.CROSSBOW_SHOOT,
+                                SoundSource.PLAYERS, 0.5F, 0.8F, false
+                        );
+                    }
+                }
+
+            }
+        }
+    }
+
+    /**
+     * 获取当前蓄力进度（用于客户端渲染）
+     *
+     * @param stack  the stack
+     * @param entity the entity
+     * @return the charge progress
+     */
+    public static float getChargeProgress(ItemStack stack, LivingEntity entity) {
+        if (entity instanceof Player player) {
+            if (player.isUsingItem() && player.getUseItem() == stack) {
+                int useTime = stack.getUseDuration() - player.getTicksUsingItem();
+                return Math.min(useTime / (float)MAX_CHARGE_TIME, 1.0F);
+            }
+        }
+        return 0.0F;
     }
 
     /**
@@ -106,14 +263,15 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
         BlockPos pos = context.getClickedPos();
         BlockState state = level.getBlockState(pos);
         ItemStack itemStack = context.getItemInHand();
-        if (canUse(itemStack)) return InteractionResult.SUCCESS;
-        if(SuperLeashKnotEntity.isSupportBlock(state)) {
-            Player player = context.getPlayer();
-            if(!level.isClientSide && player != null) {
-                return bindToBlock(player, level, pos, itemStack, false) ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
+        if (canUse(itemStack)) {
+            if(SuperLeashKnotEntity.isSupportBlock(state)) {
+                Player player = context.getPlayer();
+                if(!level.isClientSide && player != null) {
+                    return bindToBlock(player, level, pos, itemStack, false) ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
+                }
             }
-        }
-        return InteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
+        } else return InteractionResult.PASS;
     }
 
     /**
@@ -137,7 +295,7 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
      * @param pos       坐标（一般是明确持有玩家的位置）
      * @return 是否成功 boolean
      */
-    public static boolean bindToEntity(Entity newHolder, Player player, Level level, BlockPos pos) {
+    public static boolean bindToEntity(Entity newHolder, Player player, Level level, @NotNull BlockPos pos) {
         boolean isSuccess = false;
 
         // 查找当前玩家持有的可拴生物
@@ -187,7 +345,7 @@ public class SuperLeadRopeItem extends TieredItem implements IForgeItem {
      * @param shouldBindSelf 是否应该触发拴自己逻辑检查
      * @return 是否成功 boolean
      */
-    public static boolean bindToBlock(Player player, Level level, BlockPos pos, ItemStack leashStack, boolean shouldBindSelf) {
+    public static boolean bindToBlock(@NotNull Player player, Level level, @NotNull BlockPos pos, ItemStack leashStack, boolean shouldBindSelf) {
         SuperLeashKnotEntity knot = null;
         AtomicBoolean isSuccess = new AtomicBoolean(false);
         UUID uuid = player.getUUID();

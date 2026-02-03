@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -24,7 +24,6 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue;
 
 import java.util.ArrayList;
@@ -36,6 +35,9 @@ import java.util.Objects;
  */
 public class SLPItemModelProvider extends ItemModelProvider {
     private static List<Item> objectList;
+    /**
+     * The constant DOLL.
+     */
     public static final ResourceLocation DOLL = new ResourceLocation(SuperLeadRope.MOD_ID, "block/doll");
     /**
      * The constant GENERATED.
@@ -62,7 +64,6 @@ public class SLPItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         DefaultModItemModelRegister();
         superLeadRopeModel();
-        generateDollItemModel();
     }
     private void init() {
         for(SLPLangKeyValue obj : SLPLangKeyValue.values()) {
@@ -95,10 +96,6 @@ public class SLPItemModelProvider extends ItemModelProvider {
      */
     public void itemHandHeldModel(Item item, ResourceLocation location){
         withExistingParent(itemName(item), HANDHELD).texture("layer0", location);
-    }
-    private void generateDollItemModel() {
-        withExistingParent(itemName(SLPItems.DOLL.get()), DOLL);
-
     }
 
     /**

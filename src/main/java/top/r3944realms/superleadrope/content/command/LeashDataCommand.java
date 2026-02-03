@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -45,7 +45,10 @@ import top.r3944realms.superleadrope.content.gamerule.server.CreateSuperLeashKno
 import top.r3944realms.superleadrope.core.register.SLPGameruleRegistry;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static top.r3944realms.superleadrope.content.command.Command.*;
@@ -478,7 +481,13 @@ public class LeashDataCommand {
         }
     }
 
+    /**
+     * The constant RESET_STATIC_MAX_DISTANCE_.
+     */
     public static final String RESET_STATIC_MAX_DISTANCE_ = SLP_LEASH_MESSAGE_ + "reset.static.max_distance.";
+    /**
+     * The constant RESET_STATIC_MAX_DISTANCE_SUC.
+     */
     public static final String RESET_STATIC_MAX_DISTANCE_SUC = RESET_STATIC_MAX_DISTANCE_ + SUC;
     private static int resetStaticMaxDistance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
@@ -501,7 +510,13 @@ public class LeashDataCommand {
         return 0;
     }
 
+    /**
+     * The constant SET_STATIC_MAX_DISTANCE_.
+     */
     public static final String SET_STATIC_MAX_DISTANCE_ = SLP_LEASH_MESSAGE_ + "set.static.max_distance.";
+    /**
+     * The constant SET_STATIC_MAX_DISTANCE_SUC.
+     */
     public static final String SET_STATIC_MAX_DISTANCE_SUC = SET_STATIC_MAX_DISTANCE_ + SUC;
     private static int setStaticMaxDistance(CommandContext<CommandSourceStack> context, double value) throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
@@ -524,7 +539,13 @@ public class LeashDataCommand {
         return 0;
     }
 
+    /**
+     * The constant SET_STATIC_ELASTIC_DISTANCE_SCALE_.
+     */
     public static final String SET_STATIC_ELASTIC_DISTANCE_SCALE_ = SLP_LEASH_MESSAGE_ + "set.static.elastic_distance_scale.";
+    /**
+     * The constant SET_STATIC_ELASTIC_DISTANCE_SCALE_SUC.
+     */
     public static final String SET_STATIC_ELASTIC_DISTANCE_SCALE_SUC = SET_STATIC_ELASTIC_DISTANCE_SCALE_ + SUC;
     private static int setStaticElasticDistanceScale(CommandContext<CommandSourceStack> context, double value) throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");
@@ -547,7 +568,13 @@ public class LeashDataCommand {
         return 0;
     }
 
+    /**
+     * The constant RESET_STATIC_ELASTIC_DISTANCE_SCALE_.
+     */
     public static final String RESET_STATIC_ELASTIC_DISTANCE_SCALE_ = SLP_LEASH_MESSAGE_ + "reset.static.elastic_distance_scale.";
+    /**
+     * The constant RESET_STATIC_ELASTIC_DISTANCE_SCALE_SUC.
+     */
     public static final String RESET_STATIC_ELASTIC_DISTANCE_SCALE_SUC = RESET_STATIC_ELASTIC_DISTANCE_SCALE_ + SUC;
     private static int resetStaticElasticDistanceScale(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Collection<? extends Entity> targets = EntityArgument.getEntities(context, "targets");

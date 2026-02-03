@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -36,7 +36,7 @@ import top.r3944realms.superleadrope.client.model.geom.SLPModelLayers;
 import top.r3944realms.superleadrope.client.renderer.LeashRenderHandler;
 import top.r3944realms.superleadrope.client.renderer.SLPShaderRegistry;
 import top.r3944realms.superleadrope.client.renderer.entity.SuperLeashKnotRenderer;
-import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
+import top.r3944realms.superleadrope.client.renderer.entity.SuperLeashRopeRenderer;
 import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
 import top.r3944realms.superleadrope.core.register.SLPItems;
@@ -69,6 +69,12 @@ public class ClientEventHandler {
             }
             LeashRenderHandler.onRenderLevelStage(event.getPoseStack(), event.getPartialTick());
         }
+
+        /**
+         * On player tick.
+         *
+         * @param event the event
+         */
         @SubscribeEvent
         public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
             if (event.player instanceof LocalPlayer player && player.equals(Minecraft.getInstance().player)) {
@@ -135,6 +141,7 @@ public class ClientEventHandler {
         @SubscribeEvent
         public static void onRegisterRenderer (EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(SLPEntityTypes.SUPER_LEAD_KNOT.get(), SuperLeashKnotRenderer::new);
+            event.registerEntityRenderer(SLPEntityTypes.SUPER_LEASH_ROPE.get(), SuperLeashRopeRenderer::new);
         }
 
         /**

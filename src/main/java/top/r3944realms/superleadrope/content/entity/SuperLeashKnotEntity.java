@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -27,6 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -35,9 +36,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
-import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
-import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 import top.r3944realms.superleadrope.core.register.SLPEntityTypes;
+import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
 
 import java.util.Arrays;
@@ -266,5 +266,10 @@ public class SuperLeashKnotEntity extends LeashFenceKnotEntity {
             this.gameEvent(GameEvent.BLOCK_ATTACH, player);
         }
         return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public ItemStack getPickResult() {
+        return new ItemStack(SLPItems.SUPER_LEAD_ROPE.get());
     }
 }

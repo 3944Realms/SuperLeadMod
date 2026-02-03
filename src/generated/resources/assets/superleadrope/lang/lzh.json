@@ -1,9 +1,11 @@
 {
-  "block.superleadrope.doll": "戲像",
   "death.attack.eternal_potato_not_complete": "§c%1$s 非汝所主，雷霆降身！",
   "death.attack.eternal_potato_not_owner": "§c%1$s 非汝所主，雷霆降身！",
   "effect.superleadrope.no_super_leash": "禁系之效",
+  "enchantment.superleadrope.prisoner": "自拴",
+  "enchantment.superleadrope.ring_toss": "套圈",
   "entity.superleadrope.super_lead_knot": "神駒羈縻索結",
+  "entity.superleadrope.super_leash_rope": "神駒羈縻索",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent": "若阙则创超级繫绳结",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent.description": "若栅等支处阙超级繫绳结，则创之",
   "gamerule.SLP.TeleportWithLeashedEntities": "繫畜隨持者傳送",

@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -23,6 +23,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.content.entity.SuperLeashRopeEntity;
 
 /**
  * The type Slp entity types.
@@ -45,6 +46,16 @@ public class SLPEntityTypes {
                     .updateInterval(Integer.MAX_VALUE)
                     .build("super_lead_knot")
     );
+    /**
+     * The constant SUPER_LEASH_ROPE.
+     */
+    public static final RegistryObject<EntityType<SuperLeashRopeEntity>> SUPER_LEASH_ROPE =
+            ENTITY_TYPES.register("super_leash_rope", () ->
+                    EntityType.Builder.<SuperLeashRopeEntity>of(SuperLeashRopeEntity::new, MobCategory.MISC)
+                            .sized(0.5F, 0.5F)
+                            .clientTrackingRange(4)
+                            .updateInterval(20)
+                            .build("super_lead_rope"));
 
     /**
      * Gets entity name key.

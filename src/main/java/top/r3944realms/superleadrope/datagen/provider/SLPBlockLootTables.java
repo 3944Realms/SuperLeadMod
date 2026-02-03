@@ -1,13 +1,16 @@
 /*
- * *
- *  * Copyright (c) 2025 R3944Realms. All rights reserved.
- *  *
- *  * This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
- *  * To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
- *  * or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
- *  *
- *  * 本作品采用知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议进行许可。
- *
+ *  Super Lead rope mod
+ *  Copyright (C)  2026  R3944Realms
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package top.r3944realms.superleadrope.datagen.provider;
@@ -22,14 +25,20 @@ import top.r3944realms.superleadrope.core.register.SLPBlocks;
 import java.util.Set;
 
 
+/**
+ * The type Slp block loot tables.
+ */
 public class SLPBlockLootTables extends BlockLootSubProvider {
+    /**
+     * Instantiates a new Slp block loot tables.
+     */
     public SLPBlockLootTables() {
         super(Set.of(),  FeatureFlags.REGISTRY.allFlags());
     }
 
     @Override
     protected void generate() {
-        dropSelf(SLPBlocks.DOLL.get());
+
     }
     @Override
     protected @NotNull Iterable<Block> getKnownBlocks() {

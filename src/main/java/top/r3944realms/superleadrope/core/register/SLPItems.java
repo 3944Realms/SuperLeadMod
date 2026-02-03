@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -16,13 +16,11 @@
 package top.r3944realms.superleadrope.core.register;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import top.r3944realms.superleadrope.SuperLeadRope;
-import top.r3944realms.superleadrope.content.item.DollItem;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
 
@@ -51,15 +49,6 @@ public class SLPItems {
                                     .stacksTo(1) // 只能有一颗
                                     .fireResistant() // 防火
                     ));
-    public static final RegistryObject<Item> DOLL =
-            ITEMS.register("doll",
-                    () -> new DollItem(
-                            new Item.Properties()
-                                    .stacksTo(1)
-                                    .fireResistant()
-                                    .rarity(Rarity.EPIC)
-                            )
-                    );
 
     /**
      * Register.

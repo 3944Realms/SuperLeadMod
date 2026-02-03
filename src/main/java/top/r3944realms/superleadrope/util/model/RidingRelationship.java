@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -140,12 +140,13 @@ public class RidingRelationship {
         }
         return false;
     }
+
     /**
      * 查找并替换所有匹配的UUID
      *
      * @param oldUuid 要查找的旧UUID
      * @param newUuid 要替换的新UUID
-     * @return 替换的数量
+     * @return 替换的数量 int
      */
     public int findAndReplaceAll(UUID oldUuid, UUID newUuid) {
         int replacedCount = 0;
@@ -174,7 +175,7 @@ public class RidingRelationship {
      * 查找所有出现的UUID位置
      *
      * @param targetUuid 要查找的UUID
-     * @return 包含位置的列表，格式为"角色(实体/载具)-索引"
+     * @return 包含位置的列表 ，格式为"角色(实体/载具)-索引"
      */
     public List<String> findAllOccurrences(UUID targetUuid) {
         List<String> occurrences = new ArrayList<>();
@@ -207,7 +208,7 @@ public class RidingRelationship {
      * 查找并替换所有UUID（支持批量替换）
      *
      * @param replacements 替换映射表，key为旧UUID，value为新UUID
-     * @return 总替换数量
+     * @return 总替换数量 int
      */
     public int batchFindAndReplace(Map<UUID, UUID> replacements) {
         int totalReplaced = 0;
@@ -235,7 +236,7 @@ public class RidingRelationship {
     /**
      * 获取树中所有唯一的UUID集合
      *
-     * @return 包含所有UUID的集合
+     * @return 包含所有UUID的集合 all unique uui ds
      */
     public Set<UUID> getAllUniqueUUIDs() {
         Set<UUID> uuids = new HashSet<>();

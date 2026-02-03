@@ -1,9 +1,11 @@
 {
-  "block.superleadrope.doll": "玩偶",
   "death.attack.eternal_potato_not_complete": "§c%1$s 因使用非自己绑定物品，受到闪电惩罚！",
   "death.attack.eternal_potato_not_owner": "§c%1$s 因使用非自己绑定物品，受到闪电惩罚！",
   "effect.superleadrope.no_super_leash": "禁拴",
+  "enchantment.superleadrope.prisoner": "自拴",
+  "enchantment.superleadrope.ring_toss": "套圈",
   "entity.superleadrope.super_lead_knot": "超级拴绳结",
+  "entity.superleadrope.super_leash_rope": "超级拴绳",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent": "如果缺失则创建超级拴绳结",
   "gamerule.SLP.CreateSuperLeashKnotEntityIfAbsent.description": "如果在栅栏等支持处缺失超级拴绳结，则创建它",
   "gamerule.SLP.TeleportWithLeashedEntities": "被拴实体随持有者传送",

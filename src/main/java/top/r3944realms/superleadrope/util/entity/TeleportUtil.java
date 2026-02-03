@@ -1,23 +1,49 @@
+/*
+ *  Super Lead rope mod
+ *  Copyright (C)  2026  R3944Realms
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package top.r3944realms.superleadrope.util.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
-import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 
+/**
+ * The type Teleport util.
+ */
 public class TeleportUtil {
 
     /**
      * 通用实体传送（支持玩家、普通生物、跨维度、生物停飞、导航停止等）
+     *
+     * @param oldEntity   the old entity
+     * @param targetWorld the target world
+     * @param targetPos   the target pos
+     * @param direction   the direction
+     * @return the entity
      */
     public static @NotNull Entity teleportEntity(Entity oldEntity, ServerLevel targetWorld, @NotNull Vec3 targetPos, @NotNull Direction direction) {
         float yaw = direction.toYRot();

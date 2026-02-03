@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -27,10 +27,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.Llama;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -48,6 +48,7 @@ import top.r3944realms.superleadrope.compat.CurtainCompat;
 import top.r3944realms.superleadrope.compat.LuckPermsCompat;
 import top.r3944realms.superleadrope.config.LeashConfigManager;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.core.register.SLPEffects;
 import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.LeashDataSyncPacket;
@@ -343,9 +344,15 @@ public class LeashDataImpl implements ILeashData {
     }
 
     @Override
-    public void addDelayedLeash(@NotNull Player holderPlayer) {
-        delayedHolders.add(holderPlayer.getUUID());
+    public void addDelayedLeash(@NotNull Entity holder) {
+        delayedHolders.add(holder.getUUID());
     }
+
+    @Override
+    public void addDelayedLeash(@NotNull UUID holderUUID) {
+        delayedHolders.add(holderUUID);
+    }
+
 
     @Override
     public void removeDelayedLeash(UUID onceHolderUUID) {
@@ -806,10 +813,16 @@ public class LeashDataImpl implements ILeashData {
         boolean hasForce = !combinedForce.equals(Vec3.ZERO);
         Entity targetEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
         if(targetEntity instanceof LocalPlayer && hasForce){
-            entity.addDeltaMovement(limitMovement(combinedForce));
+            entity.addDeltaMovement(combinedForce);
         }
     }
 
+    /**
+     * Limit movement vec 3.
+     *
+     * @param movement the movement
+     * @return the vec 3
+     */
     public Vec3 limitMovement(@NotNull Vec3 movement) {
         double maxMovement = CommonEventHandler.leashConfigManager.getMaxMovement();
         return new Vec3(
@@ -857,7 +870,9 @@ public class LeashDataImpl implements ILeashData {
                 vaildLeashKnots.put(entry.getKey(), entry.getValue());
             }
         }
-
+        if (validLeashes > 0 ) { //重置摔落伤害
+            entity.resetFallDistance();
+        }
         boolean hasForce = !combinedForce.equals(Vec3.ZERO);
         Entity targetEntity = RindingLeash.getFinalEntityForLeashIfForce(entity, hasForce);
         if (targetEntity != null && hasForce) {
@@ -869,7 +884,7 @@ public class LeashDataImpl implements ILeashData {
             if (targetEntity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player) ) {
                 // 是真实玩家则交给客户端自行处理拴绳逻辑
                 // DO NOTHING
-                if(targetEntity != entity){
+                if(targetEntity == entity) {
                     NetworkHandler.sendToPlayer(new UpdatePlayerMovementPacket(UpdatePlayerMovementPacket.Operation.ADD, limitMovement(combinedForce)), player);
                 }
                 return;
@@ -889,7 +904,6 @@ public class LeashDataImpl implements ILeashData {
         // 直接施加合力，不再加阻力
         entity.setDeltaMovement(entity.getDeltaMovement().add(combinedForce));
         entity.hurtMarked = true;
-
         // 如果是生物，处理导航
         if (entity instanceof Mob mob) {
             if(mob.tickCount % 5 == 0){
@@ -1050,8 +1064,6 @@ public class LeashDataImpl implements ILeashData {
             return null;
         }
 
-
-
         // 2. 正常弹性拉力逻辑
         Vec3 pullForce = Vec3.ZERO;
         if (distance > elasticLimitDistance) {
@@ -1121,8 +1133,7 @@ public class LeashDataImpl implements ILeashData {
         // 计算超出临界距离的比例
         double criticalExcessRatio = (distance - extremeSnapDistance) / extremeSnapDistance;
 
-        // 在临界状态下使用更强的拉力
-        double pullStrength = 2.0 + criticalExcessRatio * 3.0; // 从2.0开始，随超出比例增加
+        double pullStrength = Math.max(criticalExcessRatio * 0.1, 1.0);
 
         double excessDistance = distance - elasticLimitDistance;
         Vec3 pullForce = pullDirection.scale(
@@ -1556,7 +1567,15 @@ public class LeashDataImpl implements ILeashData {
                 CompoundTag infoTag = holdersList.getCompound(i);
                 if (infoTag.contains("HolderUUID")) {
                     LeashInfo uuidLeashDataFormListTag = getUUIDLeashDataFormListTag(infoTag);
-                    leashHolders.put(uuidLeashDataFormListTag.holderUUIDOpt().orElseThrow(), uuidLeashDataFormListTag);
+                    Level level = entity.level();
+                    UUID key = uuidLeashDataFormListTag.holderUUIDOpt().orElseThrow();
+                    if (level instanceof ServerLevel serverLevel ) {
+                        Entity holder = serverLevel.getEntity(key);
+                        if (holder == null) {
+                            addDelayedLeash(key);
+                        }
+                    }
+                    leashHolders.put(key, uuidLeashDataFormListTag);
                 } else {
                     LeashInfo blockPosLeashDataFormListTag = getBlockPosLeashDataFormListTag(infoTag);
                     leashKnots.put(blockPosLeashDataFormListTag.blockPosOpt().orElseThrow(), blockPosLeashDataFormListTag);
@@ -1641,7 +1660,10 @@ public class LeashDataImpl implements ILeashData {
 
     @Override
     public boolean canBeLeashed() {
-        return (leashHolders.size() + leashKnots.size()) <= CommonEventHandler.leashConfigManager.getMaxLeashesPerEntity();
+        if ((leashHolders.size() + leashKnots.size()) <= CommonEventHandler.leashConfigManager.getMaxLeashesPerEntity()) {
+            return !(entity instanceof LivingEntity living) || !living.hasEffect(SLPEffects.NO_SUPER_LEASH_EFFECT.get());
+        }
+        return false;
     }
 
     @Override

@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -20,6 +20,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -28,7 +29,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
@@ -66,6 +69,7 @@ import top.r3944realms.superleadrope.content.command.LeashDataCommand;
 import top.r3944realms.superleadrope.content.command.LeashStateCommand;
 import top.r3944realms.superleadrope.content.command.MotionCommand;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
+import top.r3944realms.superleadrope.content.entity.SuperLeashRopeEntity;
 import top.r3944realms.superleadrope.content.gamerule.server.TeleportWithLeashedEntities;
 import top.r3944realms.superleadrope.content.item.EternalPotatoItem;
 import top.r3944realms.superleadrope.content.item.SuperLeadRopeItem;
@@ -75,6 +79,7 @@ import top.r3944realms.superleadrope.core.potato.EternalPotatoFacade;
 import top.r3944realms.superleadrope.core.register.SLPGameruleRegistry;
 import top.r3944realms.superleadrope.core.register.SLPItems;
 import top.r3944realms.superleadrope.core.register.SLPPotionRecipeRegistry;
+import top.r3944realms.superleadrope.core.register.SLPSoundEvents;
 import top.r3944realms.superleadrope.core.util.PotatoMode;
 import top.r3944realms.superleadrope.core.util.PotatoModeHelper;
 import top.r3944realms.superleadrope.datagen.data.SLPLangKeyValue;
@@ -473,6 +478,27 @@ public class CommonEventHandler {
         }
 
         /**
+         * On use shear item.
+         *
+         * @param event the event
+         */
+        @SubscribeEvent
+        public static void onUseShearItem (PlayerInteractEvent.RightClickItem event) {
+            ItemStack itemStack = event.getItemStack();
+            if (itemStack.getItem() instanceof ShearsItem) {
+                Player player = event.getEntity();
+                if (LeashDataInnerAPI.QueryOperations.hasLeash(player)) {
+                   LeashDataInnerAPI.LeashOperations.detachAll(player);
+                    if (!player.isCreative()) {
+                        itemStack.hurtAndBreak(5, player, p -> p.broadcastBreakEvent(event.getHand()));
+                    }
+                    event.getLevel().playSound(null, player.getOnPos(), SLPSoundEvents.LEAD_UNTIED.get(), SoundSource.AMBIENT);
+                   event.setCancellationResult(InteractionResult.CONSUME);
+                }
+            }
+        }
+
+        /**
          * On register command.
          *
          * @param event the event
@@ -501,6 +527,7 @@ public class CommonEventHandler {
             event.enqueueWork(Mod::checkAndSet);
             event.enqueueWork(SLPGameruleRegistry::register);
             event.enqueueWork(SLPPotionRecipeRegistry::init);
+            event.enqueueWork(() -> DispenserBlock.registerBehavior(SLPItems.SUPER_LEAD_ROPE.get(), SuperLeashRopeEntity.SuperLeashRopeItemBehavior.INSTANCE));
         }
 
         /**
@@ -573,6 +600,7 @@ public class CommonEventHandler {
             }
         }
         // 忘记订阅事件是静态方法了xwx
+
         /**
          * On config unloaded.
          *

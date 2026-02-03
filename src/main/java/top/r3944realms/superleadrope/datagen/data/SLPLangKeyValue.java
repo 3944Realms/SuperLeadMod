@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -278,6 +278,30 @@ public enum SLPLangKeyValue {
             SLPEntityTypes.getEntityNameKey("super_lead_knot"), ModPartEnum.ENTITY,
             "Super Lead Knot", "超级拴绳结", "超級拴繩結", "神駒羈縻索結"
     ),
+
+    /**
+     * The Entity super leash rope.
+     */
+    ENTITY_SUPER_LEASH_ROPE(
+            SLPEntityTypes.getEntityNameKey("super_leash_rope"), ModPartEnum.ENTITY,
+            "Super Lead Rope", "超级拴绳", "超級拴繩", "神駒羈縻索"
+    ),
+
+    /**
+     * The Ring ross.
+     */
+    RING_ROSS(
+            SLPEnchantments.RING_TOSS.get().getDescriptionId(), ModPartEnum.ENCHANTMENT,
+            "Ring Toss", "套圈", "套圈", "套圈"
+    ),
+
+    /**
+     * The Prisoner.
+     */
+    PRISONER(
+            SLPEnchantments.SELF_PRISONER.get().getDescriptionId(), ModPartEnum.ENCHANTMENT,
+            "Self Prisoner", "自拴", "自拴", "自拴"
+    ),
     /**
      * The Teleport with leashed entities name.
      */
@@ -348,7 +372,10 @@ public enum SLPLangKeyValue {
             "§b倍乘成功.§a%s§7:§f[§e加速§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r",
             "§b倍乘既成.§a%s§7:§f[§e速勢§7:(§a%.2f§7,§a%.2f§7,§a%.2f§7)§f]§r"
     ),
-    // ==================== 重置操作消息 ====================
+    /**
+     * The Message state reset all holder suc.
+     */
+// ==================== 重置操作消息 ====================
     MESSAGE_STATE_RESET_ALL_HOLDER_SUC(
             LeashStateCommand.RESET_ALL_HOLDER_SUC, ModPartEnum.COMMAND,
             "Successfully reset all holders for %s",
@@ -357,6 +384,9 @@ public enum SLPLangKeyValue {
             "%s之諸持者狀態，今已盡復"
     ),
 
+    /**
+     * The Message state reset holder for suc.
+     */
     MESSAGE_STATE_RESET_HOLDER_FOR_SUC(
             LeashStateCommand.RESET_HOLDER_FOR_SUC, ModPartEnum.COMMAND,
             "Successfully reset holder %s for %s",
@@ -365,6 +395,9 @@ public enum SLPLangKeyValue {
             "%s之持者%s狀態，今已復"
     ),
 
+    /**
+     * The Message state reset holder for block pos suc.
+     */
     MESSAGE_STATE_RESET_HOLDER_FOR_BLOCK_POS_SUC(
             LeashStateCommand.RESET_HOLDER_FOR_BLOCK_POS_SUC, ModPartEnum.COMMAND,
             "Successfully reset block position %s for %s",
@@ -373,6 +406,9 @@ public enum SLPLangKeyValue {
             "%s之位%s狀態，今已復"
     ),
 
+    /**
+     * The Message state reset apply entity all suc.
+     */
     MESSAGE_STATE_RESET_APPLY_ENTITY_ALL_SUC(
             LeashStateCommand.RESET_APPLY_ENTITY_ALL_SUC, ModPartEnum.COMMAND,
             "Successfully reset all apply entity offsets for %s",
@@ -381,7 +417,10 @@ public enum SLPLangKeyValue {
             "%s之諸用體偏移，今已盡復"
     ),
 
-    // ==================== 设置操作消息 ====================
+    /**
+     * The Message state set holder for suc.
+     */
+// ==================== 设置操作消息 ====================
     MESSAGE_STATE_SET_HOLDER_FOR_SUC(
             LeashStateCommand.SET_HOLDER_FOR_SUC, ModPartEnum.COMMAND,
             "Successfully set holder %s for %s",
@@ -390,6 +429,9 @@ public enum SLPLangKeyValue {
             "為%s設持者%s，其事已成"
     ),
 
+    /**
+     * The Message state set holder for block pos suc.
+     */
     MESSAGE_STATE_SET_HOLDER_FOR_BLOCK_POS_SUC(
             LeashStateCommand.SET_HOLDER_FOR_BLOCK_POS_SUC, ModPartEnum.COMMAND,
             "Successfully set block position %s for %s",
@@ -398,6 +440,9 @@ public enum SLPLangKeyValue {
             "為%s設位%s，其事已成"
     ),
 
+    /**
+     * The Message state set apply entity suc.
+     */
     MESSAGE_STATE_SET_APPLY_ENTITY_SUC(
             LeashStateCommand.SET_APPLY_ENTITY_SUC, ModPartEnum.COMMAND,
             "Successfully set apply entity offset %s for %s",
@@ -406,7 +451,10 @@ public enum SLPLangKeyValue {
             "為%s設用體偏移%s，其事已成"
     ),
 
-    // ==================== 查询操作消息 ====================
+    /**
+     * The Message state query has state suc.
+     */
+// ==================== 查询操作消息 ====================
     MESSAGE_STATE_QUERY_HAS_STATE_SUC(
             LeashStateCommand.QUERY_HAS_STATE_SUC, ModPartEnum.COMMAND,
             "%s has state: %s",
@@ -415,6 +463,9 @@ public enum SLPLangKeyValue {
             "%s 有狀否: %s"
     ),
 
+    /**
+     * The Message state get all uuid states suc.
+     */
     MESSAGE_STATE_GET_ALL_UUID_STATES_SUC(
             LeashStateCommand.GET_ALL_UUID_STATES_SUC, ModPartEnum.COMMAND,
             "Found %d UUID states for %s:",
@@ -423,6 +474,9 @@ public enum SLPLangKeyValue {
             "%s之UUID狀有%d:"
     ),
 
+    /**
+     * The Message state get all block pos states suc.
+     */
     MESSAGE_STATE_GET_ALL_BLOCK_POS_STATES_SUC(
             LeashStateCommand.GET_ALL_BLOCK_POS_STATES_SUC, ModPartEnum.COMMAND,
             "Found %d block position states for %s:",
@@ -431,6 +485,9 @@ public enum SLPLangKeyValue {
             "%s之位狀有%d:"
     ),
 
+    /**
+     * The Message state get apply entity offset suc.
+     */
     MESSAGE_STATE_GET_APPLY_ENTITY_OFFSET_SUC(
             LeashStateCommand.GET_APPLY_ENTITY_OFFSET_SUC, ModPartEnum.COMMAND,
             "%s apply entity offset: %s",
@@ -439,6 +496,9 @@ public enum SLPLangKeyValue {
             "%s 用體偏移: %s"
     ),
 
+    /**
+     * The Message state get apply entity offset none.
+     */
     MESSAGE_STATE_GET_APPLY_ENTITY_OFFSET_NONE(
             LeashStateCommand.GET_APPLY_ENTITY_OFFSET_NONE, ModPartEnum.COMMAND,
             "%s has no apply entity offset",
@@ -447,6 +507,9 @@ public enum SLPLangKeyValue {
             "%s 無用體偏移"
     ),
 
+    /**
+     * The Message state get default apply entity offset suc.
+     */
     MESSAGE_STATE_GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC(
             LeashStateCommand.GET_DEFAULT_APPLY_ENTITY_OFFSET_SUC, ModPartEnum.COMMAND,
             "%s default apply entity offset: %s",
@@ -455,6 +518,9 @@ public enum SLPLangKeyValue {
             "%s 常用體偏移: %s"
     ),
 
+    /**
+     * The Message state get all states head.
+     */
     MESSAGE_STATE_GET_ALL_STATES_HEAD(
             LeashStateCommand.GET_ALL_STATES_HEAD, ModPartEnum.COMMAND,
             "All states for %s:",
@@ -462,6 +528,9 @@ public enum SLPLangKeyValue {
             "%s 的所有狀態:",
             "%s 之諸狀:"
     ),
+    /**
+     * Message abbreviation slp lang key value.
+     */
     MESSAGE_ABBREVIATION(
             Command.ABBREVIATION, ModPartEnum.COMMAND,
             "...",
@@ -469,6 +538,9 @@ public enum SLPLangKeyValue {
             "...",
             "..."
     ),
+    /**
+     * Message end slp lang key value.
+     */
     MESSAGE_END(
             Command.END, ModPartEnum.COMMAND,
             ".",
@@ -476,6 +548,9 @@ public enum SLPLangKeyValue {
             "。",
             "。"
     ),
+    /**
+     * Message colon slp lang key value.
+     */
     MESSAGE_COLON(
             Command.COLON, ModPartEnum.COMMAND,
             ":",
@@ -483,6 +558,9 @@ public enum SLPLangKeyValue {
             ":",
             ":"
     ),
+    /**
+     * Message block pos slp lang key value.
+     */
     MESSAGE_BLOCK_POS(
             Command.BLOCK_POS, ModPartEnum.COMMAND,
             "§7[§fX: %d, Y: %d, Z: %d§7]",
@@ -490,6 +568,9 @@ public enum SLPLangKeyValue {
             "§7[§fX: %d, Y: %d, Z: %d§7]",
             "§7[§fX: %d, Y: %d, Z: %d§7]"
     ),
+    /**
+     * Message none slp lang key value.
+     */
     MESSAGE_NONE(
             Command.NONE, ModPartEnum.COMMAND,
             "<None>",
@@ -497,6 +578,9 @@ public enum SLPLangKeyValue {
             "無",
             "無"
     ),
+    /**
+     * Message state slp lang key value.
+     */
     MESSAGE_STATE(
             Command.STATE, ModPartEnum.COMMAND,
             "State",
@@ -504,6 +588,9 @@ public enum SLPLangKeyValue {
             "狀態",
             "狀"
     ),
+    /**
+     * The Message apply offset.
+     */
     MESSAGE_APPLY_OFFSET(
             LeashStateCommand.APPLY_OFFSET, ModPartEnum.COMMAND,
             "Apply Offset",
@@ -511,6 +598,9 @@ public enum SLPLangKeyValue {
             "應用偏移狀態",
             "偏狀"
     ),
+    /**
+     * The Message default offset.
+     */
     MESSAGE_DEFAULT_OFFSET(
             LeashStateCommand.DEFAULT_OFFSET, ModPartEnum.COMMAND,
             "Default Offset",
@@ -518,6 +608,9 @@ public enum SLPLangKeyValue {
             "預設偏移狀態",
             "常偏狀"
     ),
+    /**
+     * The Message leashdata all knots.
+     */
     MESSAGE_LEASHDATA_ALL_KNOTS(
             Command.ALL_KNOTS, ModPartEnum.COMMAND,
             "All Knots",
@@ -525,6 +618,9 @@ public enum SLPLangKeyValue {
             "所有繩結",
             "諸結"
     ),
+    /**
+     * The Message leashdata all holders.
+     */
     MESSAGE_LEASHDATA_ALL_HOLDERS(
             Command.ALL_HOLDERS, ModPartEnum.COMMAND,
             "All Holders",
@@ -532,6 +628,9 @@ public enum SLPLangKeyValue {
             "所有持有者",
             "諸持者"
     ),
+    /**
+     * The constant MESSAGE_LEASHDATA_SET_STATIC_MAX_DISTANCE.
+     */
     MESSAGE_LEASHDATA_SET_STATIC_MAX_DISTANCE(
             LeashDataCommand.SET_STATIC_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
             "Successfully set the static max distance of leash to %.2f from %s",
@@ -539,6 +638,9 @@ public enum SLPLangKeyValue {
             "已成功設定%.2f為%s的全域最大距離",
             "繩距定為%.2f，已立%s之全域極距"
     ),
+    /**
+     * The constant MESSAGE_LEASHDATA_RESET_STATIC_MAX_DISTANCE.
+     */
     MESSAGE_LEASHDATA_RESET_STATIC_MAX_DISTANCE(
             LeashDataCommand.RESET_STATIC_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
             "Successfully reset the static max distance of leash from %s",
@@ -546,6 +648,9 @@ public enum SLPLangKeyValue {
             "已成功重置%s的全域最大距離",
             "%s之全域極距，今已復初"
     ),
+    /**
+     * The constant MESSAGE_LEASHDATA_SET_STATIC_ELASTIC_DISTANCE_SCALE.
+     */
     MESSAGE_LEASHDATA_SET_STATIC_ELASTIC_DISTANCE_SCALE(
             LeashDataCommand.SET_STATIC_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
             "Successfully set the static elastic distance scale of leash to %.2f from %s",
@@ -553,6 +658,9 @@ public enum SLPLangKeyValue {
             "已成功設定%.2f為%s的全域彈性距離比例",
             "繩距彈性比例定為%.2f，已立%s之全域伸縮度"
     ),
+    /**
+     * The constant MESSAGE_LEASHDATA_RESET_STATIC_ELASTIC_DISTANCE_SCALE.
+     */
     MESSAGE_LEASHDATA_RESET_STATIC_ELASTIC_DISTANCE_SCALE(
             LeashDataCommand.RESET_STATIC_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
             "Successfully reset the static elastic distance scale of leash from %s",
@@ -560,6 +668,9 @@ public enum SLPLangKeyValue {
             "成功重置%s的全域彈性距離比例",
             "%s之全域伸縮比例，今已復初"
     ),
+    /**
+     * The Message leashdata set max distance suc.
+     */
     MESSAGE_LEASHDATA_SET_MAX_DISTANCE_SUC(
             LeashDataCommand.SET_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
             "Successfully adjusted the max distance of leash from %s to %s",
@@ -567,6 +678,9 @@ public enum SLPLangKeyValue {
             "成功調整%s到%s的拴繩最大距離",
             "%s至%s之拴繩極距，今已定"
     ),
+    /**
+     * The Message leashdata set max distance suc fail.
+     */
     MESSAGE_LEASHDATA_SET_MAX_DISTANCE_SUC_FAIL(
             LeashDataCommand.SET_MAX_DISTANCE_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to adjust it from %s to %s",
@@ -574,6 +688,9 @@ public enum SLPLangKeyValue {
             "，但未能調整%s到%s的拴繩最大距離",
             "，然%s至%s之拴繩極距未定"
     ),
+    /**
+     * The Message leashdata set max distance fail.
+     */
     MESSAGE_LEASHDATA_SET_MAX_DISTANCE_FAIL(
             LeashDataCommand.SET_MAX_DISTANCE_FAIL, ModPartEnum.COMMAND,
             "Failed to adjust the max distance of leash from %s to %s",
@@ -581,6 +698,9 @@ public enum SLPLangKeyValue {
             "未能調整%s到%s的拴繩最大距離",
             "%s至%s之拴繩極距未成"
     ),
+    /**
+     * The Message leashdata remove all block leashes.
+     */
     MESSAGE_LEASHDATA_REMOVE_ALL_BLOCK_LEASHES(
             LeashDataCommand.REMOVE_ALL_BLOCK_LEASHES, ModPartEnum.COMMAND,
             "Successfully removed all holders' leash to %s",
@@ -588,6 +708,9 @@ public enum SLPLangKeyValue {
             "已成功移除所有持有者對%s的牽引",
             "%s之所有羈絆，今已盡釋"
     ),
+    /**
+     * The Message leashdata remove remove all holder leashes.
+     */
     MESSAGE_LEASHDATA_REMOVE_REMOVE_ALL_HOLDER_LEASHES(
             LeashDataCommand.REMOVE_ALL_HOLDER_LEASHES, ModPartEnum.COMMAND,
             "Successfully removed all holders' leash to %s",
@@ -595,6 +718,9 @@ public enum SLPLangKeyValue {
             "已成功移除所有持有者對%s的牽引",
             "%s之所有繫繩，今已盡除"
     ),
+    /**
+     * The Message leashdata transfer from block suc.
+     */
     MESSAGE_LEASHDATA_TRANSFER_FROM_BLOCK_SUC(
             LeashDataCommand.TRANSFER_FROM_BLOCK_SUC, ModPartEnum.COMMAND,
             "Successfully transferred leash from %s to %s",
@@ -602,6 +728,9 @@ public enum SLPLangKeyValue {
             "已成功將牽引從%s轉移至%s",
             "繫繩自%s移至%s，其事已成"
     ),
+    /**
+     * The Message leashdata transfer from block suc fail.
+     */
     MESSAGE_LEASHDATA_TRANSFER_FROM_BLOCK_SUC_FAIL(
             LeashDataCommand.TRANSFER_FROM_BLOCK_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to transfer leash from %s to %s.",
@@ -609,6 +738,9 @@ public enum SLPLangKeyValue {
             "，但未能將牽引從%s轉移至%s",
             "，然自%s至%s之遷移未竟"
     ),
+    /**
+     * The Message leashdata transfer from block fail.
+     */
     MESSAGE_LEASHDATA_TRANSFER_FROM_BLOCK_FAIL(
             LeashDataCommand.TRANSFER_FROM_BLOCK_FAIL, ModPartEnum.COMMAND,
             "Failed to transfer leash from %s to %s.",
@@ -616,6 +748,9 @@ public enum SLPLangKeyValue {
             "未能將牽引從%s轉移至%s",
             "繫繩自%s遷於%s之舉未遂"
     ),
+    /**
+     * The Message leashdata set elastic distance scale suc.
+     */
     MESSAGE_LEASHDATA_SET_ELASTIC_DISTANCE_SCALE_SUC(
             LeashDataCommand.SET_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
             "Successfully adjusted the elastic distance scale of leash from %s to %s",
@@ -623,6 +758,9 @@ public enum SLPLangKeyValue {
             "成功調整%s到%s的拴繩彈性距離比例",
             "%s至%s之拴繩伸縮比例，今已定"
     ),
+    /**
+     * The Message leashdata set elastic distance scale suc fail.
+     */
     MESSAGE_LEASHDATA_SET_ELASTIC_DISTANCE_SCALE_SUC_FAIL(
             LeashDataCommand.SET_ELASTIC_DISTANCE_SCALE_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to adjust it from %s to %s",
@@ -630,6 +768,9 @@ public enum SLPLangKeyValue {
             "，但未能調整%s到%s的拴繩彈性距離比例",
             "，然%s至%s之拴繩伸縮比例未定"
     ),
+    /**
+     * The Message leashdata set elastic distance scale fail.
+     */
     MESSAGE_LEASHDATA_SET_ELASTIC_DISTANCE_SCALE_FAIL(
             LeashDataCommand.SET_ELASTIC_DISTANCE_SCALE_FAIL, ModPartEnum.COMMAND,
             "Failed to adjust the elastic distance scale of leash from %s to %s",
@@ -637,6 +778,9 @@ public enum SLPLangKeyValue {
             "未能調整%s到%s的拴繩彈性距離比例",
             "%s至%s之拴繩伸縮比例未成"
     ),
+    /**
+     * The Message leashdata set block max distance suc.
+     */
     MESSAGE_LEASHDATA_SET_BLOCK_MAX_DISTANCE_SUC(
             LeashDataCommand.SET_BLOCK_MAX_DISTANCE_SUC, ModPartEnum.COMMAND,
             "Successfully adjusted the max distance of leash from %s to %s",
@@ -644,6 +788,9 @@ public enum SLPLangKeyValue {
             "成功調整%s到%s的拴繩最大距離",
             "%s至%s之拴繩極距，今已定"
     ),
+    /**
+     * The Message leashdata set block max distance suc fail.
+     */
     MESSAGE_LEASHDATA_SET_BLOCK_MAX_DISTANCE_SUC_FAIL(
             LeashDataCommand.SET_BLOCK_MAX_DISTANCE_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to adjust it from %s to %s",
@@ -651,6 +798,9 @@ public enum SLPLangKeyValue {
             "，但未能調整%s到%s的拴繩最大距離",
             "，然%s至%s之拴繩極距未定"
     ),
+    /**
+     * The Message leashdata set block max distance fail.
+     */
     MESSAGE_LEASHDATA_SET_BLOCK_MAX_DISTANCE_FAIL(
             LeashDataCommand.SET_BLOCK_MAX_DISTANCE_FAIL, ModPartEnum.COMMAND,
             "Failed to adjust the max distance of leash from %s to %s",
@@ -658,6 +808,9 @@ public enum SLPLangKeyValue {
             "未能調整%s到%s的拴繩最大距離",
             "%s至%s之拴繩極距未成"
     ),
+    /**
+     * The Message leashdata set block elastic distance scale suc.
+     */
     MESSAGE_LEASHDATA_SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC(
             LeashDataCommand.SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC, ModPartEnum.COMMAND,
             "Successfully adjusted the elastic distance scale of leash from %s to %s",
@@ -665,6 +818,9 @@ public enum SLPLangKeyValue {
             "成功調整%s到%s的拴繩彈性距離比例",
             "%s至%s之拴繩伸縮比例，今已定"
     ),
+    /**
+     * The Message leashdata set block elastic distance scale suc fail.
+     */
     MESSAGE_LEASHDATA_SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC_FAIL(
             LeashDataCommand.SET_BLOCK_ELASTIC_DISTANCE_SCALE_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to adjust it from %s to %s",
@@ -672,6 +828,9 @@ public enum SLPLangKeyValue {
             "，但未能調整%s到%s的拴繩彈性距離比例",
             "，然%s至%s之拴繩伸縮比例未定"
     ),
+    /**
+     * The Message leashdata set block elastic distance scale fail.
+     */
     MESSAGE_LEASHDATA_SET_BLOCK_ELASTIC_DISTANCE_SCALE_FAIL(
             LeashDataCommand.SET_BLOCK_ELASTIC_DISTANCE_SCALE_FAIL, ModPartEnum.COMMAND,
             "Failed to adjust the elastic distance scale of leash from %s to %s",
@@ -679,6 +838,9 @@ public enum SLPLangKeyValue {
             "未能%s調整為拴繩彈性距離比例從%s",
             "繩距伸縮比例自%s易為%s之舉未遂"
     ),
+    /**
+     * Message leashdata leash data head slp lang key value.
+     */
     MESSAGE_LEASHDATA_LEASH_DATA_HEAD(
             LeashDataCommand.LEASH_DATA_HEAD, ModPartEnum.COMMAND,
             "LeashData:",
@@ -686,6 +848,9 @@ public enum SLPLangKeyValue {
             "拴繩數據:",
             "繫繩錄:"
     ),
+    /**
+     * Message leashdata leash data item slp lang key value.
+     */
     MESSAGE_LEASHDATA_LEASH_DATA_ITEM(
             LeashDataCommand.LEASH_DATA_ITEM, ModPartEnum.COMMAND,
             "%s { Holder:%s, BlockPos:%s }",
@@ -753,6 +918,9 @@ public enum SLPLangKeyValue {
             "保留字段",
             "備註"
     ),
+    /**
+     * Message leashdata entity slp lang key value.
+     */
     MESSAGE_LEASHDATA_ENTITY(
             LeashDataCommand.ENTITY, ModPartEnum.COMMAND,
             "§7[ §l§fEntity §r§7]",
@@ -761,6 +929,9 @@ public enum SLPLangKeyValue {
             "§7[ §l§f實者 §r§7]"
     ),
 
+    /**
+     * Message leashdata knot slp lang key value.
+     */
     MESSAGE_LEASHDATA_KNOT(
             LeashDataCommand.KNOT, ModPartEnum.COMMAND,
             "Knot",
@@ -768,6 +939,9 @@ public enum SLPLangKeyValue {
             "§7[ §l§f繩結 §r§7]",
             "§7[ §l§f結 §r§7]"
     ),
+    /**
+     * Message leashdata leash info head slp lang key value.
+     */
     MESSAGE_LEASHDATA_LEASH_INFO_HEAD(
             LeashDataCommand.LEASH_INFO_HEAD, ModPartEnum.COMMAND,
             "LeashInfo:",
@@ -775,6 +949,9 @@ public enum SLPLangKeyValue {
             "拴繩資訊:",
             "繫繩訊:"
     ),
+    /**
+     * Message leashdata leash info item slp lang key value.
+     */
     MESSAGE_LEASHDATA_LEASH_INFO_ITEM(
             LeashDataCommand.LEASH_INFO_ITEM, ModPartEnum.COMMAND,
             "%s { Info: %s }",
@@ -782,6 +959,9 @@ public enum SLPLangKeyValue {
             "%s { 資訊: %s }",
             "%s { 訊: %s }"
     ),
+    /**
+     * The Message leashdata add holder leashes suc.
+     */
     MESSAGE_LEASHDATA_ADD_HOLDER_LEASHES_SUC(
             LeashDataCommand.ADD_HOLDER_LEASHES_SUC, ModPartEnum.COMMAND,
             "Successfully attached %s leash from %s to %s",
@@ -789,6 +969,9 @@ public enum SLPLangKeyValue {
             "成功將%s拴繩從%s連接到%s",
             "%s繩自%s繫於%s，其事已成"
     ),
+    /**
+     * The Message leashdata add holder leashes suc fail.
+     */
     MESSAGE_LEASHDATA_ADD_HOLDER_LEASHES_SUC_FAIL(
             LeashDataCommand.ADD_HOLDER_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to attached %s leash from %s to %s.",
@@ -796,6 +979,9 @@ public enum SLPLangKeyValue {
             "，但未能將%s拴繩從%s連接到%s",
             "，然%s繩自%s繫於%s未竟"
     ),
+    /**
+     * The Message leashdata add holder leashes fail.
+     */
     MESSAGE_LEASHDATA_ADD_HOLDER_LEASHES_FAIL(
             LeashDataCommand.ADD_HOLDER_LEASHES_FAIL, ModPartEnum.COMMAND,
             "Failed to attached %s leash from %s to %s.",
@@ -803,6 +989,9 @@ public enum SLPLangKeyValue {
             "未能將%s拴繩從%s連接到%s",
             "%s繩自%s繫於%s之舉未遂"
     ),
+    /**
+     * The Message leashdata add block leashes suc.
+     */
     MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_SUC(
             LeashDataCommand.ADD_BLOCK_LEASHES_SUC, ModPartEnum.COMMAND,
             "Successfully attached %s leash from %s to %s",
@@ -810,6 +999,9 @@ public enum SLPLangKeyValue {
             "成功將%s拴繩從%s連接到%s",
             "%s繩自%s繫於%s，其事已成"
     ),
+    /**
+     * The Message leashdata add block leashes suc fail.
+     */
     MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_SUC_FAIL(
             LeashDataCommand.ADD_BLOCK_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to attached %s leash from %s to %s.",
@@ -817,6 +1009,9 @@ public enum SLPLangKeyValue {
             "，但未能將%s拴繩從%s連接到%s",
             "，然%s繩自%s繫於%s未竟"
     ),
+    /**
+     * The Message leashdata add block leashes fail.
+     */
     MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_FAIL(
             LeashDataCommand.ADD_BLOCK_LEASHES_FAIL, ModPartEnum.COMMAND,
             "Failed to attached %s leash from %s to %s.",
@@ -824,6 +1019,9 @@ public enum SLPLangKeyValue {
             "未能將%s拴繩從%s連接到%s",
             "%s繩自%s繫於%s之舉未遂"
     ),
+    /**
+     * The Message leashdata add block leashes fail no knot found.
+     */
     MESSAGE_LEASHDATA_ADD_BLOCK_LEASHES_FAIL_NO_KNOT_FOUND(
             LeashDataCommand.ADD_BLOCK_LEASHES_FAIL_NO_KNOT_FOUND, ModPartEnum.COMMAND,
             "Unable to tie the towing rope to %s as there is no knot in the position.",
@@ -831,6 +1029,9 @@ public enum SLPLangKeyValue {
             "無法將拴繩繫到%s，因為該位置沒有繩結",
             "%s處無結，拴繩難繫"
     ),
+    /**
+     * Message leashdata default slp lang key value.
+     */
     MESSAGE_LEASHDATA_DEFAULT(
             LeashDataCommand.DEFAULT, ModPartEnum.COMMAND,
             "Default",
@@ -838,6 +1039,9 @@ public enum SLPLangKeyValue {
             "默認值",
             "原值"
     ),
+    /**
+     * The Message leashdata remove holder leashes suc.
+     */
     MESSAGE_LEASHDATA_REMOVE_HOLDER_LEASHES_SUC(
             LeashDataCommand.REMOVE_HOLDER_LEASHES_SUC, ModPartEnum.COMMAND,
             "Successfully detached leash from %s to %s",
@@ -845,6 +1049,9 @@ public enum SLPLangKeyValue {
             "成功解除%s到%s的拴繩連接",
             "%s至%s之拴繩，今已解"
     ),
+    /**
+     * The Message leashdata remove holder leashes suc fail.
+     */
     MESSAGE_LEASHDATA_REMOVE_HOLDER_LEASHES_SUC_FAIL(
             LeashDataCommand.REMOVE_HOLDER_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to detach leash from %s to %s",
@@ -852,6 +1059,9 @@ public enum SLPLangKeyValue {
             "未能解除%s到%s的拴繩連接",
             "%s至%s之拴繩未除"
     ),
+    /**
+     * The Message leashdata remove holder leashes fail.
+     */
     MESSAGE_LEASHDATA_REMOVE_HOLDER_LEASHES_FAIL(
             LeashDataCommand.REMOVE_HOLDER_LEASHES_FAIL, ModPartEnum.COMMAND,
             "Failed to detach leash from %s to %s.",
@@ -859,6 +1069,9 @@ public enum SLPLangKeyValue {
             "成功解除%s到%s的拴繩連接",
             "%s至%s之拴繩，今已解"
     ),
+    /**
+     * The Message leashdata remove block leashes suc.
+     */
     MESSAGE_LEASHDATA_REMOVE_BLOCK_LEASHES_SUC(
             LeashDataCommand.REMOVE_BLOCK_LEASHES_SUC, ModPartEnum.COMMAND,
             "Successfully detached leash from %s to %s",
@@ -866,6 +1079,9 @@ public enum SLPLangKeyValue {
             "，但未能解除%s到%s的拴繩連接",
             "，然%s至%s之拴繩未解"
     ),
+    /**
+     * The Message leashdata remove block leashes suc fail.
+     */
     MESSAGE_LEASHDATA_REMOVE_BLOCK_LEASHES_SUC_FAIL(
             LeashDataCommand.REMOVE_BLOCK_LEASHES_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to detach leash from %s to %s",
@@ -873,6 +1089,9 @@ public enum SLPLangKeyValue {
             "未能解除%s到%s的拴繩連接",
             "%s至%s之拴繩未除"
     ),
+    /**
+     * The Message leashdata remove block leashes fail.
+     */
     MESSAGE_LEASHDATA_REMOVE_BLOCK_LEASHES_FAIL(
             LeashDataCommand.REMOVE_BLOCK_LEASHES_FAIL, ModPartEnum.COMMAND,
             "Failed to detach leash from %s to %s.",
@@ -880,6 +1099,9 @@ public enum SLPLangKeyValue {
             "成功解除%s的所有拴繩連接",
             "%s之諸拴繩，今盡解"
     ),
+    /**
+     * The Message leashdata remove all leashes.
+     */
     MESSAGE_LEASHDATA_REMOVE_ALL_LEASHES(
             LeashDataCommand.REMOVE_ALL_LEASHES, ModPartEnum.COMMAND,
             "Successfully detached all leash from %s",
@@ -887,6 +1109,9 @@ public enum SLPLangKeyValue {
             "成功解除%s的所有拴繩連接",
             "%s之諸拴繩，今盡解"
     ),
+    /**
+     * The Message leashdata transfer leash suc.
+     */
     MESSAGE_LEASHDATA_TRANSFER_LEASH_SUC(
             LeashDataCommand.TRANSFER_LEASH_SUC, ModPartEnum.COMMAND,
             "Successfully transferred leash from %s to %s",
@@ -894,6 +1119,9 @@ public enum SLPLangKeyValue {
             "成功將拴繩從%s轉移至%s",
             "拴繩自%s移至%s，其事已成"
     ),
+    /**
+     * The Message leashdata transfer leash suc fail.
+     */
     MESSAGE_LEASHDATA_TRANSFER_LEASH_SUC_FAIL(
             LeashDataCommand.TRANSFER_LEASH_SUC_FAIL, ModPartEnum.COMMAND,
             ", but failed to transfer leash from %s to %s.",
@@ -901,6 +1129,9 @@ public enum SLPLangKeyValue {
             "，但未能將拴繩從%s轉移至%s",
             "，然自%s至%s之遷移未竟"
     ),
+    /**
+     * The Message leashdata transfer leash fail.
+     */
     MESSAGE_LEASHDATA_TRANSFER_LEASH_FAIL(
             LeashDataCommand.TRANSFER_LEASH_FAIL, ModPartEnum.COMMAND,
             "Failed to transfer leash from %s to %s.",
@@ -908,6 +1139,9 @@ public enum SLPLangKeyValue {
             "未能將拴繩從%s轉移至%s",
             "拴繩自%s遷於%s之舉未遂"
     ),
+    /**
+     * The Message leashdata apply force.
+     */
     MESSAGE_LEASHDATA_APPLY_FORCE(
             LeashDataCommand.APPLY_FORCE, ModPartEnum.COMMAND,
             "Successfully applied force on %s",
@@ -915,6 +1149,9 @@ public enum SLPLangKeyValue {
             "成功觸發%s的力",
             "%s之力，今已發"
     ),
+    /**
+     * The No leash effect.
+     */
     NO_LEASH_EFFECT(
             SLPEffects.getEffectKey(SLPEffects.NO_SUPER_LEASH_EFFECT.get()), ModPartEnum.NAME,
             "No Super Leash",
@@ -922,6 +1159,9 @@ public enum SLPLangKeyValue {
             "禁拴",
             "禁系之效"
     ),
+    /**
+     * The No leash potion.
+     */
     NO_LEASH_POTION(
             SLPPotions.getPotionNameKey("no_super_leash", (char) 0), ModPartEnum.NAME,
             "No Super Leash Potion",
@@ -929,6 +1169,9 @@ public enum SLPLangKeyValue {
             "禁拴藥水",
             "禁系汤剂"
     ),
+    /**
+     * The No leash potion splash.
+     */
     NO_LEASH_POTION_SPLASH(
             SLPPotions.getPotionNameKey("no_super_leash", (char) 2), ModPartEnum.NAME,
             "Splash No Super Leash Potion",
@@ -936,6 +1179,9 @@ public enum SLPLangKeyValue {
             "噴濺型禁拴藥水",
             "飞溅禁系汤"
     ),
+    /**
+     * The No leash potion lingering.
+     */
     NO_LEASH_POTION_LINGERING(
             SLPPotions.getPotionNameKey("no_super_leash", (char) 1), ModPartEnum.NAME,
             "Splash No Super Leash Potion",
@@ -943,14 +1189,9 @@ public enum SLPLangKeyValue {
             "滯留型禁拴藥水",
             "缠绵禁系汤"
     ),
-    DOLL_BLOCK(
-            SLPBlocks.DOLL, ModPartEnum.BLOCK,
-            "Doll", "玩偶", "玩偶", "戲像"
-    ),
-    DOLL_ITEM(
-            SLPItems.DOLL, ModPartEnum.ITEM,
-            "Doll", "玩偶", "玩偶", "戲像"
-    ),
+    /**
+     * Author tooltip slp lang key value.
+     */
     AUTHOR_TOOLTIP(
             "tooltip.superleadrope.author", ModPartEnum.DESCRIPTION,
             "Author : R3944Realms", "作者 : R3944Realms",

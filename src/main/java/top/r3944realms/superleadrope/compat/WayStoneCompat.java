@@ -1,3 +1,18 @@
+/*
+ *  Super Lead rope mod
+ *  Copyright (C)  2026  R3944Realms
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package top.r3944realms.superleadrope.compat;
 
 import com.ibm.icu.impl.Pair;
@@ -29,17 +44,43 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * The type Way stone compat.
+ */
 public class WayStoneCompat {
+    /**
+     * The constant isModLoaded.
+     */
     public final static boolean isModLoaded = ModList.get().isLoaded("waystones");
+    /**
+     * The constant tempLeashMap.
+     */
     public final static Map<UUID, Set<Pair<Entity, OriginalState>>> tempLeashMap = new ConcurrentHashMap<>();
+    /**
+     * The constant uuidMap.
+     */
     public final static Map<UUID, UUID> uuidMap = new ConcurrentHashMap<>();
+
+    /**
+     * The type Original state.
+     */
     public record OriginalState(Pose pose, boolean isSprinting, float yaw, float pitch, Vec3 deltaMovement, LeashInfo leashInfo, RidingRelationship ridingRelationship) {}
+
+    /**
+     * Init.
+     */
     public static void init() {
         if (isModLoaded) {
             MinecraftForge.EVENT_BUS.addListener(WayStoneCompat::onWayStoneTeleport$Pre);
             MinecraftForge.EVENT_BUS.addListener(WayStoneCompat::onWayStoneTeleport$Post);
         }
     }
+
+    /**
+     * On way stone teleport pre.
+     *
+     * @param event the event
+     */
     public static void onWayStoneTeleport$Pre(WaystoneTeleportEvent.@NotNull Pre event) {
         Entity telEntity = event.getContext().getEntity();
         ILeashHelper.IHolder holderHelper = Services.WORK_SPACE.getLeashHelper().getHolderHelper(telEntity);
@@ -88,6 +129,12 @@ public class WayStoneCompat {
         }
         tempLeashMap.put(telEntity.getUUID(), set);
     }
+
+    /**
+     * On way stone teleport post.
+     *
+     * @param event the event
+     */
     public static void onWayStoneTeleport$Post(WaystoneTeleportEvent.@NotNull Post event) {
         Entity telEntity = event.getContext().getEntity();
         ServerLevel serverLevel = event.getContext().getDestination().getLevel();

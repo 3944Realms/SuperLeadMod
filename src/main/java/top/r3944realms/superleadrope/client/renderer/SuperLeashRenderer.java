@@ -1,13 +1,13 @@
 /*
  *  Super Lead rope mod
- *  Copyright (C)  2025  R3944Realms
+ *  Copyright (C)  2026  R3944Realms
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR 阿 PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -175,31 +175,36 @@ public class SuperLeashRenderer {
         /**
          * The Dx.
          */
-        public final float dx, /**
+        public final float dx,
+        /**
          * The Dy.
          */
-        dy, /**
+        dy,
+        /**
          * The Dz.
          */
         dz;     // 绳子差向量
         /**
          * The X offset.
          */
-        public final float xOffset, /**
+        public final float xOffset,
+        /**
          * The Z offset.
          */
         zOffset; // 横向偏移
         /**
          * The Y offset pass 1.
          */
-        public final float yOffsetPass1, /**
+        public final float yOffsetPass1,
+        /**
          * The Dy offset pass 1.
          */
         dyOffsetPass1; // pass1 纵向偏移
         /**
          * The Y offset pass 2.
          */
-        public final float yOffsetPass2, /**
+        public final float yOffsetPass2,
+        /**
          * The Dy offset pass 2.
          */
         dyOffsetPass2; // pass2 纵向偏移

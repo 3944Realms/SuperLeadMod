@@ -28,6 +28,11 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 public class JEIPlugin implements IModPlugin {
     private static final ResourceLocation UID = new ResourceLocation(SuperLeadRope.MOD_ID, "jei_plugin");
 
+    /**
+     * Gets plugin uid.
+     *
+     * @return the plugin uid
+     */
     @Override
     public @NotNull ResourceLocation getPluginUid() {
         return UID;

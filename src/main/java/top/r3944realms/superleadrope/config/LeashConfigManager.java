@@ -29,7 +29,6 @@ import top.r3944realms.superleadrope.network.NetworkHandler;
 import top.r3944realms.superleadrope.network.toClient.CommonConfigHashInformPacket;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
@@ -75,13 +74,13 @@ public class LeashConfigManager {
      */
     public volatile static int cacheHash = -1;
     // ========== 偏移映射 ==========
-    private final Map<String, double[]> entityHolderMap = new ConcurrentHashMap<>();
-    private final Map<String, double[]> tagHolderMap = new ConcurrentHashMap<>();
-    private final Map<String, double[]> modHolderMap = new ConcurrentHashMap<>();
+    private final Map<String, double[]> entityHolderMap = new TreeMap<>();
+    private final Map<String, double[]> tagHolderMap = new TreeMap<>();
+    private final Map<String, double[]> modHolderMap = new TreeMap<>();
 
-    private final Map<String, double[]> entityLeashMap = new ConcurrentHashMap<>();
-    private final Map<String, double[]> tagLeashMap = new ConcurrentHashMap<>();
-    private final Map<String, double[]> modLeashMap = new ConcurrentHashMap<>();
+    private final Map<String, double[]> entityLeashMap = new TreeMap<>();
+    private final Map<String, double[]> tagLeashMap = new TreeMap<>();
+    private final Map<String, double[]> modLeashMap = new TreeMap<>();
 
     // ========== 缓存配置 ==========
     private volatile List<String> teleportWhitelistCache = Collections.emptyList();
@@ -110,9 +109,9 @@ public class LeashConfigManager {
 
     // ================== 偏移解析 ==================
     private @NotNull @Unmodifiable Map<String, Map<String, double[]>> parseOffsetList(@NotNull List<? extends String> offsetConfigs) {
-        Map<String, double[]> entityMap = new HashMap<>();
-        Map<String, double[]> tagMap = new HashMap<>();
-        Map<String, double[]> modMap = new HashMap<>();
+        Map<String, double[]> entityMap = new TreeMap<>();
+        Map<String, double[]> tagMap = new TreeMap<>();
+        Map<String, double[]> modMap = new TreeMap<>();
 
         for (String config : offsetConfigs) {
             Matcher matcher = OFFSET_PATTERN.matcher(config);
@@ -566,7 +565,7 @@ public class LeashConfigManager {
             Map<String, double[]> tagMap,
             Map<String, double[]> modMap) {
 
-        Map<double[], Set<String>> offsetToTargets = new HashMap<>();
+        Map<double[], Set<String>> offsetToTargets = new LinkedHashMap<>();
 
         // 收集entity映射
         for (Map.Entry<String, double[]> entry : entityMap.entrySet()) {

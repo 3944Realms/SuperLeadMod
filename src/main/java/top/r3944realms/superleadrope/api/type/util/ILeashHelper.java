@@ -24,6 +24,7 @@ import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -211,7 +212,7 @@ public interface ILeashHelper {
          * @return the boolean
          */
         default boolean isHoldingLeash(Entity entity) {
-            return getAllLeash().stream().anyMatch(i -> i.isLeashedBy(entity));
+            return getAllLeash().stream().anyMatch(i -> Objects.equals(i.self(), entity));
         }
 
         /**
@@ -221,17 +222,7 @@ public interface ILeashHelper {
          * @return the boolean
          */
         default boolean isHoldingLeash(UUID uuid) {
-            return getAllLeash().stream().anyMatch(i -> i.isLeashedBy(uuid));
-        }
-
-        /**
-         * 检查是否持有特定实体的拴绳
-         *
-         * @param blockPos the block pos
-         * @return the boolean
-         */
-        default boolean isHoldingLeash(BlockPos blockPos) {
-            return getAllLeash().stream().anyMatch(i -> i.isLeashedBy(blockPos));
+            return getAllLeash().stream().anyMatch(i -> Objects.equals(i.self().getUUID(), uuid));
         }
 
         /**
@@ -267,7 +258,7 @@ public interface ILeashHelper {
             if (SuperLeadRopeApi.isLeashable(target)) {
                 if (!isHoldingLeash(target)) {
                     return false;
-                } else return unleashEntity(target.getUUID());
+                } else return unleashEntity(getHolderEntity().getUUID());
             }
             return false;
         }

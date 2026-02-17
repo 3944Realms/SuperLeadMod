@@ -258,7 +258,7 @@ public interface ILeashHelper {
             if (SuperLeadRopeApi.isLeashable(target)) {
                 if (!isHoldingLeash(target)) {
                     return false;
-                } else return unleashEntity(getHolderEntity().getUUID());
+                } else return unleashEntity(target.getUUID());
             }
             return false;
         }

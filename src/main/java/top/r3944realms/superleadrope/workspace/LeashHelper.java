@@ -67,7 +67,7 @@ public class LeashHelper implements ILeashHelper {
                 Entity entity = CommonEventHandler.Game.getServerLevel().getEntity(uuid);
 
                 if (entity != null && SuperLeadRopeApi.isLeashable(entity)) {
-                    return LeashDataInnerAPI.getLeashData(entity).map(i-> i.addLeash(entity)).orElse(false);
+                    return LeashDataInnerAPI.getLeashData(entity).map(i-> i.addLeash(getHolderEntity())).orElse(false);
                 }
                 return false;
             }
@@ -76,7 +76,7 @@ public class LeashHelper implements ILeashHelper {
             public boolean unleashEntity(UUID uuid) {
                 Entity entity = CommonEventHandler.Game.getServerLevel().getEntity(uuid);
                 if (entity != null && SuperLeadRopeApi.isLeashable(entity)) {
-                    return LeashDataInnerAPI.getLeashData(entity).map(i-> i.removeLeash(entity)).orElse(false);
+                    return LeashDataInnerAPI.getLeashData(entity).map(i-> i.removeLeash(getHolderEntity())).orElse(false);
                 }
                 return false;
             }

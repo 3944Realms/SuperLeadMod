@@ -15,6 +15,7 @@
 
 package top.r3944realms.superleadrope.api.workspace;
 
+import org.jetbrains.annotations.ApiStatus;
 import top.r3944realms.superleadrope.api.SuperLeadRopeApi;
 
 import java.util.ServiceLoader;
@@ -22,6 +23,7 @@ import java.util.ServiceLoader;
 /**
  * The type Services.
  */
+@ApiStatus.Internal
 public class Services {
     /**
      * The constant WORK_SPACE.

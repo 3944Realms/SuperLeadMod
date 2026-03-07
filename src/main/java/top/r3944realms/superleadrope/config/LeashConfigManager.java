@@ -663,7 +663,7 @@ public class LeashConfigManager {
             maxLeashLength = tag.getDouble("max_leash_length");
         }
         if (tag.contains("max_movement", Tag.TAG_DOUBLE)) {
-            maxLeashLength = tag.getDouble("max_movement");
+            maxMovement = tag.getDouble("max_movement");
         }
         if (tag.contains("elastic_distance_scale", Tag.TAG_DOUBLE)) {
             elasticDistanceScale = tag.getDouble("elastic_distance_scale");

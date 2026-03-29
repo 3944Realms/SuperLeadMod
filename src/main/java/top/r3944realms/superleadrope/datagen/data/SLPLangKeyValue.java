@@ -294,6 +294,16 @@ public enum SLPLangKeyValue {
             SLPEnchantments.RING_TOSS.get().getDescriptionId(), ModPartEnum.ENCHANTMENT,
             "Ring Toss", "套圈", "套圈", "套圈"
     ),
+    /**
+     * The Ring ross desc.
+     */
+    RING_ROSS_DESC(
+            SLPEnchantments.RING_TOSS.get().getDescriptionId() + ".desc", ModPartEnum.ENCHANTMENT,
+            "Throw the lead to lasso creatures. Higher levels increase throwing distance and reduce required charge time",
+            "可以将拴绳丢出去套中生物，等级越高丢出去的距离越远，所需蓄力时间越短",
+            "可以將拴繩丟出去套中生物，等級越高丟出去的距離越遠，所需蓄力時間越短",
+            "擲繩套獸，階愈高，擲愈遠，蓄愈短"
+    ),
 
     /**
      * The Prisoner.
@@ -302,6 +312,18 @@ public enum SLPLangKeyValue {
             SLPEnchantments.SELF_PRISONER.get().getDescriptionId(), ModPartEnum.ENCHANTMENT,
             "Self Prisoner", "自拴", "自拴", "自拴"
     ),
+
+    /**
+     * The Prisoner desc.
+     */
+    PRISONER_DESC(
+            SLPEnchantments.SELF_PRISONER.get().getDescriptionId() + ".desc", ModPartEnum.ENCHANTMENT,
+            "Throw the lead to lasso yourself. Requires Ring Toss enchantment to take effect. Higher levels increase throwing distance",
+            "可以将拴绳丢出去套中自己。需要套圈附魔才能生效。等级越高丢出去的距离越远",
+            "可以將拴繩丟出去套中自己。需要套圈附魔才能生效。等級越高丟出去的距離越遠",
+            "擲繩，需套圈附魔方效。階愈高，擲愈遠"
+    ),
+
     /**
      * The Teleport with leashed entities name.
      */

@@ -29,15 +29,11 @@ public class CurtainCompat{
     public final static boolean isModLoaded = ModList.get().isLoaded("curtain");
 
     /**
-     * Is not fake player boolean.
-     *
-     * @param player the player
-     * @return the boolean
+     * Init.
      */
-    public static boolean isNotFakePlayer(Player player) {
+    public static void init() {
         if (isModLoaded) {
-            return !(player instanceof EntityPlayerMPFake);
+            FakePlayerJudge.registersFakePlayer(EntityPlayerMPFake.class);
         }
-        return true;
     }
 }

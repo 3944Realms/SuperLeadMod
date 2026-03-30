@@ -44,7 +44,7 @@ import top.r3944realms.superleadrope.SuperLeadRope;
 import top.r3944realms.superleadrope.api.event.SuperLeadRopeEvent;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.LeashInfo;
-import top.r3944realms.superleadrope.compat.CurtainCompat;
+import top.r3944realms.superleadrope.compat.FakePlayerJudge;
 import top.r3944realms.superleadrope.compat.LuckPermsCompat;
 import top.r3944realms.superleadrope.config.LeashConfigManager;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
@@ -785,7 +785,7 @@ public class LeashDataImpl implements ILeashData {
     }
     @Override
     public void applyLeashForcesClientPlayer() {
-        if (entity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player)) return;
+        if (entity instanceof ServerPlayer player && FakePlayerJudge.isNotFakePlayer(player)) return;
         Vec3 combinedForce = Vec3.ZERO;
         Vec3 combinedDirection = Vec3.ZERO;
         Map<Integer, LeashInfo> result = leashHolders.entrySet().stream()
@@ -881,7 +881,7 @@ public class LeashDataImpl implements ILeashData {
             if (MinecraftForge.EVENT_BUS.post(hasFocus)) return;
             combinedForce = hasFocus.getCombinedForce();
             // 玩家与普通实体统一力应用
-            if (targetEntity instanceof ServerPlayer player && CurtainCompat.isNotFakePlayer(player) ) {
+            if (targetEntity instanceof ServerPlayer player && FakePlayerJudge.isNotFakePlayer(player)) {
                 // 是真实玩家则交给客户端自行处理拴绳逻辑
                 // DO NOTHING
                 if(targetEntity == entity) {

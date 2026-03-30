@@ -123,6 +123,11 @@ legacyForge {
         server {
             server()
         }
+        testServer {
+            server()
+            // 设置服务器运行目录
+            gameDirectory  = file('run/server')
+        }
         data {
             data()
             programArguments.addAll '--mod', mod_id, '--all',

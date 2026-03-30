@@ -228,7 +228,7 @@ public class LeashConfigManager {
      * @return the teleport whitelist
      */
 // ================== 白名单 ==================
-    public List<String> getTeleportWhitelist() { return Collections.unmodifiableList(teleportWhitelistCache); }
+    public List<String> getTeleportWhitelist() { return  new ArrayList<>(teleportWhitelistCache); }
 
     /**
      * Is entity teleport allowed boolean.
@@ -358,7 +358,7 @@ public class LeashConfigManager {
      *
      * @return the axis elasticity
      */
-    public List<Double> getAxisElasticity() { return Collections.unmodifiableList(axisElasticity); }
+    public List<Double> getAxisElasticity() { return  new ArrayList<>(axisElasticity); }
 
     /**
      * Gets x elasticity.
@@ -423,7 +423,7 @@ public class LeashConfigManager {
             maxForce = LeashCommonConfig.COMMON.maxForce.get();
             playerSpringFactor = LeashCommonConfig.COMMON.playerSpringFactor.get();
             mobSpringFactor = LeashCommonConfig.COMMON.mobSpringFactor.get();
-            cacheHash = calculateConfigHash();
+            cacheHash = -1;
             cacheTag = serializeToNBT();
             SuperLeadRope.logger.debug("Configs reloaded: {}", getStats());
         } catch (Exception e) {
@@ -476,7 +476,11 @@ public class LeashConfigManager {
      * @return the compound tag
      */
     public synchronized CompoundTag serializeToNBT() {
-        if (cacheHash == calculateConfigHash() && cacheTag != null) return cacheTag;
+        int currentHash = calculateConfigHash();
+
+        if (cacheTag != null && cacheHash == currentHash) {
+            return cacheTag;
+        }
         CompoundTag tag = new CompoundTag();
 
         // 序列化偏移映射
@@ -518,7 +522,7 @@ public class LeashConfigManager {
         tag.put("axis_elasticity", elasticityTag);
 
         tag.putInt("max_leashes_per_entity", maxLeashesPerEntity);
-        cacheHash = calculateConfigHash();
+        cacheHash = currentHash;
         cacheTag = tag;
 
         return tag;
@@ -554,7 +558,6 @@ public class LeashConfigManager {
         LeashCommonConfig.COMMON.maxForce.set(maxForce);
         LeashCommonConfig.COMMON.playerSpringFactor.set(playerSpringFactor);
         LeashCommonConfig.COMMON.mobSpringFactor.set(mobSpringFactor);
-
     }
 
     /**
@@ -617,6 +620,9 @@ public class LeashConfigManager {
     public void deserializeFromNBT(CompoundTag tag) {
         if (tag == null || tag.isEmpty()) return;
 
+        cacheHash = -1;
+        cacheTag = null;
+
         // 反序列化偏移映射
         if (tag.contains("offsets", Tag.TAG_COMPOUND)) {
             CompoundTag offsets = tag.getCompound("offsets");
@@ -635,7 +641,7 @@ public class LeashConfigManager {
             for (int i = 0; i < whitelistTag.size(); i++) {
                 whitelist.add(whitelistTag.getString(i));
             }
-            teleportWhitelistCache = Collections.unmodifiableList(whitelist);
+            teleportWhitelistCache =  new ArrayList<>(whitelist);
         }
 
         if (tag.contains("command_prefix", Tag.TAG_STRING)) {
@@ -681,7 +687,7 @@ public class LeashConfigManager {
             for (int i = 0; i < elasticityTag.size(); i++) {
                 elasticity.add(elasticityTag.getDouble(i));
             }
-            axisElasticity = Collections.unmodifiableList(elasticity);
+            axisElasticity =  new ArrayList<>(elasticity);
         }
 
         if (tag.contains("max_leashes_per_entity", Tag.TAG_INT)) {
@@ -707,10 +713,6 @@ public class LeashConfigManager {
         hash = fnv1aHashMap(hash, tagLeashMap);
         hash = fnv1aHashMap(hash, modLeashMap);
 
-        // 哈希白名单
-        for (String entry : teleportWhitelistCache) {
-            hash = fnv1aHashString(hash, entry);
-        }
 
         // 哈希字符串参数
         hash = fnv1aHashString(hash, commandPrefixCache);
@@ -727,8 +729,18 @@ public class LeashConfigManager {
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(extremeSnapFactor));
         hash = fnv1aHashLong(hash, Double.doubleToLongBits(springDampening));
 
-        // 哈希轴弹性列表
-        for (double value : axisElasticity) {
+
+        // 白名单排序后再哈希
+        List<String> sortedWhitelist = new ArrayList<>(teleportWhitelistCache);
+        Collections.sort(sortedWhitelist);
+        for (String entry : sortedWhitelist) {
+            hash = fnv1aHashString(hash, entry);
+        }
+
+        // 轴弹性列表排序（或者保持原序但确保两端一致）
+        List<Double> sortedElasticity = new ArrayList<>(axisElasticity);
+        Collections.sort(sortedElasticity);
+        for (double value : sortedElasticity) {
             hash = fnv1aHashLong(hash, Double.doubleToLongBits(value));
         }
 
@@ -743,7 +755,7 @@ public class LeashConfigManager {
     private void serializeOffsetMap(CompoundTag parent, String key, @NotNull Map<String, double[]> map) {
         CompoundTag mapTag = new CompoundTag();
         for (Map.Entry<String, double[]> entry : map.entrySet()) {
-            String entryKey = entry.getKey().replace(':', '_'); // 避免NBT键中的冒号问题
+            String entryKey = entry.getKey();
             ListTag offsetList = new ListTag();
             for (double value : entry.getValue()) {
                 offsetList.add(DoubleTag.valueOf(value));
@@ -764,11 +776,12 @@ public class LeashConfigManager {
                     for (int i = 0; i < offsetList.size(); i++) {
                         offset[i] = offsetList.getDouble(i);
                     }
-                    map.put(entryKey.replace('_', ':'), offset); // 恢复原始键名
+                    map.put(entryKey, offset);
                 }
             }
         }
     }
+
 
     // FNV-1a哈希辅助方法
     private int fnv1aHashInt(int hash, int value) {
@@ -797,7 +810,8 @@ public class LeashConfigManager {
     }
 
     private int fnv1aHashMap(int hash, @NotNull Map<String, double[]> map) {
-        for (Map.Entry<String, double[]> entry : map.entrySet()) {
+        Map<String, double[]> sortedMap = map instanceof TreeMap ? map : new TreeMap<>(map);
+        for (Map.Entry<String, double[]> entry : sortedMap.entrySet()) {
             hash = fnv1aHashString(hash, entry.getKey());
             for (double value : entry.getValue()) {
                 hash = fnv1aHashLong(hash, Double.doubleToLongBits(value));

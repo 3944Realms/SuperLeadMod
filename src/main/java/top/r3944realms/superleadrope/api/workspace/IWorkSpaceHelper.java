@@ -104,4 +104,11 @@ public interface IWorkSpaceHelper {
      * @return the leash state
      */
     Optional<ILeashState> getLeashState(@NotNull Entity pEntity);
+
+    /**
+     * Register fake player.
+     *
+     * @param classes the classes
+     */
+    void registerFakePlayer(@NotNull Class<?>... classes);
 }

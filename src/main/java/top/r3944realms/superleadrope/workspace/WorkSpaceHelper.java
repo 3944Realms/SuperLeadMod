@@ -26,6 +26,7 @@ import top.r3944realms.superleadrope.api.type.capabilty.ILeashData;
 import top.r3944realms.superleadrope.api.type.capabilty.ILeashState;
 import top.r3944realms.superleadrope.api.type.util.ILeashHelper;
 import top.r3944realms.superleadrope.api.workspace.IWorkSpaceHelper;
+import top.r3944realms.superleadrope.compat.FakePlayerJudge;
 import top.r3944realms.superleadrope.content.capability.impi.LeashDataImpl;
 import top.r3944realms.superleadrope.content.entity.SuperLeashKnotEntity;
 import top.r3944realms.superleadrope.util.capability.LeashDataInnerAPI;
@@ -82,6 +83,11 @@ public class WorkSpaceHelper implements IWorkSpaceHelper {
     @Override
     public Optional<ILeashState> getLeashState(@NotNull Entity pEntity) {
         return LeashStateInnerAPI.getLeashState(pEntity);
+    }
+
+    @Override
+    public void registerFakePlayer(@NotNull Class<?>... classes) {
+        FakePlayerJudge.registersFakePlayer(classes);
     }
 
 }
